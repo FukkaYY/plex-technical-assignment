@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>インターン生スカウトサービス 仕様書 v0.3</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --text: #172033;
+      --muted: #5f6b7a;
+      --line: #dce3ec;
+      --brand: #2856d8;
+      --brand-soft: #eaf0ff;
+      --required: #176b45;
+      --required-soft: #e7f6ee;
+      --decision: #8a4b08;
+      --decision-soft: #fff1dc;
+      --open: #98394d;
+      --open-soft: #fdebf0;
+      --shadow: 0 10px 30px rgba(28, 43, 71, 0.08);
+      font-family: Inter, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.75; }
+    a { color: var(--brand); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    code:not(pre code) { padding: .1rem .35rem; border-radius: 5px; background: #edf1f7; }
+    pre { overflow: auto; padding: 1rem; border-radius: 10px; background: #111827; color: #eef2ff; line-height: 1.55; }
+
+    .hero { padding: 48px 24px 40px; color: white; background: linear-gradient(135deg, #193b9f, #3767e8); }
+    .hero-inner { max-width: 1180px; margin: auto; }
+    .eyebrow { margin: 0 0 8px; font-size: .85rem; font-weight: 700; letter-spacing: .08em; opacity: .86; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.25; }
+    .subtitle { max-width: 780px; margin: 14px 0 0; opacity: .9; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 24px; margin-top: 24px; font-size: .92rem; }
+
+    .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; max-width: 1180px; margin: 28px auto 64px; padding: 0 20px; }
+    nav { position: sticky; top: 20px; align-self: start; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+    nav strong { display: block; margin-bottom: 8px; }
+    nav ol { margin: 0; padding-left: 1.25rem; font-size: .91rem; }
+    nav li { margin: .32rem 0; }
+    nav a { color: var(--text); text-decoration: none; }
+    nav a:hover { color: var(--brand); }
+
+    main { min-width: 0; }
+    section { margin-bottom: 24px; padding: 28px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); }
+    h2 { margin: 0 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--brand-soft); font-size: 1.5rem; }
+    h3 { margin: 26px 0 10px; font-size: 1.15rem; }
+    h4 { margin: 20px 0 8px; font-size: 1rem; }
+    p:first-child { margin-top: 0; }
+    .lead { font-size: 1.06rem; }
+    .muted { color: var(--muted); }
+
+    .badge { display: inline-block; padding: .14rem .55rem; border-radius: 999px; font-size: .76rem; font-weight: 700; vertical-align: .08rem; white-space: nowrap; }
+    .required { color: var(--required); background: var(--required-soft); }
+    .decision { color: var(--decision); background: var(--decision-soft); }
+    .open { color: var(--open); background: var(--open-soft); }
+    .p0 { color: #2449aa; background: #e9efff; }
+    .p1 { color: #6b4b13; background: #fff2d7; }
+    .p2 { color: #6b7280; background: #edf0f4; }
+
+    .callout { margin: 16px 0; padding: 14px 16px; border-left: 4px solid var(--brand); border-radius: 8px; background: var(--brand-soft); }
+    .warning { border-left-color: var(--open); background: var(--open-soft); }
+    .decision-box { border-left-color: var(--decision); background: var(--decision-soft); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .91rem; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--surface-soft); }
+
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 14px 0; }
+    .flow-step { padding: 10px 14px; border: 1px solid #bfcbed; border-radius: 9px; background: #f5f8ff; font-weight: 650; }
+    .arrow { color: var(--muted); font-weight: 800; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .card { padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); }
+    .card h3, .card h4 { margin-top: 0; }
+    .card p:last-child { margin-bottom: 0; }
+    .endpoint { display: grid; grid-template-columns: 80px 1fr; gap: 8px; margin: 8px 0; }
+    .method { font-weight: 800; color: var(--brand); }
+    .checklist { padding-left: 1.3rem; }
+    .checklist li { margin: .3rem 0; }
+    .decision-log td:first-child { white-space: nowrap; font-weight: 700; }
+
+    footer { padding: 30px 20px 45px; color: var(--muted); text-align: center; font-size: .85rem; }
+    @media (max-width: 860px) {
+      .layout { display: block; }
+      nav { position: static; margin-bottom: 24px; }
+      section { padding: 22px 18px; }
+      .arrow { transform: rotate(90deg); }
+      .flow { flex-direction: column; align-items: stretch; }
+      .flow-step { text-align: center; }
+    }
+    @media print {
+      body { background: white; }
+      .hero { color: black; background: white; border-bottom: 2px solid #333; }
+      .layout { display: block; max-width: none; margin: 0; padding: 0; }
+      nav { display: none; }
+      section { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">株式会社プレックス インターン技術課題</p>
+      <h1>インターン生スカウトサービス 仕様書</h1>
+      <p class="subtitle">課題文の必須要件を2週間で動作するMVPへ落とし込み、既定要件・設計判断・未確定事項を分離して管理する。</p>
+      <div class="meta">
+        <span>Version: 0.3</span>
+        <span>更新日: 2026-08-31</span>
+        <span>状態: 継続編集中</span>
+        <span>正本: 本HTML</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="目次">
+      <strong>目次</strong>
+      <ol>
+        <li><a href="#policy">文書の読み方</a></li>
+        <li><a href="#source">課題原文と目的</a></li>
+        <li><a href="#scope">スコープ</a></li>
+        <li><a href="#architecture">システム構成</a></li>
+        <li><a href="#flows">主要ユーザーフロー</a></li>
+        <li><a href="#screens">画面構成</a></li>
+        <li><a href="#student-registration">学生登録</a></li>
+        <li><a href="#company-login">企業ログイン</a></li>
+        <li><a href="#student-list">学生一覧</a></li>
+        <li><a href="#student-detail">学生詳細</a></li>
+        <li><a href="#database">DB設計</a></li>
+        <li><a href="#api">API仕様</a></li>
+        <li><a href="#auth">認証・認可</a></li>
+        <li><a href="#validation">バリデーション</a></li>
+        <li><a href="#acceptance">受け入れ条件</a></li>
+        <li><a href="#tests">テスト方針</a></li>
+        <li><a href="#schedule">開発順序</a></li>
+        <li><a href="#open-issues">未確定事項</a></li>
+        <li><a href="#decision-log">Decision Log</a></li>
+        <li><a href="#changelog">変更履歴</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section id="policy">
+        <h2>1. 文書の読み方</h2>
+        <p class="lead">仕様の根拠を混同しないため、各項目を次の3種類に分類する。</p>
+        <div class="cards">
+          <div class="card"><span class="badge required">既定</span><h3>課題文で定められた要件</h3><p>課題文に直接記載された技術・期間・機能。</p></div>
+          <div class="card"><span class="badge decision">設計判断</span><h3>本仕様で採用</h3><p>要件を実装可能にするために追加した判断。必要に応じてDecision Logで変更する。</p></div>
+          <div class="card"><span class="badge open">未確定</span><h3>今後決める事項</h3><p>後続仕様や実装検証によって確定する事項。</p></div>
+        </div>
+      </section>
+
+      <section id="source">
+        <h2>2. 課題原文とプロダクト目的</h2>
+        <h3>課題文で定められた要件</h3>
+        <ul>
+          <li><span class="badge required">既定</span> バックエンドにRails、フロントエンドにNext.jsを使用する。</li>
+          <li><span class="badge required">既定</span> ソースコードをGitHubで管理する。</li>
+          <li><span class="badge required">既定</span> 2週間以内を目安に提出する。</li>
+          <li><span class="badge required">既定</span> インターン生が登録できる。</li>
+          <li><span class="badge required">既定</span> 企業がインターン生にメッセージを送れる。</li>
+          <li><span class="badge required">既定</span> 余裕があれば企業が募集を掲載できる。</li>
+        </ul>
+        <h3>本仕様における目的</h3>
+        <p><span class="badge decision">設計判断</span> 企業が登録済みインターン生のプロフィールを確認し、関心を持った学生に最初のスカウトメッセージを届けられる状態をMVPの達成条件とする。</p>
+      </section>
+
+      <section id="scope">
+        <h2>3. スコープと優先度</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>優先度</th><th>機能</th><th>理由</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge p0">P0 / MVP</span></td><td>学生アカウント・プロフィール登録、企業ログイン、学生一覧・詳細、企業からのメッセージ送信、学生の受信確認</td><td>課題の必須要件を利用可能な一連のフローにする。</td></tr>
+              <tr><td><span class="badge p1">P1</span></td><td>プロフィール編集、学生検索・絞り込み、学生からの返信、未読管理</td><td>価値は高いが必須要件ではない。</td></tr>
+              <tr><td><span class="badge p2">P2</span></td><td>企業の募集掲載、予定調整、グループチャット</td><td>課題文上も追加機能であり、2週間のMVPでは後回しにする。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout decision-box"><strong>企業の公開登録はP0に含めない。</strong> 企業確認・審査・なりすまし対策が必要になるため、P0では開発・デモ用企業アカウントをseedで用意する。</div>
+      </section>
+
+      <section id="architecture">
+        <h2>4. システム構成</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>領域</th><th>採用方針</th><th>分類</th></tr></thead>
+            <tbody>
+              <tr><td>リポジトリ</td><td>GitHubモノレポ（<code>frontend/</code>、<code>backend/</code>）</td><td><span class="badge decision">設計判断</span></td></tr>
+              <tr><td>フロントエンド</td><td>Next.js App Router＋TypeScript</td><td><span class="badge required">Next.js</span> <span class="badge decision">詳細判断</span></td></tr>
+              <tr><td>バックエンド</td><td>Rails APIモード、JSON REST API</td><td><span class="badge required">Rails</span> <span class="badge decision">詳細判断</span></td></tr>
+              <tr><td>DB</td><td>PostgreSQL</td><td><span class="badge decision">設計判断</span></td></tr>
+              <tr><td>認証</td><td>Railsセッション＋HttpOnly Cookie</td><td><span class="badge decision">設計判断</span></td></tr>
+              <tr><td>ローカル環境</td><td>Docker Composeを推奨</td><td><span class="badge decision">設計判断</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>ディレクトリ案</h3>
+        <pre><code>repository/
+├── backend/       # Rails API
+├── frontend/      # Next.js
+├── compose.yaml
+└── README.md</code></pre>
+      </section>
+
+      <section id="flows">
+        <h2>5. 主要ユーザーフロー</h2>
+        <h3>インターン生</h3>
+        <div class="flow" aria-label="インターン生フロー">
+          <div class="flow-step">トップ</div><span class="arrow">→</span>
+          <div class="flow-step">学生登録</div><span class="arrow">→</span>
+          <div class="flow-step">自動ログイン</div><span class="arrow">→</span>
+          <div class="flow-step">マイページ</div><span class="arrow">→</span>
+          <div class="flow-step">受信確認</div>
+        </div>
+        <h3>企業</h3>
+        <div class="flow" aria-label="企業フロー">
+          <div class="flow-step">企業ログイン</div><span class="arrow">→</span>
+          <div class="flow-step">学生一覧</div><span class="arrow">→</span>
+          <div class="flow-step">学生詳細</div><span class="arrow">→</span>
+          <div class="flow-step">メッセージ作成</div><span class="arrow">→</span>
+          <div class="flow-step">送信完了</div>
+        </div>
+      </section>
+
+      <section id="screens">
+        <h2>6. 画面構成</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>パス</th><th>画面</th><th>対象</th><th>優先度</th><th>状態</th></tr></thead>
+            <tbody>
+              <tr><td>G-01</td><td><code>/</code></td><td>トップ</td><td>全員</td><td>P0</td><td>概要のみ確定</td></tr>
+              <tr><td>S-01</td><td><code>/students/sign-up</code></td><td>インターン生登録</td><td>未ログイン</td><td>P0</td><td>確定</td></tr>
+              <tr><td>S-02</td><td><code>/students/me</code></td><td>学生マイページ</td><td>学生</td><td>P0</td><td>詳細は後続</td></tr>
+              <tr><td>S-03</td><td><code>/students/messages</code></td><td>受信メッセージ</td><td>学生</td><td>P0</td><td>詳細は後続</td></tr>
+              <tr><td>C-01</td><td><code>/company/login</code></td><td>企業ログイン</td><td>未ログイン</td><td>P0</td><td>確定</td></tr>
+              <tr><td>C-02</td><td><code>/company/students</code></td><td>インターン生一覧</td><td>企業</td><td>P0</td><td>確定</td></tr>
+              <tr><td>C-03</td><td><code>/company/students/[id]</code></td><td>インターン生詳細</td><td>企業</td><td>P0</td><td>確定</td></tr>
+              <tr><td>C-04</td><td><code>/company/students/[id]/message</code></td><td>メッセージ作成</td><td>企業</td><td>P0</td><td>次回具体化</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="student-registration">
+        <h2>7. インターン生登録</h2>
+        <p><span class="badge required">既定</span> インターン生が登録できる。</p>
+        <p><span class="badge decision">設計判断</span> 学生本人が認証アカウントとプロフィールを1画面で同時作成する。成功時は自動ログインし、学生マイページへ遷移する。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>項目</th><th>必須</th><th>備考</th></tr></thead>
+            <tbody>
+              <tr><td>氏名</td><td>必須</td><td>企業向け表示名</td></tr>
+              <tr><td>メールアドレス</td><td>必須</td><td>ログインID。企業には表示しない。</td></tr>
+              <tr><td>パスワード</td><td>必須</td><td>8文字以上。ハッシュ化して保存。</td></tr>
+              <tr><td>学校名</td><td>必須</td><td>200文字以内</td></tr>
+              <tr><td>卒業予定年</td><td>必須</td><td>西暦</td></tr>
+              <tr><td>希望職種</td><td>必須</td><td>100文字以内</td></tr>
+              <tr><td>スキル</td><td>任意</td><td>最大20件、1件50文字以内</td></tr>
+              <tr><td>自己紹介</td><td>必須</td><td>2,000文字以内</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">ユーザーとプロフィールは同一DBトランザクションで作成し、プロフィール作成に失敗した場合はユーザーも残さない。学生登録APIでは<code>role=student</code>をサーバー側で固定する。</div>
+      </section>
+
+      <section id="company-login">
+        <h2>8. 企業ログイン</h2>
+        <p><span class="badge decision">設計判断</span> 企業の新規登録は実装せず、development／test／デモ環境に限りseedで企業アカウントを作成する。</p>
+
+        <h3>C-01 画面仕様</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>要素</th><th>仕様</th></tr></thead>
+            <tbody>
+              <tr><td>メールアドレス</td><td>必須。メール形式。ブラウザのパスワード管理を利用できる属性を設定する。</td></tr>
+              <tr><td>パスワード</td><td>必須。画面上では伏字表示。</td></tr>
+              <tr><td>ログインボタン</td><td>送信中は二重送信を防止し、処理中表示にする。</td></tr>
+              <tr><td>エラー</td><td>「メールアドレスまたはパスワードが正しくありません」と一律表示し、アカウントの存在を漏らさない。</td></tr>
+              <tr><td>成功時</td><td><code>/company/students</code>へ遷移する。</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>遷移・例外</h3>
+        <ul>
+          <li>ログイン済み企業がログイン画面を開いた場合は学生一覧へリダイレクトする。</li>
+          <li>学生アカウントの資格情報では企業画面へログインできない。</li>
+          <li>認証済み学生が企業URLへアクセスした場合は403相当の画面へ遷移する。</li>
+          <li>未ログイン状態で企業向け画面へアクセスした場合は企業ログイン画面へ遷移する。</li>
+          <li>ログアウト後はセッションを破棄して企業ログイン画面へ戻す。</li>
+        </ul>
+
+        <h3>実装コスト・安全性・評価への影響</h3>
+        <div class="table-wrap"><table><thead><tr><th>観点</th><th>評価</th></tr></thead><tbody>
+          <tr><td>実装コスト</td><td>低〜中。企業登録・審査を省き、ログインとセッション管理に集中できる。</td></tr>
+          <tr><td>安全性</td><td>企業だけが学生情報へアクセスできる。認証エラーの一律化でアカウント列挙を抑える。</td></tr>
+          <tr><td>課題評価</td><td>認証・ロール認可を示しつつ、必須フローの完成度へ時間を配分できる。</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="student-list">
+        <h2>9. インターン生一覧</h2>
+        <p><span class="badge decision">設計判断</span> 認証済み企業だけが閲覧できる。P0では検索を実装せず、登録が新しい順に20件ずつ表示する。</p>
+
+        <h3>C-02 画面仕様</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>表示項目</th><th>仕様</th></tr></thead>
+            <tbody>
+              <tr><td>氏名</td><td>プロフィールの氏名</td></tr>
+              <tr><td>学校名</td><td>長い場合はカード内で省略表示し、詳細では全文表示</td></tr>
+              <tr><td>卒業予定年</td><td>「2028年卒」の形式</td></tr>
+              <tr><td>希望職種</td><td>主要情報として目立たせる</td></tr>
+              <tr><td>スキル</td><td>先頭5件をタグ表示。超過分は「ほかN件」</td></tr>
+              <tr><td>自己紹介</td><td>冒頭120文字程度の抜粋</td></tr>
+              <tr><td>詳細導線</td><td>カード全体または「プロフィールを見る」から詳細へ遷移</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>一覧状態</h3>
+        <ul>
+          <li><strong>通常：</strong>学生カードを20件単位で表示する。</li>
+          <li><strong>0件：</strong>「登録されているインターン生はいません」と表示する。</li>
+          <li><strong>読み込み失敗：</strong>エラー概要と再読み込みボタンを表示する。</li>
+          <li><strong>2ページ目以降：</strong>前へ／次へと現在ページを表示する。</li>
+        </ul>
+
+        <div class="callout decision-box">メールアドレス、パスワード関連情報、内部ユーザーIDなど、スカウト判断に不要な認証情報は一覧APIで返さない。</div>
+      </section>
+
+      <section id="student-detail">
+        <h2>10. インターン生詳細</h2>
+        <p><span class="badge decision">設計判断</span> 認証済み企業が、一覧で選んだ学生のプロフィール全文を確認し、メッセージ作成へ進む画面とする。</p>
+
+        <h3>C-03 画面仕様</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>領域</th><th>表示内容</th></tr></thead>
+            <tbody>
+              <tr><td>基本情報</td><td>氏名、学校名、卒業予定年、希望職種</td></tr>
+              <tr><td>スキル</td><td>登録された全スキルをタグ表示</td></tr>
+              <tr><td>自己紹介</td><td>改行を保持して全文表示</td></tr>
+              <tr><td>主要操作</td><td>「メッセージを送る」ボタン</td></tr>
+              <tr><td>補助操作</td><td>「一覧へ戻る」リンク</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>遷移・例外</h3>
+        <ul>
+          <li>「メッセージを送る」から<code>/company/students/[id]/message</code>へ遷移する。</li>
+          <li>存在しない学生IDは404画面を表示する。</li>
+          <li>学生ユーザーまたは未ログインユーザーへプロフィールデータを返さない。</li>
+          <li>APIレスポンスに学生のメールアドレスを含めない。</li>
+        </ul>
+      </section>
+
+      <section id="database">
+        <h2>11. DB設計</h2>
+        <h3>users</h3>
+        <div class="table-wrap"><table><thead><tr><th>カラム</th><th>型</th><th>制約・用途</th></tr></thead><tbody>
+          <tr><td>id</td><td>bigint</td><td>主キー</td></tr>
+          <tr><td>email</td><td>string</td><td>NOT NULL。小文字化して扱い、<code>LOWER(email)</code>に一意制約</td></tr>
+          <tr><td>password_digest</td><td>string</td><td>NOT NULL。<code>has_secure_password</code></td></tr>
+          <tr><td>role</td><td>string</td><td>NOT NULL。<code>student</code>または<code>company</code>。DBチェック制約</td></tr>
+          <tr><td>created_at / updated_at</td><td>datetime</td><td>Rails標準</td></tr>
+        </tbody></table></div>
+
+        <h3>student_profiles</h3>
+        <div class="table-wrap"><table><thead><tr><th>カラム</th><th>型</th><th>制約・用途</th></tr></thead><tbody>
+          <tr><td>id</td><td>bigint</td><td>主キー</td></tr>
+          <tr><td>user_id</td><td>bigint</td><td>外部キー、NOT NULL、UNIQUE</td></tr>
+          <tr><td>name</td><td>string</td><td>NOT NULL、100文字以内</td></tr>
+          <tr><td>school_name</td><td>string</td><td>NOT NULL、200文字以内</td></tr>
+          <tr><td>graduation_year</td><td>integer</td><td>NOT NULL</td></tr>
+          <tr><td>desired_role</td><td>string</td><td>NOT NULL、100文字以内</td></tr>
+          <tr><td>skills</td><td>jsonb</td><td>NOT NULL、デフォルト<code>[]</code></td></tr>
+          <tr><td>self_introduction</td><td>text</td><td>NOT NULL、2,000文字以内</td></tr>
+          <tr><td>created_at / updated_at</td><td>datetime</td><td>Rails標準</td></tr>
+        </tbody></table></div>
+
+        <h3>company_profiles</h3>
+        <div class="table-wrap"><table><thead><tr><th>カラム</th><th>型</th><th>制約・用途</th></tr></thead><tbody>
+          <tr><td>id</td><td>bigint</td><td>主キー</td></tr>
+          <tr><td>user_id</td><td>bigint</td><td>外部キー、NOT NULL、UNIQUE</td></tr>
+          <tr><td>company_name</td><td>string</td><td>NOT NULL、200文字以内</td></tr>
+          <tr><td>created_at / updated_at</td><td>datetime</td><td>Rails標準</td></tr>
+        </tbody></table></div>
+
+        <div class="callout">企業名は後続のメッセージ送信者表示に必要なため、P0から<code>company_profiles</code>を用意する。企業プロフィール編集はP0に含めない。</div>
+      </section>
+
+      <section id="api">
+        <h2>12. API仕様</h2>
+        <p>ベースパスは<code>/api/v1</code>とする。レスポンスはJSON、日時はISO 8601形式とする。</p>
+
+        <h3>認証・登録</h3>
+        <div class="endpoint"><span class="method">GET</span><code>/auth/csrf</code></div>
+        <div class="endpoint"><span class="method">POST</span><code>/student_registrations</code></div>
+        <div class="endpoint"><span class="method">POST</span><code>/auth/login</code></div>
+        <div class="endpoint"><span class="method">GET</span><code>/auth/me</code></div>
+        <div class="endpoint"><span class="method">DELETE</span><code>/auth/logout</code></div>
+
+        <h3>企業ログイン</h3>
+        <pre><code>POST /api/v1/auth/login
+{
+  "email": "company@example.com",
+  "password": "********"
+}</code></pre>
+        <p>成功時は<code>200 OK</code>とセッションCookieを返す。</p>
+        <pre><code>{
+  "data": {
+    "id": 2,
+    "role": "company",
+    "company": { "name": "ダミー株式会社" }
+  }
+}</code></pre>
+        <p>認証失敗または企業以外の場合は<code>401 Unauthorized</code>と共通メッセージを返す。</p>
+
+        <h3>学生一覧</h3>
+        <div class="endpoint"><span class="method">GET</span><code>/students?page=1&amp;per_page=20</code></div>
+        <pre><code>{
+  "data": [
+    {
+      "id": 10,
+      "name": "山田太郎",
+      "school_name": "○○大学",
+      "graduation_year": 2028,
+      "desired_role": "Webエンジニア",
+      "skills": ["Ruby", "TypeScript"],
+      "self_introduction_excerpt": "大学でWebアプリ開発に…"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "per_page": 20,
+    "total_pages": 1,
+    "total_count": 1
+  }
+}</code></pre>
+        <p><code>per_page</code>は最大50に制限し、未指定時は20とする。並び順は<code>student_profiles.created_at DESC</code>。</p>
+
+        <h3>学生詳細</h3>
+        <div class="endpoint"><span class="method">GET</span><code>/students/:id</code></div>
+        <pre><code>{
+  "data": {
+    "id": 10,
+    "name": "山田太郎",
+    "school_name": "○○大学",
+    "graduation_year": 2028,
+    "desired_role": "Webエンジニア",
+    "skills": ["Ruby", "TypeScript"],
+    "self_introduction": "大学でWebアプリ開発に取り組んでいます。"
+  }
+}</code></pre>
+
+        <h3>共通ステータス</h3>
+        <div class="table-wrap"><table><thead><tr><th>HTTP</th><th>用途</th></tr></thead><tbody>
+          <tr><td>200</td><td>取得・ログイン成功</td></tr>
+          <tr><td>201</td><td>学生登録成功</td></tr>
+          <tr><td>204</td><td>ログアウト成功</td></tr>
+          <tr><td>401</td><td>未認証・ログイン失敗</td></tr>
+          <tr><td>403</td><td>認証済みだがロール権限なし</td></tr>
+          <tr><td>404</td><td>対象学生が存在しない</td></tr>
+          <tr><td>422</td><td>入力値エラー</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="auth">
+        <h2>13. 認証・認可</h2>
+        <h3>認証方式</h3>
+        <p><span class="badge decision">設計判断</span> Railsがセッションを管理し、ブラウザには署名・暗号化されたセッションCookieを保存する。Cookieは本番環境で<code>HttpOnly</code>、<code>Secure</code>、<code>SameSite=Lax</code>とする。</p>
+        <ul>
+          <li>パスワードは<code>has_secure_password</code>でハッシュ化する。</li>
+          <li>フロントエンドからの変更系リクエストは<code>X-CSRF-Token</code>を送信する。</li>
+          <li>Next.js側の<code>/api/*</code>をRailsへ同一オリジンで転送し、CORSとCookie設定を単純化する。</li>
+          <li>セッションに秘密情報やプロフィール全体を格納せず、ユーザー識別子だけを保持する。</li>
+        </ul>
+
+        <h3>認可マトリクス</h3>
+        <div class="table-wrap"><table><thead><tr><th>操作</th><th>未ログイン</th><th>学生</th><th>企業</th></tr></thead><tbody>
+          <tr><td>学生登録</td><td>○</td><td>―</td><td>―</td></tr>
+          <tr><td>企業ログイン</td><td>○</td><td>―</td><td>―</td></tr>
+          <tr><td>自身の学生プロフィール確認</td><td>×</td><td>○</td><td>×</td></tr>
+          <tr><td>学生一覧</td><td>×</td><td>×</td><td>○</td></tr>
+          <tr><td>学生詳細</td><td>×</td><td>×</td><td>○</td></tr>
+          <tr><td>学生へメッセージ送信</td><td>×</td><td>×</td><td>○</td></tr>
+        </tbody></table></div>
+        <div class="callout warning"><strong>未確定：</strong>実際のデプロイ先でNext.jsのrewriteが<code>Set-Cookie</code>を意図どおり中継できるか、初期段階で技術検証する。難しい場合は同一サイト配下のリバースプロキシ構成を採用する。</div>
+      </section>
+
+      <section id="validation">
+        <h2>14. バリデーション</h2>
+        <ul>
+          <li>メールアドレス：必須、形式確認、大文字小文字を無視して一意。</li>
+          <li>パスワード：必須、8文字以上。</li>
+          <li>role：<code>student</code>または<code>company</code>。学生登録時はサーバー側で固定。</li>
+          <li>氏名：必須、100文字以内。</li>
+          <li>学校名：必須、200文字以内。</li>
+          <li>卒業予定年：必須。現在年から10年後まで。</li>
+          <li>希望職種：必須、100文字以内。</li>
+          <li>スキル：配列、最大20件、各50文字以内、空文字と重複を除去。</li>
+          <li>自己紹介：必須、2,000文字以内。</li>
+          <li>ページ番号：1以上の整数。1件数は1〜50。</li>
+        </ul>
+      </section>
+
+      <section id="acceptance">
+        <h2>15. 受け入れ条件</h2>
+        <h3>学生登録</h3>
+        <ul class="checklist">
+          <li>正しい入力で学生アカウントとプロフィールを同時作成できる。</li>
+          <li>登録直後にログイン状態となり、マイページへ遷移する。</li>
+          <li>同じメールアドレスを大文字小文字だけ変えて再登録できない。</li>
+          <li>プロフィール作成失敗時にユーザーだけが残らない。</li>
+          <li>リクエストから企業ロールを指定できない。</li>
+        </ul>
+        <h3>企業ログイン</h3>
+        <ul class="checklist">
+          <li>seedの企業アカウントでログインできる。</li>
+          <li>ログイン成功後に学生一覧へ遷移する。</li>
+          <li>誤った資格情報ではセッションを作成しない。</li>
+          <li>学生アカウントでは企業向け画面へアクセスできない。</li>
+          <li>ログアウト後は保護されたAPIを利用できない。</li>
+        </ul>
+        <h3>学生一覧・詳細</h3>
+        <ul class="checklist">
+          <li>認証済み企業が登録済み学生を新着順に閲覧できる。</li>
+          <li>一覧が20件単位でページ分割される。</li>
+          <li>学生を選ぶとプロフィール全文を確認できる。</li>
+          <li>未ログイン・学生ロールからは一覧と詳細を取得できない。</li>
+          <li>一覧・詳細APIに学生のメールアドレスが含まれない。</li>
+          <li>存在しない学生IDに対して404を返す。</li>
+          <li>詳細画面からメッセージ作成画面へ進める。</li>
+        </ul>
+      </section>
+
+      <section id="tests">
+        <h2>16. テスト方針</h2>
+        <div class="table-wrap"><table><thead><tr><th>層</th><th>P0で実施するテスト</th></tr></thead><tbody>
+          <tr><td>Rails model</td><td>メール一意性、role、プロフィール項目、関連削除、パスワード認証</td></tr>
+          <tr><td>Rails request</td><td>学生登録、ログイン、ログアウト、<code>me</code>、学生一覧・詳細、401／403／404／422</td></tr>
+          <tr><td>Next.js unit/component</td><td>ログインフォームの入力・エラー、学生カード、空状態、ページネーション</td></tr>
+          <tr><td>E2E</td><td>企業ログイン→学生一覧→学生詳細→メッセージ作成画面への遷移</td></tr>
+        </tbody></table></div>
+        <p>2週間のため網羅率の数値目標は置かず、権限境界と必須ユーザーフローを優先する。</p>
+      </section>
+
+      <section id="schedule">
+        <h2>17. 開発順序（2週間）</h2>
+        <div class="table-wrap"><table><thead><tr><th>期間</th><th>実装内容</th><th>完了条件</th></tr></thead><tbody>
+          <tr><td>1〜2日目</td><td>モノレポ、Rails API、Next.js、PostgreSQL、Docker、CIの基盤</td><td>両アプリが起動し、疎通できる。</td></tr>
+          <tr><td>3〜4日目</td><td>users、学生登録、プロフィール、セッション認証</td><td>学生登録と自動ログインが動作する。</td></tr>
+          <tr><td>5日目</td><td>企業seed、企業ログイン、認可</td><td>企業だけが保護APIへアクセスできる。</td></tr>
+          <tr><td>6〜7日目</td><td>学生一覧・詳細、ページネーション</td><td>企業が候補学生を選択できる。</td></tr>
+          <tr><td>8〜9日目</td><td>メッセージ送信・受信</td><td>必須のスカウトフローが完結する。</td></tr>
+          <tr><td>10〜11日目</td><td>テスト、エラー状態、UI調整</td><td>主要受け入れ条件を満たす。</td></tr>
+          <tr><td>12日目</td><td>デプロイと本番検証</td><td>公開環境で主要フローが動作する。</td></tr>
+          <tr><td>13〜14日目</td><td>README、デモデータ、余裕があればP1</td><td>第三者が再現・評価できる。</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="open-issues">
+        <h2>18. 未確定事項</h2>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>論点</th><th>確定時期</th><th>影響</th></tr></thead><tbody>
+          <tr><td>O-001</td><td>企業からのメッセージを1学生につき1会話へまとめるか、送信ごとに独立させるか。</td><td>次回</td><td>DB、API、画面</td></tr>
+          <tr><td>O-002</td><td>学生側の受信画面で企業名以外にどの企業情報を表示するか。</td><td>次回</td><td>企業プロフィール</td></tr>
+          <tr><td>O-003</td><td>Next.jsからRailsへの同一オリジン転送方式と本番配置。</td><td>実装1〜2日目</td><td>Cookie、CSRF、CORS</td></tr>
+          <tr><td>O-004</td><td>プロフィール公開停止機能をP1に含めるか。</td><td>P0完成後</td><td>プライバシー、一覧条件</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="decision-log">
+        <h2>19. Decision Log</h2>
+        <div class="table-wrap"><table class="decision-log"><thead><tr><th>ID</th><th>決定</th><th>理由</th><th>状態</th></tr></thead><tbody>
+          <tr><td>D-001</td><td>必須要件と追加判断を分離して記載する。</td><td>課題文の要求と独自設計を混同しないため。</td><td>採用</td></tr>
+          <tr><td>D-002</td><td>P0／P1／P2でスコープを管理する。</td><td>2週間で必須フローを完成させるため。</td><td>採用</td></tr>
+          <tr><td>D-003</td><td>学生は認証アカウントとプロフィールを同時登録する。</td><td>受信確認や将来の返信を本人へ安全に紐付けるため。</td><td>採用</td></tr>
+          <tr><td>D-004</td><td><code>users</code>を学生・企業で共通化し、文字列roleで区別する。</td><td>認証処理を共通化し、将来のロール追加にも対応しやすくするため。</td><td>採用</td></tr>
+          <tr><td>D-005</td><td>企業の公開登録をP0から除外し、seedアカウントを利用する。</td><td>企業審査を省き、必須のメッセージ機能へ集中するため。</td><td>採用</td></tr>
+          <tr><td>D-006</td><td>学生一覧・詳細は認証済み企業だけに公開する。</td><td>学生情報の不必要な公開を避けるため。</td><td>採用</td></tr>
+          <tr><td>D-007</td><td>企業向けAPIから学生のメールアドレスを除外する。</td><td>スカウト判断に不要なログイン情報を保護するため。</td><td>採用</td></tr>
+          <tr><td>D-008</td><td>P0の一覧は新着順・20件単位とし、検索はP1に置く。</td><td>必須フローを保ちつつ、一覧性能とUIを最低限担保するため。</td><td>採用</td></tr>
+          <tr><td>D-009</td><td>RailsセッションとHttpOnly Cookieで認証する。</td><td>ブラウザJavaScriptから認証情報を読めない構成にするため。</td><td>採用・配置検証待ち</td></tr>
+          <tr><td>D-010</td><td>今後はHTMLを仕様書の正本として継続編集する。</td><td>閲覧性を優先し、編集作業を本チャットで一元化するため。</td><td>採用</td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section id="changelog">
+        <h2>20. 変更履歴</h2>
+        <div class="table-wrap"><table><thead><tr><th>Version</th><th>日付</th><th>変更内容</th></tr></thead><tbody>
+          <tr><td>0.1</td><td>以前作成</td><td>初期仕様。現環境では原本未確認。</td></tr>
+          <tr><td>0.2</td><td>2026-08-31</td><td>課題原文を再確認。学生登録、企業ログイン、学生一覧・詳細を具体化。DB・API・認証・受け入れ条件・テスト・開発順序を整合。HTMLを正本化。</td></tr>
+          <tr><td>0.3</td><td>2026-08-31</td><td>要件区分の表示を「課題明示」から「既定」へ変更し、関連する見出しと説明を統一。</td></tr>
+        </tbody></table></div>
+      </section>
+    </main>
+  </div>
+
+  <footer>インターン生スカウトサービス 仕様書 v0.3 — 継続編集中</footer>
+</body>
+</html>
