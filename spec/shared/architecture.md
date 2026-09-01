@@ -12,6 +12,18 @@
 | 開発環境 | Docker Compose | 設計判断 |
 | CI | GitHub Actions | 設計判断 |
 
+## 固定バージョン
+
+| 対象 | バージョン |
+|---|---|
+| Ruby | 3.4.10 |
+| Rails | 8.1.3.1 |
+| Node.js | 24 LTS |
+| Next.js | 16.3.3 |
+| PostgreSQL | 17 |
+
+パッチ更新はセキュリティ修正を優先し、依存関係更新時はCIでフロントエンドのlint・buildとRailsのrequest specを確認する。
+
 ## ディレクトリ案
 
 ```text
@@ -39,4 +51,3 @@ repository/
 5. メッセージ送信・受信
 6. テスト、UI調整、デプロイ、README
 7. 余裕があればP1
-
