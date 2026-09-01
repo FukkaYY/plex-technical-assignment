@@ -51,5 +51,5 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
           working-directory: backend
-      - run: bin/rails db:prepare
+      - run: bin/rails db:create db:schema:load
       - run: bundle exec rspec
