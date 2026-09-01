@@ -5,7 +5,7 @@
 | カラム | 型 | 制約 |
 |---|---|---|
 | id | bigint | PK |
-| email | string | NOT NULL、正規化後UNIQUE |
+| email | string | NOT NULL、前後空白除去・小文字化後UNIQUE |
 | password_digest | string | NOT NULL |
 | role | string | NOT NULL、student/company |
 | created_at / updated_at | datetime | NOT NULL |
@@ -30,7 +30,7 @@
 |---|---|---|
 | id | bigint | PK |
 | user_id | bigint | FK、NOT NULL、UNIQUE |
-| company_name | string | NOT NULL |
+| company_name | string | NOT NULL、200文字以内 |
 | created_at / updated_at | datetime | NOT NULL |
 
 ## conversations（案）
@@ -57,6 +57,7 @@
 ## 共通制約
 
 - 外部キーと検索対象へ適切なindexを設定する。
+- `users.email` はDB制約でも大文字小文字を無視して一意にする。
 - ユーザー削除時の従属データ削除方針を明示する。
 - roleとプロフィール種別の整合性はモデル検証と作成サービスで保証する。
-
+- `company_profiles` は `company` ロールのユーザーにだけ関連付ける。

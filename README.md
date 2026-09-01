@@ -52,6 +52,21 @@ cd frontend && npm run lint && npm run build
 cd backend && bundle exec rspec
 ```
 
+## デモ企業アカウント
+
+コンテナ起動後、再実行可能なseedを実行します。
+
+```bash
+docker compose exec backend bin/rails db:seed
+```
+
+ローカル開発用のダミー資格情報は次のとおりです。
+
+- メールアドレス: `company@example.com`
+- パスワード: `password123`
+
+値は `.env` の `DEMO_COMPANY_EMAIL` と `DEMO_COMPANY_PASSWORD` で変更できます。本番環境でダミー値を使用しないでください。
+
 ## 仕様の参照先
 
 - 公開用の概要: `index.html`

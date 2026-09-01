@@ -12,6 +12,7 @@ module PlexTechnicalAssignment
   class Application < Rails::Application
     config.load_defaults 8.1
     config.api_only = true
+    config.cache_store = :memory_store, { size: 16 * 1024 * 1024 }
 
     # APIモードでもCookieセッションを利用するため、必要なmiddlewareだけを戻す。
     config.session_store :cookie_store,

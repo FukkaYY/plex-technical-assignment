@@ -2,7 +2,7 @@
 
 ## 方針
 
-Railsが認証を管理し、セッションIDをHttpOnly Cookieで保持する。
+Railsが認証を管理し、暗号化・署名されたセッション情報をHttpOnly Cookieで保持する。MVPではRailsの `cookie_store` を使用する。
 
 ## 採用理由
 
@@ -15,7 +15,8 @@ Railsが認証を管理し、セッションIDをHttpOnly Cookieで保持する�
 - `HttpOnly`: 必須
 - `Secure`: 本番環境で必須
 - `SameSite`: 配置構成に応じて `Lax` を第一候補に検証
-- 有効期限: MVPでは固定期間とし、値は実装時に決定
+- 有効期限: MVPでは永続期限を設けず、ブラウザーセッション終了まで
+- 自動延長・永続ログイン: P0対象外
 
 ## パスワード
 
@@ -25,17 +26,26 @@ Railsが認証を管理し、セッションIDをHttpOnly Cookieで保持する�
 
 ## エンドポイント
 
+- `GET /api/v1/csrf`
 - `POST /api/v1/session`
 - `DELETE /api/v1/session`
 - `GET /api/v1/me`
 
 ## CSRF
 
-- Cookie認証の変更系リクエストでCSRF対策を行う。
-- Next.jsとRailsの本番配置を確定後、トークン取得・送信方式を決める。
+- P0ではNext.jsからRailsへの同一オリジン転送を前提とする。
+- Cookie認証の変更系リクエストでRailsのCSRF保護を有効にする。
+- フロントエンドは `GET /api/v1/csrf` から `data.csrf_token` を取得し、変更系リクエストの `X-CSRF-Token` ヘッダーで送信する。
+- `SameSite=Lax` だけをCSRF対策としない。
+
+## ログイン
+
+- `POST /api/v1/session` は学生・企業で共通化する。
+- クライアントが送信するroleはログイン対象の絞り込みにだけ使い、保存済みユーザーのroleを変更しない。
+- 成功時はセッションを再生成し、セッション固定攻撃を防ぐ。
+- 資格情報とroleの不一致は、どちらが原因かを区別しない共通エラーとする。
+- `POST /api/v1/session` は成否を含むすべての試行をIPアドレス単位で計数し、60秒間に5回まで許可する。6回目以降は `429 Too Many Requests` と `base` / `rate_limited` を返す。
 
 ## 未確定事項
 
-- 本番の同一オリジン転送方式。
-- セッション有効期限と延長方針。
-
+- 本番環境でも同一オリジン転送を維持する具体的な配置方式。

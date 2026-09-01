@@ -1,2 +1,97 @@
 class ApplicationController < ActionController::API
+  include ActionController::Cookies
+  include ActionController::RequestForgeryProtection
+
+  protect_from_forgery with: :exception
+
+  rescue_from ActionController::InvalidAuthenticityToken, with: :render_invalid_csrf_token
+  rescue_from ActionController::ParameterMissing, with: :render_missing_parameter
+
+  private
+
+  def current_user
+    @current_user ||= User.find_by(id: session[:user_id])
+  end
+
+  def require_authentication
+    return if current_user
+
+    render json: { errors: [{ field: "base", code: "unauthenticated", message: "ログインが必要です" }] }, status: :unauthorized
+  end
+
+  def require_company
+    unless current_user
+      render json: { errors: [{ field: "base", code: "unauthenticated", message: "ログインが必要です" }] }, status: :unauthorized
+      return false
+    end
+    return true if current_user.company?
+
+    render json: { errors: [{ field: "base", code: "forbidden", message: "この操作を実行する権限がありません" }] }, status: :forbidden
+    false
+  end
+
+  def user_json(user)
+    user.as_json(only: %i[id email role])
+  end
+
+  def student_profile_json(profile)
+    profile.as_json(only: %i[id user_id name school_name graduation_year desired_role skills self_introduction])
+  end
+
+  def company_profile_json(profile)
+    profile.as_json(only: %i[id user_id company_name])
+  end
+
+  def authenticated_user_json(user)
+    {
+      user: user_json(user),
+      student_profile: user.student? ? student_profile_json(user.student_profile) : nil,
+      company_profile: user.company? ? company_profile_json(user.company_profile) : nil
+    }
+  end
+
+  def validation_errors(errors)
+    errors.map do |field, code, message|
+      { field: field.to_s, code: code.to_s, message: validation_message(field, code, message) }
+    end
+  end
+
+  def validation_message(field, code, fallback)
+    labels = {
+      email: "メールアドレス",
+      password: "パスワード",
+      password_confirmation: "パスワード確認",
+      name: "氏名",
+      school_name: "学校名",
+      graduation_year: "卒業予定年",
+      desired_role: "希望職種",
+      skills: "スキル",
+      self_introduction: "自己紹介",
+      company_name: "企業名"
+    }
+    label = labels[field.to_sym] || field.to_s
+
+    case code.to_sym
+    when :blank then "#{label}を入力してください"
+    when :invalid then "#{label}が正しくありません"
+    when :taken then "#{label}はすでに使用されています"
+    when :confirmation then "#{label}がパスワードと一致しません"
+    when :too_short then "#{label}は8文字以上で入力してください"
+    when :too_long then "#{label}が上限文字数を超えています"
+    when :too_many then "#{label}が上限件数を超えています"
+    when :greater_than_or_equal_to, :less_than_or_equal_to then "#{label}が許可範囲外です"
+    when :not_a_number, :not_an_integer then "#{label}は整数で入力してください"
+    else fallback
+    end
+  end
+
+  def render_invalid_csrf_token
+    render json: { errors: [{ field: "csrf_token", code: "invalid", message: "CSRFトークンが無効です" }] }, status: :unprocessable_entity
+  end
+
+  def render_missing_parameter(error)
+    render json: {
+      errors: [{ field: error.param.to_s, code: "missing", message: "必要な入力データがありません" }]
+    }, status: :unprocessable_entity
+  end
 end

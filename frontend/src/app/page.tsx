@@ -1,13 +1,16 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="shell">
       <section className="card">
         <p className="eyebrow">PLEX INTERN SCOUT</p>
-        <h1>開発環境の準備ができました</h1>
-        <p>
-          次は、必須機能の最初の単位であるインターン生登録を実装します。
-        </p>
-        <a href="/api/v1/health">Rails APIの疎通を確認</a>
+        <h1>あなたの可能性と、企業をつなぐ。</h1>
+        <p>プロフィールを登録して、インターンのスカウトを受け取りましょう。</p>
+        <div className="actions">
+          <Link className="primary-link" href="/students/register">インターン生として登録</Link>
+          <Link className="secondary-link" href="/companies/login">企業ログイン</Link>
+        </div>
       </section>
     </main>
   );

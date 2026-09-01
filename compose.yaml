@@ -20,6 +20,8 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/plex_development}
       RAILS_ENV: development
+      DEMO_COMPANY_EMAIL: ${DEMO_COMPANY_EMAIL:-company@example.com}
+      DEMO_COMPANY_PASSWORD: ${DEMO_COMPANY_PASSWORD:-password123}
     volumes:
       - ./backend:/app
       - bundle_cache:/usr/local/bundle
