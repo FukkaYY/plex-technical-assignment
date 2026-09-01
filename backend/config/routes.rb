@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       post "session", to: "sessions#create"
       get "me", to: "sessions#show"
       delete "session", to: "sessions#destroy"
+      resources :students, only: :index
     end
   end
 end

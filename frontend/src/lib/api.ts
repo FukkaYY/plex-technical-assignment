@@ -33,6 +33,27 @@ export type AuthenticatedUserData = {
   company_profile: CompanyProfile | null;
 };
 
+export type StudentListItem = {
+  id: number;
+  name: string;
+  school_name: string;
+  graduation_year: number;
+  desired_role: string;
+  skills: string[];
+  skills_count: number;
+  self_introduction_excerpt: string;
+  registered_at: string;
+};
+
+export type StudentListMeta = {
+  page: number;
+  per_page: number;
+  total_count: number;
+  total_pages: number;
+  has_previous: boolean;
+  has_next: boolean;
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -104,6 +125,15 @@ export async function login(email: string, password: string, role: User["role"])
   });
 
   return parseResponse<{ data: AuthenticatedUserData }>(response);
+}
+
+export async function getStudents(page = 1) {
+  const response = await fetch(`/api/v1/students?page=${page}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: StudentListItem[]; meta: StudentListMeta }>(response);
 }
 
 export async function logout() {

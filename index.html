@@ -97,8 +97,8 @@
 
     <section>
       <h2>現在の実装対象</h2>
-      <p class="lead">学生登録に続き、デモ企業のseed、企業ログイン、企業専用APIの共通認可を実装する。</p>
-      <div class="notice">ログインAPIは学生・企業で共通化し、指定roleと保存済みroleの一致を検証する。企業ログインは共通エラーとIP単位の試行制限で保護し、成功後は企業認証済みの <code>/students</code> へ遷移する。</div>
+      <p class="lead">企業ログインに続き、認証済み企業向けの学生一覧を実装する。</p>
+      <div class="notice">学生一覧は新着順・20件単位とし、スキル先頭3件と自己紹介の抜粋を表示する。架空学生25人のseedで2ページ分をデモでき、学生のメールアドレスなどの認証情報は企業へ返さない。</div>
     </section>
 
     <section>
@@ -106,7 +106,7 @@
       <div class="cards">
         <article class="card"><h3>インターン生登録</h3><p>アカウントとプロフィールの同時作成、入力値の正規化、自動ログイン、登録後画面、受け入れ条件。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-registration.md">仕様を開く</a></article>
         <article class="card"><h3>企業ログイン</h3><p>再実行可能なデモseed、共通ログインAPI、ロール検証、試行制限、企業認可。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/company-authentication.md">仕様を開く</a></article>
-        <article class="card"><h3>学生一覧</h3><p>表示項目、新着順、ページネーション、非公開項目。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-list.md">仕様を開く</a></article>
+        <article class="card"><h3>学生一覧</h3><p>新着順、20件単位、スキルと自己紹介の抜粋、前後ページ、非公開項目。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-list.md">仕様を開く</a></article>
         <article class="card"><h3>学生詳細</h3><p>プロフィール全文、認可、メッセージ作成への導線。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-detail.md">仕様を開く</a></article>
         <article class="card"><h3>メッセージ</h3><p>企業の送信、学生の受信、会話・メッセージの設計案。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/messaging.md">仕様を開く</a></article>
       </div>

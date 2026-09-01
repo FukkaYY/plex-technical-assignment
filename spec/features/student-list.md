@@ -22,6 +22,13 @@
 
 メールアドレスなどのログイン情報は返さない。
 
+### 表示用の加工
+
+- 学生を識別する `id` は `users.id` とし、詳細とメッセージ送信でも同じIDを使用する。
+- スキルは登録順の先頭3件を `skills` に返し、全件数を `skills_count` に返す。
+- 自己紹介はRails側で最大120文字に切り詰め、120文字を超える場合だけ末尾を `…` とする。フロントエンドで追加の切り詰めを行わない。
+- 登録日時 `registered_at` は `student_profiles.created_at` をUTCのISO 8601形式で返す。
+
 ## API
 
 `GET /api/v1/students?page=1`
@@ -29,17 +36,66 @@
 - 成功: `200 OK`
 - 未ログイン: `401 Unauthorized`
 - 学生ロール: `403 Forbidden`
-- 並び順: `created_at DESC, id DESC`
+- 並び順: `student_profiles.created_at DESC, student_profiles.id DESC`
 - ページサイズ: 20件固定
-- レスポンスにページ番号、総件数、総ページ数を含める。
+
+### 成功レスポンス
+
+```json
+{
+  "data": [{
+    "id": 123,
+    "name": "山田 太郎",
+    "school_name": "プレックス大学",
+    "graduation_year": 2028,
+    "desired_role": "バックエンドエンジニア",
+    "skills": ["Ruby", "PostgreSQL", "Docker"],
+    "skills_count": 5,
+    "self_introduction_excerpt": "Webアプリの開発に取り組んでいます…",
+    "registered_at": "2026-09-01T00:00:00Z"
+  }],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total_count": 25,
+    "total_pages": 2,
+    "has_previous": false,
+    "has_next": true
+  }
+}
+```
+
+- メールアドレス、`password_digest`、`student_profiles.id` は返さない。
+
+### ページ番号
+
+- `page` 省略時は1ページ目を返す。
+- 1以上の整数だけを受け付ける。
+- 0、負数、整数以外は `422 Unprocessable Entity` と `page` / `invalid` を返す。
+- 総ページ数を超える正の整数は `200 OK` と空の `data` を返す。
+- 学生が0件の場合は `page=1`, `total_pages=0`, 空の `data` を返す。
 
 ## 画面状態
 
 - 読み込み中
 - 一覧表示
 - 登録学生が0件の空状態
-- APIエラー
+- APIエラーと再試行
 - 前後ページへの移動
+
+## 画面動作
+
+- 現在ページと総ページ数、「前へ」「次へ」を表示する。ページ番号一覧はP0では表示しない。
+- APIエラー時はエラーメッセージと「再試行」を表示する。
+- 未ログインは企業ログイン画面、学生ロールは学生マイページへ移動する。APIはそれぞれ `401` と `403` を返す。
+- 学生カードに「詳細を見る」リンクを表示し、`/students/:id` へ移動する。
+- 学生詳細の実装前は `/students/:id` に「詳細機能は準備中」と一覧へ戻る導線を表示する。
+
+## seedデータ
+
+- `student01@example.com` から `student25@example.com` までの架空学生25人を作成する。
+- パスワードは開発用のダミー値とし、学校名、卒業予定年、希望職種、スキルに複数パターンを用意する。
+- seedは再実行しても同じメールアドレスのユーザーを重複作成しない。
 
 ## 受け入れ条件
 
@@ -48,4 +104,5 @@
 - 学生カードから学生詳細へ移動できる。
 - APIレスポンスに学生のメールアドレスが含まれない。
 - 未ログインまたは学生ロールでは取得できない。
-
+- 不正なページ番号に `422` を返し、範囲外の正のページ番号に空の一覧を返す。
+- seedだけで25人の架空学生と2ページ分の表示を確認できる。

@@ -61,3 +61,4 @@
 - ユーザー削除時の従属データ削除方針を明示する。
 - roleとプロフィール種別の整合性はモデル検証と作成サービスで保証する。
 - `company_profiles` は `company` ロールのユーザーにだけ関連付ける。
+- 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。
