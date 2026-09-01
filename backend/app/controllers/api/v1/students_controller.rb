@@ -27,6 +27,18 @@ module Api
         }
       end
 
+      def show
+        profile = StudentProfile.find_by(user_id: params[:id])
+        unless profile
+          render json: {
+            errors: [{ field: "student", code: "not_found", message: "学生が見つかりません" }]
+          }, status: :not_found
+          return
+        end
+
+        render json: { data: detail_json(profile) }
+      end
+
       private
 
       def parsed_page
@@ -51,6 +63,18 @@ module Api
           skills_count: profile.skills.length,
           self_introduction_excerpt: profile.self_introduction.truncate(120, omission: "…"),
           registered_at: profile.created_at.utc.iso8601
+        }
+      end
+
+      def detail_json(profile)
+        {
+          id: profile.user_id,
+          name: profile.name,
+          school_name: profile.school_name,
+          graduation_year: profile.graduation_year,
+          desired_role: profile.desired_role,
+          skills: profile.skills,
+          self_introduction: profile.self_introduction
         }
       end
     end

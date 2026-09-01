@@ -157,4 +157,58 @@ RSpec.describe "Students", type: :request do
     expect(response).to have_http_status(:forbidden)
     expect(response.parsed_body.dig("errors", 0, "code")).to eq("forbidden")
   end
+
+  describe "GET /api/v1/students/:id" do
+    it "returns the complete public profile without private fields" do
+      student = create_student(1)
+      login_as(company)
+
+      get "/api/v1/students/#{student.id}"
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body.fetch("data")).to eq(
+        "id" => student.id,
+        "name" => "学生 1",
+        "school_name" => "デモ大学",
+        "graduation_year" => Time.zone.today.year + 1,
+        "desired_role" => "エンジニア",
+        "skills" => ["Ruby", "Rails", "PostgreSQL", "Docker"],
+        "self_introduction" => ("あ" * 130)
+      )
+      expect(response.body).not_to include(student.email)
+      expect(response.body).not_to include("password_digest")
+      expect(response.parsed_body.fetch("data")).not_to have_key("user_id")
+    end
+
+    it "returns 404 for a missing student" do
+      login_as(company)
+
+      get "/api/v1/students/999999"
+
+      expect(response).to have_http_status(:not_found)
+      expect(response.parsed_body.dig("errors", 0)).to include(
+        "field" => "student",
+        "code" => "not_found"
+      )
+    end
+
+    it "requires authentication" do
+      student = create_student(1)
+
+      get "/api/v1/students/#{student.id}"
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body.dig("errors", 0, "code")).to eq("unauthenticated")
+    end
+
+    it "rejects a student role" do
+      student = create_student(1)
+      login_as(student)
+
+      get "/api/v1/students/#{student.id}"
+
+      expect(response).to have_http_status(:forbidden)
+      expect(response.parsed_body.dig("errors", 0, "code")).to eq("forbidden")
+    end
+  end
 end

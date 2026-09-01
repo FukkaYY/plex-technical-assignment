@@ -54,6 +54,16 @@ export type StudentListMeta = {
   has_next: boolean;
 };
 
+export type StudentDetail = {
+  id: number;
+  name: string;
+  school_name: string;
+  graduation_year: number;
+  desired_role: string;
+  skills: string[];
+  self_introduction: string;
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -134,6 +144,15 @@ export async function getStudents(page = 1) {
   });
 
   return parseResponse<{ data: StudentListItem[]; meta: StudentListMeta }>(response);
+}
+
+export async function getStudent(id: string) {
+  const response = await fetch(`/api/v1/students/${encodeURIComponent(id)}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: StudentDetail }>(response);
 }
 
 export async function logout() {

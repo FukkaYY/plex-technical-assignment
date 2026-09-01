@@ -445,6 +445,83 @@ a {
   opacity: 0.45;
 }
 
+.student-detail-shell {
+  width: min(920px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 36px 20px 70px;
+}
+
+.back-link {
+  margin: 0 0 20px;
+  text-decoration: none;
+}
+
+.student-detail-card {
+  padding: clamp(28px, 5vw, 52px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(30 52 88 / 10%);
+}
+
+.student-detail-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.student-detail-heading h1 {
+  margin-bottom: 8px;
+}
+
+.student-affiliation {
+  margin: 0;
+  color: var(--muted);
+}
+
+.message-action {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.message-action .primary-button {
+  margin-top: 0;
+}
+
+.message-action .primary-button:disabled {
+  cursor: not-allowed;
+}
+
+.message-action small {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.detail-section {
+  padding-top: 30px;
+}
+
+.detail-section h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+}
+
+.detail-value,
+.self-introduction-full {
+  margin: 0;
+}
+
+.self-introduction-full {
+  color: #344054;
+  white-space: pre-wrap;
+}
+
 @media (max-width: 640px) {
   .card {
     padding: 30px 24px;
@@ -465,12 +542,17 @@ a {
 
   .dashboard-header,
   .student-card-heading,
-  .list-summary {
+  .list-summary,
+  .student-detail-heading {
     align-items: stretch;
     flex-direction: column;
   }
 
   .student-grid {
     grid-template-columns: 1fr;
+  }
+
+  .message-action {
+    align-items: stretch;
   }
 }
