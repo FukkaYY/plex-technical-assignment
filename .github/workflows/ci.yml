@@ -69,7 +69,7 @@ jobs:
         working-directory: frontend
       - run: docker compose up --build --detach
       - name: Wait for the application
-        run: curl --fail --retry 40 --retry-delay 2 --retry-connrefused http://127.0.0.1:3000/api/v1/health
+        run: curl --fail --retry 40 --retry-delay 2 --retry-all-errors http://127.0.0.1:3000/api/v1/health
       - run: docker compose exec -T backend bin/rails db:seed
       - run: npm run test:e2e
         working-directory: frontend
