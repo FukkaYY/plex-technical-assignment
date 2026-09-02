@@ -51,8 +51,12 @@ class ApplicationController < ActionController::API
   end
 
   def validation_errors(errors)
-    errors.map do |field, code, message|
-      { field: field.to_s, code: code.to_s, message: validation_message(field, code, message) }
+    errors.map do |error|
+      {
+        field: error.attribute.to_s,
+        code: error.type.to_s,
+        message: validation_message(error.attribute, error.type, error.message)
+      }
     end
   end
 
