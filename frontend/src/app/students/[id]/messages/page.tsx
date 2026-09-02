@@ -105,8 +105,8 @@ export default function StudentMessagesPage() {
             <p>送信したメッセージは学生本人が受信画面から確認できます。</p>
           </header>
 
-          <section className="message-history" aria-label="送信履歴">
-            <h2>送信履歴</h2>
+          <section className="message-history" aria-label="会話履歴">
+            <h2>会話履歴</h2>
             {messages.length === 0 ? (
               <div className="message-empty">
                 <p>まだメッセージを送信していません。</p>
@@ -114,7 +114,8 @@ export default function StudentMessagesPage() {
             ) : (
               <ol>
                 {messages.map((message) => (
-                  <li key={message.id}>
+                  <li className={message.sender_role === "student" ? "message-from-student" : "message-from-company"} key={message.id}>
+                    <strong>{message.sender_role === "student" ? `${studentName}さん` : "自社"}</strong>
                     <p>{message.body}</p>
                     <time dateTime={message.sent_at}>{formatSentAt(message.sent_at)}</time>
                   </li>

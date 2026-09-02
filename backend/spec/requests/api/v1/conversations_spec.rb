@@ -84,6 +84,7 @@ RSpec.describe "Conversations", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig("data", "company", "company_name")).to eq("第一株式会社")
     expect(response.parsed_body.dig("data", "messages").pluck("body")).to eq(["最初", "次"])
+    expect(response.parsed_body.dig("data", "messages").pluck("sender_role")).to eq(["company", "company"])
     expect(response.body).not_to include(first_company.email)
   end
 

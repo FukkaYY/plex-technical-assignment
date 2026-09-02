@@ -11,7 +11,9 @@ Rails.application.routes.draw do
       resources :students, only: %i[index show] do
         resources :messages, only: %i[index create], controller: :student_messages
       end
-      resources :conversations, only: %i[index show]
+      resources :conversations, only: %i[index show] do
+        resources :messages, only: :create, controller: :conversation_messages
+      end
     end
   end
 end

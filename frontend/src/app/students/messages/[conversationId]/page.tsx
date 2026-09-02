@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ApiRequestError, ConversationDetail, getConversation } from "@/lib/api";
+import { ApiRequestError, ConversationDetail, getConversation, replyToConversation } from "@/lib/api";
+
+const MAX_BODY_LENGTH = 2_000;
 
 export default function StudentMessageDetailPage() {
   const params = useParams<{ conversationId: string }>();
@@ -12,6 +14,9 @@ export default function StudentMessageDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isNotFound, setIsNotFound] = useState(false);
   const [error, setError] = useState("");
+  const [replyError, setReplyError] = useState("");
+  const [body, setBody] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
@@ -58,6 +63,44 @@ export default function StudentMessageDetailPage() {
     setRetryKey((current) => current + 1);
   }
 
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const normalizedBody = body.trim();
+    if (!normalizedBody || normalizedBody.length > MAX_BODY_LENGTH || isSending) return;
+
+    setReplyError("");
+    setIsSending(true);
+    try {
+      const response = await replyToConversation(params.conversationId, body);
+      setConversation((current) => current ? { ...current, messages: [...current.messages, response.data.message] } : current);
+      setBody("");
+    } catch (requestError: unknown) {
+      if (requestError instanceof ApiRequestError) {
+        if (requestError.errors.some((item) => item.code === "unauthenticated")) {
+          router.replace("/students/login");
+          return;
+        }
+        if (requestError.errors.some((item) => item.code === "forbidden")) {
+          router.replace("/students");
+          return;
+        }
+        if (requestError.errors.some((item) => item.code === "not_found")) {
+          setConversation(null);
+          setIsNotFound(true);
+          return;
+        }
+        setReplyError(requestError.errors[0]?.message ?? "返信の送信に失敗しました。");
+      } else {
+        setReplyError("返信の送信に失敗しました。");
+      }
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  const normalizedLength = body.trim().length;
+  const canSend = normalizedLength > 0 && normalizedLength <= MAX_BODY_LENGTH && !isSending;
+
   return (
     <main className="message-shell">
       <Link className="back-link" href="/students/messages">← 受信メッセージへ戻る</Link>
@@ -85,16 +128,37 @@ export default function StudentMessageDetailPage() {
           <header className="message-header">
             <p className="eyebrow">MESSAGE FROM</p>
             <h1>{conversation.company.company_name}</h1>
-            <p>この画面では受信内容を確認できます。学生からの返信は現在利用できません。</p>
+            <p>企業からのメッセージを確認し、この会話へ返信できます。</p>
           </header>
-          <section className="received-message-history" aria-label="受信メッセージ履歴">
+          <section className="received-message-history" aria-label="会話履歴">
             {conversation.messages.map((message) => (
-              <div className="received-message" key={message.id}>
+              <div className={`received-message ${message.sender_role === "student" ? "message-from-student" : "message-from-company"}`} key={message.id}>
+                <strong>{message.sender_role === "student" ? "あなた" : conversation.company.company_name}</strong>
                 <p>{message.body}</p>
                 <time dateTime={message.sent_at}>{formatSentAt(message.sent_at)}</time>
               </div>
             ))}
           </section>
+          <form className="message-form" aria-label="返信フォーム" onSubmit={handleSubmit}>
+            <label htmlFor="reply-body">返信本文</label>
+            <textarea
+              id="reply-body"
+              value={body}
+              onChange={(event) => setBody(event.target.value)}
+              maxLength={MAX_BODY_LENGTH}
+              rows={6}
+              disabled={isSending}
+              aria-describedby="reply-count"
+              required
+            />
+            <div className="message-form-footer">
+              <span id="reply-count">{body.length} / {MAX_BODY_LENGTH}文字</span>
+              <button className="primary-button" type="submit" disabled={!canSend}>
+                {isSending ? "返信中…" : "返信を送信"}
+              </button>
+            </div>
+            {replyError && <div className="error-banner send-error" role="alert">{replyError} 入力内容を保持しています。</div>}
+          </form>
         </article>
       )}
     </main>

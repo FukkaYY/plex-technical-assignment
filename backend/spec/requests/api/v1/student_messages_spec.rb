@@ -72,6 +72,22 @@ RSpec.describe "Student messages", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig("data", "student")).to eq("id" => student.id, "name" => "山田 太郎")
     expect(response.parsed_body.dig("data", "messages").pluck("body")).to eq(["最初のメッセージ", "次のメッセージ"])
+    expect(response.parsed_body.dig("data", "messages").pluck("sender_role")).to eq(["company", "company"])
+  end
+
+  it "includes student replies in the company's conversation history" do
+    conversation = Conversation.create!(company: company, student: student)
+    conversation.messages.create!(sender: company, body: "企業から送信")
+    conversation.messages.create!(sender: student, body: "学生から返信")
+    login_as(company)
+
+    get "/api/v1/students/#{student.id}/messages"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "messages").map { |message| [message["body"], message["sender_role"]] }).to eq([
+      ["企業から送信", "company"],
+      ["学生から返信", "student"]
+    ])
   end
 
   it "does not expose another company's conversation" do

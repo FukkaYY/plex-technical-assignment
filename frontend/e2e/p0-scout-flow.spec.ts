@@ -19,13 +19,15 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByText(/人が検索条件に一致しました/)).toBeVisible();
   const studentCard = page.locator("article.student-card").filter({ hasText: targetStudentName });
   await expect(studentCard).toBeVisible();
+  const studentDetailPath = await studentCard.getByRole("link", { name: "詳細を見る" }).getAttribute("href");
+  if (!studentDetailPath) throw new Error("学生詳細へのリンクを取得できませんでした");
   await studentCard.getByRole("link", { name: "詳細を見る" }).click();
   await expect(page.getByRole("heading", { name: targetStudentName })).toBeVisible();
   await page.getByRole("link", { name: "この学生にメッセージを送る" }).click();
 
   await page.getByLabel("メッセージ本文").fill(messageBody);
   await page.getByRole("button", { name: "メッセージを送信" }).click();
-  await expect(page.getByLabel("送信履歴")).toContainText(messageBody);
+  await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
 
   await page.getByRole("link", { name: "学生詳細へ戻る" }).click();
   await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
@@ -49,8 +51,19 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(conversation).toContainText(messageBody);
   await conversation.click();
   await expect(page.getByRole("heading", { name: "デモ企業株式会社" })).toBeVisible();
-  await expect(page.getByLabel("受信メッセージ履歴")).toContainText(messageBody);
+  await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
+  await page.getByLabel("返信本文").fill("E2Eテストからの返信です。");
+  await page.getByRole("button", { name: "返信を送信" }).click();
+  await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
 
   await page.goto("/students");
   await expect(page).toHaveURL(/\/students\/me$/);
+
+  await page.getByRole("button", { name: "ログアウト" }).click();
+  await page.getByRole("link", { name: "企業ログイン" }).click();
+  await page.getByLabel("メールアドレス").fill("company@example.com");
+  await page.getByLabel("パスワード").fill("password123");
+  await page.getByRole("button", { name: "ログイン" }).click();
+  await page.goto(`${studentDetailPath}/messages`);
+  await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
 });

@@ -639,6 +639,22 @@ a {
   white-space: pre-wrap;
 }
 
+.message-history li strong,
+.received-message strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+}
+
+.message-history li.message-from-student {
+  margin-right: min(12%, 70px);
+  margin-left: 0;
+  border-color: #cfd7e3;
+  border-radius: 14px 14px 14px 3px;
+  background: #f4f6f9;
+}
+
 .message-history time {
   display: block;
   color: var(--muted);
@@ -792,6 +808,13 @@ a {
   border: 1px solid var(--line);
   border-radius: 14px 14px 14px 3px;
   background: #fff;
+}
+
+.received-message.message-from-student {
+  margin-left: auto;
+  border-color: #cdd8f8;
+  border-radius: 14px 14px 3px 14px;
+  background: #eef3ff;
 }
 
 .received-message p {

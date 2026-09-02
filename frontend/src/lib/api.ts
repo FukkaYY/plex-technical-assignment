@@ -74,6 +74,7 @@ export type MessageItem = {
   id: number;
   body: string;
   sent_at: string;
+  sender_role: "student" | "company";
 };
 
 export type StudentMessageHistory = {
@@ -250,6 +251,21 @@ export async function getConversation(id: string) {
   });
 
   return parseResponse<{ data: ConversationDetail }>(response);
+}
+
+export async function replyToConversation(id: string, body: string) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/conversations/${encodeURIComponent(id)}/messages`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ message: { body } }),
+  });
+
+  return parseResponse<{ data: { message: MessageItem } }>(response);
 }
 
 export async function logout() {

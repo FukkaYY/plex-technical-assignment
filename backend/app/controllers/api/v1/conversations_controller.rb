@@ -59,7 +59,8 @@ module Api
         {
           id: message.id,
           body: message.body,
-          sent_at: message.created_at.utc.iso8601
+          sent_at: message.created_at.utc.iso8601,
+          sender_role: message.sender.role
         }
       end
     end

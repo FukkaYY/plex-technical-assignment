@@ -8,7 +8,7 @@ module Api
         return unless @student
 
         conversation = current_user.company_conversations
-          .includes(:messages)
+          .includes(messages: :sender)
           .find_by(student: @student)
 
         render json: {
@@ -67,7 +67,8 @@ module Api
         {
           id: message.id,
           body: message.body,
-          sent_at: message.created_at.utc.iso8601
+          sent_at: message.created_at.utc.iso8601,
+          sender_role: message.sender.role
         }
       end
     end
