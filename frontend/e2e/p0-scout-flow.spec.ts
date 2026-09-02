@@ -12,6 +12,11 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "ログイン" }).click();
 
   await expect(page).toHaveURL(/\/students$/);
+  await page.getByLabel("キーワード").fill("Rails");
+  await page.getByLabel("希望職種").fill("バックエンドエンジニア");
+  await page.getByRole("button", { name: "検索する" }).click();
+  await expect(page).toHaveURL(/query=Rails/);
+  await expect(page.getByText(/人が検索条件に一致しました/)).toBeVisible();
   const studentCard = page.locator("article.student-card").filter({ hasText: targetStudentName });
   await expect(studentCard).toBeVisible();
   await studentCard.getByRole("link", { name: "詳細を見る" }).click();

@@ -96,6 +96,76 @@ RSpec.describe "Students", type: :request do
     expect(response.parsed_body.dig("meta", "page")).to eq(1)
   end
 
+  it "searches public profile fields and combines exact filters" do
+    ruby_student = create_student(1, created_at: 1.minute.ago)
+    ruby_student.student_profile.update!(
+      name: "山田 花子",
+      school_name: "東京大学",
+      graduation_year: Time.zone.today.year + 2,
+      desired_role: "バックエンドエンジニア",
+      skills: ["Ruby", "PostgreSQL"]
+    )
+    create_student(2, created_at: 2.minutes.ago).student_profile.update!(
+      name: "佐藤 太郎",
+      school_name: "大阪大学",
+      graduation_year: Time.zone.today.year + 1,
+      desired_role: "フロントエンドエンジニア",
+      skills: ["TypeScript"]
+    )
+    login_as(company)
+
+    get "/api/v1/students", params: {
+      query: " ruby ",
+      graduation_year: Time.zone.today.year + 2,
+      desired_role: " バックエンドエンジニア "
+    }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch("data").pluck("id")).to eq([ruby_student.id])
+    expect(response.parsed_body.fetch("meta")).to include("total_count" => 1, "total_pages" => 1)
+  end
+
+  it "treats SQL wildcard characters in a keyword as literal text" do
+    create_student(1).student_profile.update!(name: "100% 学生")
+    create_student(2).student_profile.update!(name: "1000 学生")
+    login_as(company)
+
+    get "/api/v1/students", params: { query: "%" }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch("data").pluck("name")).to eq(["100% 学生"])
+  end
+
+  it "returns an empty result with pagination metadata when no profile matches" do
+    create_student(1)
+    login_as(company)
+
+    get "/api/v1/students", params: { query: "該当しない語句" }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch("data")).to eq([])
+    expect(response.parsed_body.fetch("meta")).to include("total_count" => 0, "total_pages" => 0)
+  end
+
+  it "returns 422 for invalid search filters" do
+    login_as(company)
+
+    [
+      { params: { query: "a" * 101 }, field: "query" },
+      { params: { desired_role: "a" * 101 }, field: "desired_role" },
+      { params: { graduation_year: "not-a-year" }, field: "graduation_year" },
+      { params: { graduation_year: Time.zone.today.year + 11 }, field: "graduation_year" }
+    ].each do |example|
+      get "/api/v1/students", params: example.fetch(:params)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.dig("errors", 0)).to include(
+        "field" => example.fetch(:field),
+        "code" => "invalid"
+      )
+    end
+  end
+
   it "returns 422 for an invalid page" do
     login_as(company)
 

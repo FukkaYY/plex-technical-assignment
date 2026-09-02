@@ -89,7 +89,7 @@
         <thead><tr><th>優先度</th><th>機能</th></tr></thead>
         <tbody>
           <tr><td><strong>P0 / MVP</strong></td><td>学生登録、企業ログイン、学生一覧・詳細、企業からのメッセージ送信、学生の受信確認</td></tr>
-          <tr><td><strong>P1</strong></td><td>プロフィール編集（実装済み）、学生検索・絞り込み、学生からの返信、未読管理</td></tr>
+          <tr><td><strong>P1</strong></td><td>プロフィール編集、学生検索・絞り込み（実装済み）、学生からの返信、未読管理</td></tr>
           <tr><td><strong>P2</strong></td><td>企業の募集掲載、予定調整、グループチャット</td></tr>
         </tbody>
       </table></div>
@@ -97,8 +97,8 @@
 
     <section>
       <h2>現在の実装対象</h2>
-      <p class="lead">P0の主要機能とブラウザ受け入れ検証が完成し、P1の学生プロフィール編集まで実装する。</p>
-      <div class="notice">学生本人が登録時と同じ検証規則でプロフィールを更新できる。メールアドレス・パスワード変更、画像、公開停止は今回の対象外とする。</div>
+      <p class="lead">P0の主要機能とブラウザ受け入れ検証に加え、P1の学生プロフィール編集と学生検索・絞り込みを実装する。</p>
+      <div class="notice">企業は公開プロフィールのキーワード検索と、卒業予定年・希望職種の完全一致を組み合わせられる。条件はURLに保持し、検索結果にも既存のページ分割を適用する。</div>
     </section>
 
     <section>
@@ -106,7 +106,7 @@
       <div class="cards">
         <article class="card"><h3>インターン生登録</h3><p>アカウントとプロフィールの同時作成、入力値の正規化、自動ログイン、登録後画面、受け入れ条件。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-registration.md">仕様を開く</a></article>
         <article class="card"><h3>企業ログイン</h3><p>再実行可能なデモseed、共通ログインAPI、ロール検証、試行制限、企業認可。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/company-authentication.md">仕様を開く</a></article>
-        <article class="card"><h3>学生一覧</h3><p>新着順、20件単位、スキルと自己紹介の抜粋、前後ページ、非公開項目。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-list.md">仕様を開く</a></article>
+        <article class="card"><h3>学生一覧</h3><p>新着順、20件単位、公開プロフィールの検索、卒業予定年・希望職種の絞り込み、非公開項目。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-list.md">仕様を開く</a></article>
         <article class="card"><h3>学生詳細</h3><p>全スキルと自己紹介全文、企業認可、404・再試行、メッセージ作成への導線。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-detail.md">仕様を開く</a></article>
         <article class="card"><h3>メッセージ</h3><p>企業の送信履歴、学生の受信一覧・詳細、参加者ごとの認可。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/messaging.md">仕様を開く</a></article>
         <article class="card"><h3>プロフィール編集</h3><p>学生本人による現在値の編集、登録時と共通の検証・正規化、認可と完了表示。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/profile-editing.md">仕様を開く</a></article>

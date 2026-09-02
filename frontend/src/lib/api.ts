@@ -54,6 +54,12 @@ export type StudentListMeta = {
   has_next: boolean;
 };
 
+export type StudentSearchFilters = {
+  query?: string;
+  graduationYear?: string;
+  desiredRole?: string;
+};
+
 export type StudentDetail = {
   id: number;
   name: string;
@@ -181,8 +187,13 @@ export async function login(email: string, password: string, role: User["role"])
   return parseResponse<{ data: AuthenticatedUserData }>(response);
 }
 
-export async function getStudents(page = 1) {
-  const response = await fetch(`/api/v1/students?page=${page}`, {
+export async function getStudents(page = 1, filters: StudentSearchFilters = {}) {
+  const params = new URLSearchParams({ page: String(page) });
+  if (filters.query) params.set("query", filters.query);
+  if (filters.graduationYear) params.set("graduation_year", filters.graduationYear);
+  if (filters.desiredRole) params.set("desired_role", filters.desiredRole);
+
+  const response = await fetch(`/api/v1/students?${params.toString()}`, {
     credentials: "same-origin",
     cache: "no-store",
   });
