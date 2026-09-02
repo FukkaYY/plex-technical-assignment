@@ -13,7 +13,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
 
   await expect(page).toHaveURL(/\/students$/);
   await page.getByLabel("キーワード").fill("Rails");
-  await page.getByLabel("希望職種").fill("バックエンドエンジニア");
+  await page.getByLabel("卒業予定年").fill(String(new Date().getFullYear() + 1));
   await page.getByRole("button", { name: "検索する" }).click();
   await expect(page).toHaveURL(/query=Rails/);
   await expect(page.getByText(/人が検索条件に一致しました/)).toBeVisible();
@@ -64,6 +64,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
+  await expect(page).toHaveURL(/\/students$/);
   await page.goto(`${studentDetailPath}/messages`);
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
 });
