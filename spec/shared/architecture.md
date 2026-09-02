@@ -51,3 +51,5 @@ repository/
 5. メッセージ送信・受信
 6. テスト、UI調整、デプロイ、README
 7. 余裕があればP1
+
+P0実装完了後はPlaywrightで企業送信から学生受信までを通し、GitHub Actionsの独立したE2Eジョブで継続検証する。

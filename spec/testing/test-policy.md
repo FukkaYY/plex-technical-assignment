@@ -36,3 +36,4 @@
 4. 学生が受信内容を確認
 5. 異なるロール・他ユーザーのリソースへアクセスできないこと
 
+PlaywrightのChromiumで1〜4を連続した必須フローとして実行し、学生セッションで企業画面を開けないことも確認する。Docker ComposeでアプリとDBを起動し、seedのデモ企業・デモ学生を利用する。GitHub Actionsでは通常のfrontend・backendジョブと分離し、失敗時にHTMLレポート、スクリーンショット、動画、trace、コンテナログをartifactとして7日間保存する。

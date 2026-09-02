@@ -79,7 +79,7 @@
       <div class="cards">
         <article class="card"><span class="badge required">既定</span><h3>課題文で定められた要件</h3><p>Rails、Next.js、GitHub管理、2週間、学生登録、企業から学生へのメッセージ。</p></article>
         <article class="card"><span class="badge decision">設計判断</span><h3>本仕様で採用した内容</h3><p>企業認証、学生一覧・詳細、受信確認、データ構造、CookieセッションとCSRF保護など。</p></article>
-        <article class="card"><span class="badge">未確定</span><h3>後続で決める内容</h3><p>会話単位、企業情報の表示範囲、本番配置、公開停止機能など。</p></article>
+        <article class="card"><span class="badge">未確定</span><h3>後続で決める内容</h3><p>本番配置、公開停止機能など。会話単位と学生向け企業情報はP0実装で確定済み。</p></article>
       </div>
     </section>
 
@@ -97,8 +97,8 @@
 
     <section>
       <h2>現在の実装対象</h2>
-      <p class="lead">企業のメッセージ送信に続き、学生ログインと受信確認を実装する。</p>
-      <div class="notice">学生は本人の会話だけを最新順の受信一覧で確認し、詳細では送信元企業名と全メッセージを古い順に閲覧する。他の学生の会話は404として存在を隠し、返信・未読管理はP1とする。</div>
+      <p class="lead">P0の主要機能は完成し、企業送信から学生受信までのブラウザ受け入れ検証を整備する。</p>
+      <div class="notice">PlaywrightとDocker Composeで企業ログイン、学生選択、メッセージ送信、学生ログイン、受信確認を連続実行する。GitHub Actionsでは独立したE2Eジョブとし、失敗時の画面・trace・コンテナログを保存する。</div>
     </section>
 
     <section>

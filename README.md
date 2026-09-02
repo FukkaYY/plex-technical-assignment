@@ -52,6 +52,16 @@ cd frontend && npm run lint && npm run build
 cd backend && bundle exec rspec
 ```
 
+ブラウザ上のP0必須フローはPlaywrightで確認します。初回だけブラウザをインストールしてください。
+
+```bash
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+```
+
+E2E実行前に、リポジトリ直下で `docker compose up --build -d` と `docker compose exec backend bin/rails db:seed` を実行しておきます。失敗時のスクリーンショット、動画、traceは `frontend/test-results/` に保存されます。
+
 ## デモ企業アカウント
 
 コンテナ起動後、再実行可能なseedを実行します。
@@ -64,6 +74,13 @@ docker compose exec backend bin/rails db:seed
 
 - メールアドレス: `company@example.com`
 - パスワード: `password123`
+
+## デモ学生アカウント
+
+- メールアドレス: `student01@example.com`
+- パスワード: `password123`
+
+手動でP0の必須フローを確認する場合は、企業としてログインし「デモ学生 01」へメッセージを送信したあと、ログアウトして上記学生でログインします。学生マイページの「受信メッセージを見る」から、デモ企業名と送信本文を確認できます。
 
 値は `.env` の `DEMO_COMPANY_EMAIL` と `DEMO_COMPANY_PASSWORD` で変更できます。本番環境でダミー値を使用しないでください。
 
