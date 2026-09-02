@@ -142,6 +142,21 @@ export async function registerStudent(payload: Record<string, unknown>) {
   return parseResponse<{ data: { user: User; student_profile: StudentProfile } }>(response);
 }
 
+export async function updateStudentProfile(payload: Record<string, unknown>) {
+  const token = await csrfToken();
+  const response = await fetch("/api/v1/student_profile", {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ student_profile: payload }),
+  });
+
+  return parseResponse<{ data: StudentProfile }>(response);
+}
+
 export async function getCurrentUser() {
   const response = await fetch("/api/v1/me", {
     credentials: "same-origin",

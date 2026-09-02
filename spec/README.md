@@ -19,6 +19,7 @@
 | 作業 | 最初に読むファイル | 追加で読む共通仕様 |
 |---|---|---|
 | 学生登録 | `features/student-registration.md` | `shared/authentication.md`, `shared/database.md`, `shared/validation.md` |
+| プロフィール編集 | `features/profile-editing.md` | `shared/authorization.md`, `shared/validation.md` |
 | 企業ログイン | `features/company-authentication.md` | `shared/authentication.md`, `shared/api-conventions.md` |
 | 学生一覧 | `features/student-list.md` | `shared/authorization.md`, `shared/api-conventions.md` |
 | 学生詳細 | `features/student-detail.md` | `shared/authorization.md`, `shared/database.md` |
@@ -37,4 +38,3 @@
 3. 判断理由や代替案がある変更は `decisions/decision-log.md` に追記する。
 4. 受け入れ条件が変わる場合は `testing/acceptance-criteria.md` も更新する。
 5. `index.html` は公開用の概要であり、詳細仕様を重複させない。
-

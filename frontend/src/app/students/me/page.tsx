@@ -9,6 +9,7 @@ export default function StudentMyPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -23,6 +24,10 @@ export default function StudentMyPage() {
           return;
         }
         setProfile(data.student_profile);
+        if (new URLSearchParams(window.location.search).get("updated") === "1") {
+          setNotice("プロフィールを更新しました。");
+          window.history.replaceState(null, "", "/students/me");
+        }
       })
       .catch((requestError: unknown) => {
         if (requestError instanceof ApiRequestError && requestError.errors.some((item) => item.code === "unauthenticated")) {
@@ -49,6 +54,7 @@ export default function StudentMyPage() {
     <main className="page-shell">
       <section className="profile-card" aria-live="polite">
         {error && <div className="error-banner" role="alert">{error}</div>}
+        {notice && <div className="success-banner" role="status">{notice}</div>}
 
         {!profile && !error && <p className="loading">プロフィールを読み込んでいます…</p>}
 
@@ -64,6 +70,7 @@ export default function StudentMyPage() {
             </dl>
             <div className="actions">
               <Link className="primary-link" href="/students/messages">受信メッセージを見る</Link>
+              <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>
               <button className="secondary-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>
                 {isLoggingOut ? "ログアウト中…" : "ログアウト"}
               </button>

@@ -7,6 +7,7 @@ Rails.application.routes.draw do
       post "session", to: "sessions#create"
       get "me", to: "sessions#show"
       delete "session", to: "sessions#destroy"
+      resource :student_profile, only: :update
       resources :students, only: %i[index show] do
         resources :messages, only: %i[index create], controller: :student_messages
       end

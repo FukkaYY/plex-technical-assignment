@@ -33,6 +33,12 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students\/me$/);
 
+  await page.getByRole("link", { name: "プロフィールを編集" }).click();
+  await page.getByLabel("希望職種").fill("E2E更新済みエンジニア");
+  await page.getByRole("button", { name: "プロフィールを更新" }).click();
+  await expect(page.getByRole("status")).toHaveText("プロフィールを更新しました。");
+  await expect(page.getByText("E2E更新済みエンジニア", { exact: true })).toBeVisible();
+
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
   await expect(conversation).toContainText(messageBody);
