@@ -52,10 +52,16 @@ class ApplicationController < ActionController::API
 
   def validation_errors(errors)
     errors.map do |error|
+      field, code, fallback = if error.respond_to?(:attribute)
+        [error.attribute, error.type, error.message]
+      else
+        error
+      end
+
       {
-        field: error.attribute.to_s,
-        code: error.type.to_s,
-        message: validation_message(error.attribute, error.type, error.message)
+        field: field.to_s,
+        code: code.to_s,
+        message: validation_message(field, code, fallback)
       }
     end
   end
