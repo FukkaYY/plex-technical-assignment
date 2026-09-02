@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_01_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_02_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_01_000004) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_company_profiles_on_user_id", unique: true
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "student_id"], name: "index_conversations_on_company_id_and_student_id", unique: true
+    t.index ["company_id"], name: "index_conversations_on_company_id"
+    t.index ["student_id"], name: "index_conversations_on_student_id"
+    t.check_constraint "company_id <> student_id", name: "conversations_distinct_participants"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "body", null: false
+    t.bigint "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "sender_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id", "created_at", "id"], name: "index_messages_on_conversation_id_and_created_at_and_id"
+    t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
   create_table "student_profiles", force: :cascade do |t|
@@ -47,5 +69,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_01_000004) do
   end
 
   add_foreign_key "company_profiles", "users", on_delete: :cascade
+  add_foreign_key "conversations", "users", column: "company_id", on_delete: :cascade
+  add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
+  add_foreign_key "messages", "conversations", on_delete: :cascade
+  add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "student_profiles", "users", on_delete: :cascade
 end

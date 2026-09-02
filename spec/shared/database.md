@@ -33,7 +33,7 @@
 | company_name | string | NOT NULL、200文字以内 |
 | created_at / updated_at | datetime | NOT NULL |
 
-## conversations（案）
+## conversations
 
 | カラム | 型 | 制約 |
 |---|---|---|
@@ -42,9 +42,9 @@
 | student_id | bigint | usersへのFK、NOT NULL |
 | created_at / updated_at | datetime | NOT NULL |
 
-`company_id, student_id` の複合UNIQUEを第一候補とするが、メッセージ仕様確定時に決定する。
+`company_id, student_id` に複合UNIQUE制約を設定し、同じ企業と学生の会話を1件に固定する。両IDが同じ値になることをCHECK制約で禁止する。
 
-## messages（案）
+## messages
 
 | カラム | 型 | 制約 |
 |---|---|---|
@@ -54,6 +54,8 @@
 | body | text | NOT NULL |
 | created_at / updated_at | datetime | NOT NULL |
 
+メッセージは `conversation_id, created_at, id` の順で古いものから安定して取得できるindexを持つ。本文は前後空白除去後1文字以上2,000文字以内とする。
+
 ## 共通制約
 
 - 外部キーと検索対象へ適切なindexを設定する。
@@ -61,4 +63,7 @@
 - ユーザー削除時の従属データ削除方針を明示する。
 - roleとプロフィール種別の整合性はモデル検証と作成サービスで保証する。
 - `company_profiles` は `company` ロールのユーザーにだけ関連付ける。
+- `conversations.company_id` は企業ロール、`conversations.student_id` は学生ロールだけを関連付ける。
+- `messages.sender_id` は会話参加者だけを関連付ける。
+- ユーザー削除時は参加する会話と送信メッセージ、会話削除時は配下のメッセージを削除する。
 - 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。

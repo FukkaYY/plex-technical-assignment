@@ -64,6 +64,18 @@ export type StudentDetail = {
   self_introduction: string;
 };
 
+export type MessageItem = {
+  id: number;
+  body: string;
+  sent_at: string;
+};
+
+export type StudentMessageHistory = {
+  student: Pick<StudentDetail, "id" | "name">;
+  conversation_id: number | null;
+  messages: MessageItem[];
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -153,6 +165,30 @@ export async function getStudent(id: string) {
   });
 
   return parseResponse<{ data: StudentDetail }>(response);
+}
+
+export async function getStudentMessages(studentId: string) {
+  const response = await fetch(`/api/v1/students/${encodeURIComponent(studentId)}/messages`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: StudentMessageHistory }>(response);
+}
+
+export async function sendStudentMessage(studentId: string, body: string) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/students/${encodeURIComponent(studentId)}/messages`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ message: { body } }),
+  });
+
+  return parseResponse<{ data: { conversation_id: number; message: MessageItem } }>(response);
 }
 
 export async function logout() {

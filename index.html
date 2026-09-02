@@ -97,8 +97,8 @@
 
     <section>
       <h2>現在の実装対象</h2>
-      <p class="lead">学生一覧に続き、認証済み企業向けの学生詳細を実装する。</p>
-      <div class="notice">学生詳細では全スキルと自己紹介全文を表示し、読み込み・404・通信エラーを区別する。メッセージ送信導線は次の機能実装まで準備中表示で無効化し、学生のメールアドレスなどの認証情報は企業へ返さない。</div>
+      <p class="lead">学生詳細に続き、企業から学生へのメッセージ送信と履歴表示を実装する。</p>
+      <div class="notice">企業と学生の組み合わせごとに会話を1件作成し、初回送信は会話とメッセージを同一トランザクションで保存する。企業は対象学生名と自社の送信履歴を古い順に確認でき、送信失敗時も入力本文を保持する。</div>
     </section>
 
     <section>
@@ -107,8 +107,8 @@
         <article class="card"><h3>インターン生登録</h3><p>アカウントとプロフィールの同時作成、入力値の正規化、自動ログイン、登録後画面、受け入れ条件。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-registration.md">仕様を開く</a></article>
         <article class="card"><h3>企業ログイン</h3><p>再実行可能なデモseed、共通ログインAPI、ロール検証、試行制限、企業認可。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/company-authentication.md">仕様を開く</a></article>
         <article class="card"><h3>学生一覧</h3><p>新着順、20件単位、スキルと自己紹介の抜粋、前後ページ、非公開項目。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-list.md">仕様を開く</a></article>
-        <article class="card"><h3>学生詳細</h3><p>全スキルと自己紹介全文、企業認可、404・再試行、準備中のメッセージ導線。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-detail.md">仕様を開く</a></article>
-        <article class="card"><h3>メッセージ</h3><p>企業の送信、学生の受信、会話・メッセージの設計案。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/messaging.md">仕様を開く</a></article>
+        <article class="card"><h3>学生詳細</h3><p>全スキルと自己紹介全文、企業認可、404・再試行、メッセージ作成への導線。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/student-detail.md">仕様を開く</a></article>
+        <article class="card"><h3>メッセージ</h3><p>企業と学生ごとの会話、企業の送信・履歴、学生の受信要件。</p><a href="https://github.com/FukkaYY/plex-technical-assignment/blob/main/spec/features/messaging.md">仕様を開く</a></article>
       </div>
     </section>
 

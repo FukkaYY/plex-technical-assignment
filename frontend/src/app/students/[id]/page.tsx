@@ -89,8 +89,7 @@ export default function StudentDetailPage() {
               <p className="student-affiliation">{student.school_name} / {student.graduation_year}年卒業予定</p>
             </div>
             <div className="message-action">
-              <button className="primary-button" type="button" disabled>この学生にメッセージを送る</button>
-              <small>メッセージ機能は準備中です</small>
+              <Link className="primary-link" href={`/students/${student.id}/messages`}>この学生にメッセージを送る</Link>
             </div>
           </header>
 
