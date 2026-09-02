@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test("企業が送信したメッセージを対象学生が受信できる", async ({ page }) => {
   const messageBody = "E2Eテストから送信したスカウトメッセージです。";
+  const targetStudentName = "デモ学生 25";
+  const targetStudentEmail = "student25@example.com";
 
   await page.goto("/");
   await page.getByRole("link", { name: "企業ログイン" }).click();
@@ -10,10 +12,10 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "ログイン" }).click();
 
   await expect(page).toHaveURL(/\/students$/);
-  const studentCard = page.locator("article.student-card").filter({ hasText: "デモ学生 01" });
+  const studentCard = page.locator("article.student-card").filter({ hasText: targetStudentName });
   await expect(studentCard).toBeVisible();
   await studentCard.getByRole("link", { name: "詳細を見る" }).click();
-  await expect(page.getByRole("heading", { name: "デモ学生 01" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: targetStudentName })).toBeVisible();
   await page.getByRole("link", { name: "この学生にメッセージを送る" }).click();
 
   await page.getByLabel("メッセージ本文").fill(messageBody);
@@ -26,7 +28,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page).toHaveURL(/\/$/);
 
   await page.getByRole("link", { name: "学生ログイン" }).click();
-  await page.getByLabel("メールアドレス").fill("student01@example.com");
+  await page.getByLabel("メールアドレス").fill(targetStudentEmail);
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students\/me$/);
