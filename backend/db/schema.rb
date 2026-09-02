@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_02_000006) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_02_000007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,10 +27,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_000006) do
     t.datetime "created_at", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
+    t.bigint "student_last_read_message_id"
     t.index ["company_id", "student_id"], name: "index_conversations_on_company_id_and_student_id", unique: true
     t.index ["company_id"], name: "index_conversations_on_company_id"
     t.index ["student_id"], name: "index_conversations_on_student_id"
+    t.index ["student_last_read_message_id"], name: "index_conversations_on_student_last_read_message_id"
     t.check_constraint "company_id <> student_id", name: "conversations_distinct_participants"
+    t.check_constraint "student_last_read_message_id IS NULL OR student_last_read_message_id > 0", name: "conversations_student_last_read_message_id_positive"
   end
 
   create_table "messages", force: :cascade do |t|

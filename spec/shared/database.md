@@ -40,9 +40,11 @@
 | id | bigint | PK |
 | company_id | bigint | usersへのFK、NOT NULL |
 | student_id | bigint | usersへのFK、NOT NULL |
+| student_last_read_message_id | bigint | NULL可、正のメッセージID |
 | created_at / updated_at | datetime | NOT NULL |
 
 `company_id, student_id` に複合UNIQUE制約を設定し、同じ企業と学生の会話を1件に固定する。両IDが同じ値になることをCHECK制約で禁止する。
+`student_last_read_message_id` は学生が受信詳細で実際に確認した最後のメッセージを表し、同じ会話内のメッセージだけを単調増加で記録する。
 
 ## messages
 

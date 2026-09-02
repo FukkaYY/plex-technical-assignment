@@ -80,7 +80,14 @@ export default function StudentMessagesPage() {
           {conversations.map((conversation) => (
             <Link key={conversation.id} className="inbox-item" href={`/students/messages/${conversation.id}`}>
               <div>
-                <h2>{conversation.company.company_name}</h2>
+                <div className="inbox-item-heading">
+                  <h2>{conversation.company.company_name}</h2>
+                  {conversation.unread_count > 0 && (
+                    <span className="unread-badge" aria-label={`未読 ${conversation.unread_count}件`}>
+                      未読 {conversation.unread_count}件
+                    </span>
+                  )}
+                </div>
                 <p>{conversation.latest_message_excerpt}</p>
               </div>
               <time dateTime={conversation.latest_message_sent_at}>{formatSentAt(conversation.latest_message_sent_at)}</time>

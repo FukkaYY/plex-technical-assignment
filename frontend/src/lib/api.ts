@@ -92,6 +92,7 @@ export type ConversationListItem = {
   company: ConversationCompany;
   latest_message_excerpt: string;
   latest_message_sent_at: string;
+  unread_count: number;
 };
 
 export type ConversationDetail = {
@@ -251,6 +252,21 @@ export async function getConversation(id: string) {
   });
 
   return parseResponse<{ data: ConversationDetail }>(response);
+}
+
+export async function markConversationRead(id: string, messageId: number) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/conversations/${encodeURIComponent(id)}/read`, {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ conversation: { message_id: messageId } }),
+  });
+
+  return parseResponse<{ data: { unread_count: number } }>(response);
 }
 
 export async function replyToConversation(id: string, body: string) {

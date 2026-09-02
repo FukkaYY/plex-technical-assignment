@@ -49,12 +49,15 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
   await expect(conversation).toContainText(messageBody);
+  await expect(conversation.getByLabel(/未読 \d+件/)).toBeVisible();
   await conversation.click();
   await expect(page.getByRole("heading", { name: "デモ企業株式会社" })).toBeVisible();
   await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
   await page.getByLabel("返信本文").fill("E2Eテストからの返信です。");
   await page.getByRole("button", { name: "返信を送信" }).click();
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
+  await page.getByRole("link", { name: "受信メッセージへ戻る" }).click();
+  await expect(page.getByRole("link", { name: /デモ企業株式会社/ }).getByText(/未読/)).toHaveCount(0);
 
   await page.goto("/students");
   await expect(page).toHaveURL(/\/students\/me$/);

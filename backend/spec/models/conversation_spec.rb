@@ -39,4 +39,29 @@ RSpec.describe Conversation, type: :model do
     expect(conversation).not_to be_valid
     expect(conversation.errors.of_kind?(:company, :invalid)).to be(true)
   end
+
+  it "counts only company messages after the student's read position" do
+    company = create_user(email: "company@example.com", role: :company)
+    student = create_user(email: "student@example.com", role: :student)
+    conversation = described_class.create!(company: company, student: student)
+    first = conversation.messages.create!(sender: company, body: "最初")
+    conversation.messages.create!(sender: student, body: "返信")
+    conversation.mark_read_by_student!(first)
+    conversation.messages.create!(sender: company, body: "新着")
+
+    expect(conversation.student_unread_count).to eq(1)
+  end
+
+  it "does not move the student's read position backwards" do
+    company = create_user(email: "company@example.com", role: :company)
+    student = create_user(email: "student@example.com", role: :student)
+    conversation = described_class.create!(company: company, student: student)
+    first = conversation.messages.create!(sender: company, body: "最初")
+    second = conversation.messages.create!(sender: company, body: "次")
+
+    conversation.mark_read_by_student!(second)
+    conversation.mark_read_by_student!(first)
+
+    expect(conversation.reload.student_last_read_message_id).to eq(second.id)
+  end
 end

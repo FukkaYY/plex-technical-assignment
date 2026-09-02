@@ -776,6 +776,30 @@ a {
   font-size: 1.08rem;
 }
 
+.inbox-item-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.inbox-item-heading h2 {
+  margin: 0;
+}
+
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #fff;
+  background: #3156c8;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .inbox-item p {
   margin: 0;
   color: #475467;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ApiRequestError, ConversationDetail, getConversation, replyToConversation } from "@/lib/api";
+import { ApiRequestError, ConversationDetail, getConversation, markConversationRead, replyToConversation } from "@/lib/api";
 
 const MAX_BODY_LENGTH = 2_000;
 
@@ -23,7 +23,10 @@ export default function StudentMessageDetailPage() {
     let cancelled = false;
 
     void getConversation(params.conversationId)
-      .then(({ data }) => {
+      .then(async ({ data }) => {
+        if (cancelled) return;
+        const latestMessage = data.messages[data.messages.length - 1];
+        if (latestMessage) await markConversationRead(params.conversationId, latestMessage.id);
         if (!cancelled) setConversation(data);
       })
       .catch((requestError: unknown) => {

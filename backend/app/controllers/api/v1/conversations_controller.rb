@@ -35,6 +35,28 @@ module Api
         }
       end
 
+      def mark_read
+        conversation = current_user.student_conversations.find_by(id: params[:id])
+
+        unless conversation
+          render json: {
+            errors: [{ field: "conversation", code: "not_found", message: "会話が見つかりません" }]
+          }, status: :not_found
+          return
+        end
+
+        message = conversation.messages.find_by(id: read_params[:message_id])
+        unless message
+          render json: {
+            errors: [{ field: "message_id", code: "invalid", message: "既読にするメッセージが正しくありません" }]
+          }, status: :unprocessable_entity
+          return
+        end
+
+        conversation.mark_read_by_student!(message)
+        render json: { data: { unread_count: conversation.student_unread_count } }
+      end
+
       private
 
       def list_item_json(conversation)
@@ -45,8 +67,13 @@ module Api
           id: conversation.id,
           company: company_json(conversation.company),
           latest_message_excerpt: latest_message.body.truncate(120, omission: "…"),
-          latest_message_sent_at: latest_message.created_at.utc.iso8601
+          latest_message_sent_at: latest_message.created_at.utc.iso8601,
+          unread_count: conversation.student_unread_count
         }
+      end
+
+      def read_params
+        params.require(:conversation).permit(:message_id)
       end
 
       def company_json(company)

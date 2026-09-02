@@ -12,6 +12,7 @@ Rails.application.routes.draw do
         resources :messages, only: %i[index create], controller: :student_messages
       end
       resources :conversations, only: %i[index show] do
+        patch :read, on: :member, action: :mark_read
         resources :messages, only: :create, controller: :conversation_messages
       end
     end

@@ -63,7 +63,21 @@ RSpec.describe "Conversations", type: :request do
     expect(response.parsed_body.dig("data", 0, "company")).to eq(
       "company_name" => "第二株式会社"
     )
+    expect(response.parsed_body.dig("data", 0, "unread_count")).to eq(1)
     expect(response.body).not_to include(second_company.email)
+  end
+
+  it "counts only unread company messages in the list" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["既読", "未読"])
+    first_message = conversation.messages.first
+    conversation.messages.create!(sender: student, body: "学生からの返信")
+    conversation.update!(student_last_read_message_id: first_message.id)
+    login_as(student)
+
+    get "/api/v1/conversations"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", 0, "unread_count")).to eq(1)
   end
 
   it "returns an empty list when the student has no conversations" do
@@ -98,12 +112,83 @@ RSpec.describe "Conversations", type: :request do
     expect(response.parsed_body.dig("errors", 0, "code")).to eq("not_found")
   end
 
+  it "marks messages through the displayed message as read" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["最初", "次"])
+    latest_message = conversation.messages.last
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: latest_message.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "unread_count")).to eq(0)
+    expect(conversation.reload.student_last_read_message_id).to eq(latest_message.id)
+  end
+
+  it "does not mark another conversation's message as read" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    other_conversation = create_conversation(company: second_company, recipient: student, bodies: ["別会話"])
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: other_conversation.messages.last.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(conversation.reload.student_last_read_message_id).to be_nil
+  end
+
+  it "hides another student's conversation when marking it read" do
+    conversation = create_conversation(company: first_company, recipient: other_student, bodies: ["本文"])
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: conversation.messages.last.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:not_found)
+  end
+
+  it "requires CSRF protection when marking a conversation as read" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: conversation.messages.last.id } },
+      as: :json
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(conversation.reload.student_last_read_message_id).to be_nil
+  end
+
   it "requires a student session" do
     get "/api/v1/conversations"
     expect(response).to have_http_status(:unauthorized)
 
     login_as(first_company)
     get "/api/v1/conversations"
+    expect(response).to have_http_status(:forbidden)
+  end
+
+  it "requires a student session when marking a conversation as read" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    token = csrf_token
+
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: conversation.messages.last.id } },
+      headers: { "X-CSRF-Token" => token },
+      as: :json
+    expect(response).to have_http_status(:unauthorized)
+
+    login_as(first_company)
+    patch "/api/v1/conversations/#{conversation.id}/read",
+      params: { conversation: { message_id: conversation.messages.last.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
     expect(response).to have_http_status(:forbidden)
   end
 end
