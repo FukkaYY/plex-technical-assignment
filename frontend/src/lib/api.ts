@@ -76,6 +76,23 @@ export type StudentMessageHistory = {
   messages: MessageItem[];
 };
 
+export type ConversationCompany = {
+  company_name: string;
+};
+
+export type ConversationListItem = {
+  id: number;
+  company: ConversationCompany;
+  latest_message_excerpt: string;
+  latest_message_sent_at: string;
+};
+
+export type ConversationDetail = {
+  id: number;
+  company: ConversationCompany;
+  messages: MessageItem[];
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -189,6 +206,24 @@ export async function sendStudentMessage(studentId: string, body: string) {
   });
 
   return parseResponse<{ data: { conversation_id: number; message: MessageItem } }>(response);
+}
+
+export async function getConversations() {
+  const response = await fetch("/api/v1/conversations", {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: ConversationListItem[] }>(response);
+}
+
+export async function getConversation(id: string) {
+  const response = await fetch(`/api/v1/conversations/${encodeURIComponent(id)}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: ConversationDetail }>(response);
 }
 
 export async function logout() {

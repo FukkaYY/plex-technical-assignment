@@ -72,6 +72,10 @@ a {
   margin-top: 28px;
 }
 
+.actions .secondary-button {
+  margin-top: 0;
+}
+
 .primary-link,
 .primary-button {
   border: 0;
@@ -651,6 +655,112 @@ a {
   margin-bottom: 0;
 }
 
+.login-alternative {
+  margin: 22px 0 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.login-alternative a {
+  margin-top: 0;
+}
+
+.inbox-shell {
+  width: min(880px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 36px 20px 70px;
+}
+
+.inbox-header {
+  margin-bottom: 26px;
+}
+
+.inbox-header h1 {
+  margin-bottom: 8px;
+}
+
+.inbox-header p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.inbox-list {
+  display: grid;
+  gap: 12px;
+}
+
+.inbox-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: inherit;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(30 52 88 / 6%);
+  text-decoration: none;
+}
+
+.inbox-item:hover {
+  border-color: #9aacec;
+  box-shadow: 0 12px 30px rgb(30 52 88 / 10%);
+}
+
+.inbox-item h2 {
+  margin: 0 0 6px;
+  font-size: 1.08rem;
+}
+
+.inbox-item p {
+  margin: 0;
+  color: #475467;
+}
+
+.inbox-item time {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.received-conversation {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(30 52 88 / 10%);
+}
+
+.received-message-history {
+  display: grid;
+  gap: 16px;
+  padding: clamp(24px, 5vw, 42px);
+  background: #f8faff;
+}
+
+.received-message {
+  max-width: 82%;
+  padding: 17px 19px;
+  border: 1px solid var(--line);
+  border-radius: 14px 14px 14px 3px;
+  background: #fff;
+}
+
+.received-message p {
+  margin: 0 0 9px;
+  color: #344054;
+  white-space: pre-wrap;
+}
+
+.received-message time {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 @media (max-width: 640px) {
   .card {
     padding: 30px 24px;
@@ -692,5 +802,14 @@ a {
 
   .message-history li {
     margin-left: 0;
+  }
+
+  .inbox-item {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .received-message {
+    max-width: 100%;
   }
 }

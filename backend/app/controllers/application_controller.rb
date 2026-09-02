@@ -30,6 +30,17 @@ class ApplicationController < ActionController::API
     false
   end
 
+  def require_student
+    unless current_user
+      render json: { errors: [{ field: "base", code: "unauthenticated", message: "ログインが必要です" }] }, status: :unauthorized
+      return false
+    end
+    return true if current_user.student?
+
+    render json: { errors: [{ field: "base", code: "forbidden", message: "この操作を実行する権限がありません" }] }, status: :forbidden
+    false
+  end
+
   def user_json(user)
     user.as_json(only: %i[id email role])
   end
