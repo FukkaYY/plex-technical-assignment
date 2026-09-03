@@ -8,6 +8,7 @@ Rails.application.routes.draw do
       get "me", to: "sessions#show"
       delete "session", to: "sessions#destroy"
       resource :student_profile, only: :update
+      patch "student_profile/visibility", to: "student_profiles#update_visibility"
       resources :students, only: %i[index show] do
         resources :messages, only: %i[index create], controller: :student_messages
         resources :schedule_proposals, only: :create, controller: :company_schedule_proposals

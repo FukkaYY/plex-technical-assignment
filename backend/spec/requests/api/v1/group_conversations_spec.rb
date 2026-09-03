@@ -50,6 +50,18 @@ RSpec.describe "Group conversations", type: :request do
     end
   end
 
+  it "does not allow a hidden student to be added to a new group" do
+    second_student.student_profile.update!(visible_to_companies: false)
+    login_as(company)
+
+    expect {
+      post "/api/v1/company/group_conversations", params: { group_conversation: { name: "非公開を含むグループ", student_ids: [first_student.id, second_student.id], body: "本文" } }, headers: { "X-CSRF-Token" => csrf_token }, as: :json
+    }.not_to change(GroupConversation, :count)
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.dig("errors", 0, "field")).to eq("student_ids")
+  end
+
   it "lets members and the owner exchange messages" do
     group = create_group
     login_as(first_student)

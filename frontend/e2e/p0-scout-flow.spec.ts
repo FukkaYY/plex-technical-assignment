@@ -10,6 +10,18 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const groupReply = `E2Eグループ返信 ${Date.now()}`;
 
   await page.goto("/");
+  await page.getByRole("link", { name: "学生ログイン" }).click();
+  await page.getByLabel("メールアドレス").fill(targetStudentEmail);
+  await page.getByLabel("パスワード").fill("password123");
+  await page.getByRole("button", { name: "ログイン" }).click();
+  await expect(page).toHaveURL(/\/students\/me$/);
+  await expect(page.getByRole("heading", { name: `${targetStudentName}さん` })).toBeVisible();
+  const restoreVisibilityButton = page.getByRole("button", { name: "プロフィールを公開する" });
+  if (await restoreVisibilityButton.isVisible()) {
+    await restoreVisibilityButton.click();
+    await expect(page.getByRole("status")).toHaveText("プロフィールを企業へ公開しました。");
+  }
+  await page.getByRole("button", { name: "ログアウト" }).click();
   await page.getByRole("link", { name: "企業ログイン" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
@@ -79,6 +91,9 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "プロフィールを更新" }).click();
   await expect(page.getByRole("status")).toHaveText("プロフィールを更新しました。");
   await expect(page.getByText("E2E更新済みエンジニア", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "プロフィールを非公開にする" }).click();
+  await expect(page.getByRole("status")).toHaveText("プロフィールを企業から非公開にしました。");
+  await expect(page.getByText("非公開", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "インターン募集を見る" }).click();
   const jobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
@@ -123,7 +138,13 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students$/);
-  await page.getByRole("link", { name: "募集を管理" }).click();
+  await page.getByLabel("キーワード").fill(targetStudentName);
+  await page.getByRole("button", { name: "検索する" }).click();
+  await expect(page.getByText("0人が検索条件に一致しました")).toBeVisible();
+  await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toHaveCount(0);
+  await page.goto(studentDetailPath);
+  await expect(page.getByRole("heading", { name: "学生が見つかりません" })).toBeVisible();
+  await page.goto("/companies/job-postings");
   const companyJobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
   await companyJobCard.getByRole("button", { name: "募集を終了" }).click();
   await expect(companyJobCard.getByText("募集終了", { exact: true })).toBeVisible();
@@ -135,4 +156,21 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
   const acceptedSchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });
   await expect(acceptedSchedule.getByText("承諾", { exact: true })).toBeVisible();
+
+  await page.goto("/students");
+  await page.getByRole("button", { name: "ログアウト" }).click();
+  await page.getByRole("link", { name: "学生ログイン" }).click();
+  await page.getByLabel("メールアドレス").fill(targetStudentEmail);
+  await page.getByLabel("パスワード").fill("password123");
+  await page.getByRole("button", { name: "ログイン" }).click();
+  await page.getByRole("button", { name: "プロフィールを公開する" }).click();
+  await expect(page.getByRole("status")).toHaveText("プロフィールを企業へ公開しました。");
+  await page.getByRole("button", { name: "ログアウト" }).click();
+  await page.getByRole("link", { name: "企業ログイン" }).click();
+  await page.getByLabel("メールアドレス").fill("company@example.com");
+  await page.getByLabel("パスワード").fill("password123");
+  await page.getByRole("button", { name: "ログイン" }).click();
+  await page.getByLabel("キーワード").fill(targetStudentName);
+  await page.getByRole("button", { name: "検索する" }).click();
+  await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toBeVisible();
 });

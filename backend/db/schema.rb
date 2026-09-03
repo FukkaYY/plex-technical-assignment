@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_000010) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -101,8 +101,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000010) do
     t.jsonb "skills", default: [], null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["created_at", "id"], name: "index_student_profiles_on_created_at_and_id"
+    t.boolean "visible_to_companies", default: true, null: false
     t.index ["user_id"], name: "index_student_profiles_on_user_id", unique: true
+    t.index ["visible_to_companies", "created_at", "id"], name: "index_student_profiles_on_visibility_and_list_order"
   end
 
   create_table "schedule_proposals", force: :cascade do |t|

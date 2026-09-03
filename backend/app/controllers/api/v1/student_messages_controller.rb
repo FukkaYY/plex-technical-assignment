@@ -46,7 +46,11 @@ module Api
 
       def set_student
         @student = User.student.includes(:student_profile).find_by(id: params[:student_id])
-        return if @student
+        if @student && (@student.student_profile.visible_to_companies? || current_user.company_conversations.exists?(student: @student))
+          return
+        end
+
+        @student = nil
 
         render json: {
           errors: [{ field: "student", code: "not_found", message: "学生が見つかりません" }]

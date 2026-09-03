@@ -49,6 +49,14 @@ RSpec.describe "Student profiles", type: :request do
       as: :json
   end
 
+  def update_visibility(value, include_csrf: true)
+    headers = include_csrf ? { "X-CSRF-Token" => csrf_token } : {}
+    patch "/api/v1/student_profile/visibility",
+      params: { student_profile: { visible_to_companies: value } },
+      headers: headers,
+      as: :json
+  end
+
   it "updates the signed-in student's profile with normalized values" do
     login(student)
 
@@ -106,5 +114,47 @@ RSpec.describe "Student profiles", type: :request do
     expect(response).to have_http_status(:forbidden)
     expect(response.parsed_body.dig("errors", 0, "code")).to eq("forbidden")
     expect(student.student_profile.reload.name).to eq("更新前 学生")
+  end
+
+  it "lets a student hide and republish their profile" do
+    login(student)
+
+    update_visibility(false)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "visible_to_companies")).to be(false)
+    expect(student.student_profile.reload.visible_to_companies).to be(false)
+
+    update_visibility(true)
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "visible_to_companies")).to be(true)
+    expect(student.student_profile.reload.visible_to_companies).to be(true)
+  end
+
+  it "protects visibility changes with authentication, role authorization, and CSRF" do
+    update_visibility(false)
+    expect(response).to have_http_status(:unauthorized)
+
+    login(company)
+    update_visibility(false)
+    expect(response).to have_http_status(:forbidden)
+
+    login(student)
+    update_visibility(false, include_csrf: false)
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.dig("errors", 0, "field")).to eq("csrf_token")
+    expect(student.student_profile.reload.visible_to_companies).to be(true)
+  end
+
+  it "rejects a missing or non-boolean visibility value" do
+    login(student)
+
+    [nil, "false"].each do |value|
+      update_visibility(value)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.parsed_body.dig("errors", 0)).to include(
+        "field" => "visible_to_companies",
+        "code" => "invalid"
+      )
+    end
   end
 end

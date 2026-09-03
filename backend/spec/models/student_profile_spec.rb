@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.describe StudentProfile, type: :model do
+  it "is visible to companies by default" do
+    profile = described_class.new
+
+    expect(profile.visible_to_companies).to be(true)
+  end
   def build_profile(**attributes)
     user = User.new(
       email: "student@example.com",

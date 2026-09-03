@@ -227,6 +227,58 @@ a {
   border-radius: 8px;
 }
 
+.profile-visibility {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #d6dce5;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.profile-visibility h2,
+.profile-visibility p {
+  margin: 0;
+}
+
+.profile-visibility > div > p:last-child {
+  margin-top: 8px;
+  color: #526174;
+}
+
+.visibility-status {
+  display: inline-block;
+  margin-top: 8px !important;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.visibility-status.visible {
+  color: #05603a;
+  background: #dcfae6;
+}
+
+.visibility-status.private {
+  color: #7a271a;
+  background: #fee4e2;
+}
+
+.profile-visibility .secondary-button {
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .profile-visibility {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 .error-banner {
   color: #7a271a;
   border: 1px solid #fda29b;

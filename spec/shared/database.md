@@ -22,6 +22,7 @@
 | desired_role | string | NOT NULL |
 | skills | jsonb | NOT NULL、既定値 `[]` |
 | self_introduction | text | NOT NULL |
+| visible_to_companies | boolean | NOT NULL、既定値 `true` |
 | created_at / updated_at | datetime | NOT NULL |
 
 ## company_profiles
@@ -109,4 +110,4 @@
 - `schedule_proposals` は既存会話へ関連付け、会話削除時に削除する。
 - グループメッセージの送信者は所有企業または参加学生に限定する。
 - ユーザー削除時は参加する会話と送信メッセージ、会話削除時は配下のメッセージを削除する。
-- 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。
+- 公開中の学生一覧を `created_at DESC, id DESC` で安定して取得するため、`student_profiles(visible_to_companies, created_at, id)` に複合indexを設定する。

@@ -96,6 +96,26 @@ RSpec.describe "Students", type: :request do
     expect(response.parsed_body.dig("meta", "page")).to eq(1)
   end
 
+  it "excludes hidden profiles from lists, searches, pagination, and direct details until republished" do
+    visible_student = create_student(1, created_at: 1.minute.ago)
+    hidden_student = create_student(2, created_at: 2.minutes.ago)
+    hidden_student.student_profile.update!(visible_to_companies: false)
+    login_as(company)
+
+    get "/api/v1/students", params: { query: "学生" }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch("data").pluck("id")).to eq([visible_student.id])
+    expect(response.parsed_body.fetch("meta")).to include("total_count" => 1, "total_pages" => 1)
+
+    get "/api/v1/students/#{hidden_student.id}"
+    expect(response).to have_http_status(:not_found)
+
+    hidden_student.student_profile.update!(visible_to_companies: true)
+    get "/api/v1/students/#{hidden_student.id}"
+    expect(response).to have_http_status(:ok)
+  end
+
   it "searches public profile fields and combines exact filters" do
     ruby_student = create_student(1, created_at: 1.minute.ago)
     ruby_student.student_profile.update!(

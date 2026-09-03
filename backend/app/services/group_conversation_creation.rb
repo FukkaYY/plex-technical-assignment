@@ -24,7 +24,7 @@ class GroupConversationCreation
   private
 
   def students
-    @students ||= User.student.where(id: normalized_student_ids).to_a
+    @students ||= User.student.joins(:student_profile).merge(StudentProfile.visible_to_companies).where(id: normalized_student_ids).to_a
   end
 
   def normalized_student_ids

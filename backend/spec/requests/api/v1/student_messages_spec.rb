@@ -90,6 +90,28 @@ RSpec.describe "Student messages", type: :request do
     ])
   end
 
+  it "keeps an existing conversation available after the student hides their profile" do
+    conversation = Conversation.create!(company: company, student: student)
+    conversation.messages.create!(sender: company, body: "公開中のメッセージ")
+    student.student_profile.update!(visible_to_companies: false)
+    login_as(company)
+
+    get "/api/v1/students/#{student.id}/messages"
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "messages").pluck("body")).to eq(["公開中のメッセージ"])
+
+    send_message("非公開後のメッセージ")
+    expect(response).to have_http_status(:created)
+  end
+
+  it "does not allow a company to start a conversation with a hidden student" do
+    student.student_profile.update!(visible_to_companies: false)
+    login_as(company)
+
+    expect { send_message("新規メッセージ") }.not_to change(Conversation, :count)
+    expect(response).to have_http_status(:not_found)
+  end
+
   it "does not expose another company's conversation" do
     conversation = Conversation.create!(company: other_company, student: student)
     conversation.messages.create!(sender: other_company, body: "別企業のメッセージ")

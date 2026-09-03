@@ -4,6 +4,8 @@ class StudentProfile < ApplicationRecord
 
   belongs_to :user
 
+  scope :visible_to_companies, -> { where(visible_to_companies: true) }
+
   before_validation :normalize_attributes
 
   validates :name, presence: true, length: { maximum: 100 }

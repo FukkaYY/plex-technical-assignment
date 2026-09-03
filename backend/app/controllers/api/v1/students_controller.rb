@@ -11,7 +11,7 @@ module Api
         filters = parsed_filters
         return unless filters
 
-        scope = StudentProfile.includes(:user).order(created_at: :desc, id: :desc)
+        scope = StudentProfile.visible_to_companies.includes(:user).order(created_at: :desc, id: :desc)
         scope = apply_filters(scope, filters)
         total_count = scope.count
         total_pages = (total_count.to_f / PER_PAGE).ceil
@@ -31,7 +31,7 @@ module Api
       end
 
       def show
-        profile = StudentProfile.find_by(user_id: params[:id])
+        profile = StudentProfile.visible_to_companies.find_by(user_id: params[:id])
         unless profile
           render json: {
             errors: [{ field: "student", code: "not_found", message: "学生が見つかりません" }]

@@ -19,6 +19,7 @@ export type StudentProfile = {
   desired_role: string;
   skills: string[];
   self_introduction: string;
+  visible_to_companies: boolean;
 };
 
 export type CompanyProfile = {
@@ -214,6 +215,21 @@ export async function updateStudentProfile(payload: Record<string, unknown>) {
       "X-CSRF-Token": token,
     },
     body: JSON.stringify({ student_profile: payload }),
+  });
+
+  return parseResponse<{ data: StudentProfile }>(response);
+}
+
+export async function updateStudentProfileVisibility(visibleToCompanies: boolean) {
+  const token = await csrfToken();
+  const response = await fetch("/api/v1/student_profile/visibility", {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ student_profile: { visible_to_companies: visibleToCompanies } }),
   });
 
   return parseResponse<{ data: StudentProfile }>(response);

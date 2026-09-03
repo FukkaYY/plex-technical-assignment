@@ -46,7 +46,7 @@ class ApplicationController < ActionController::API
   end
 
   def student_profile_json(profile)
-    profile.as_json(only: %i[id user_id name school_name graduation_year desired_role skills self_introduction])
+    profile.as_json(only: %i[id user_id name school_name graduation_year desired_role skills self_introduction visible_to_companies])
   end
 
   def company_profile_json(profile)
