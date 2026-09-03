@@ -60,7 +60,7 @@
       <h1>インターン生スカウトサービス 仕様概要</h1>
       <p class="subtitle">2週間で必須フローを完成させるためのスコープと、実装時に参照する分割仕様への入口をまとめる。</p>
       <div class="meta">
-        <span>状態: 継続編集中</span>
+        <span>状態: 実装・検証完了</span>
         <span>公開概要: 本ページ</span>
         <span>実装仕様: spec/ 配下</span>
       </div>
@@ -79,7 +79,7 @@
       <div class="cards">
         <article class="card"><span class="badge required">既定</span><h3>課題文で定められた要件</h3><p>Rails、Next.js、GitHub管理、2週間、学生登録、企業から学生へのメッセージ。</p></article>
         <article class="card"><span class="badge decision">設計判断</span><h3>本仕様で採用した内容</h3><p>企業認証、学生一覧・詳細、受信確認、データ構造、CookieセッションとCSRF保護など。</p></article>
-        <article class="card"><span class="badge">未確定</span><h3>後続で決める内容</h3><p>本番環境で同一オリジン転送を維持する具体的な配置方式。</p></article>
+        <article class="card"><span class="badge">対象外</span><h3>本番公開</h3><p>本課題では公開せず、Docker ComposeとGitHub Actionsで再現性と動作を検証する。</p></article>
       </div>
     </section>
 
@@ -130,6 +130,7 @@
 
     <section>
       <h2>公開上の注意</h2>
+      <p class="notice">本番公開は現在の提出範囲に含めません。将来公開する場合は、配置方式とセキュリティ設定を改めて設計・検証します。</p>
       <ul>
         <li>認証情報、個人情報、秘密鍵、実在ユーザーのデータをコミットしない。</li>
         <li>公開意図が確認できない外部URLを掲載しない。</li>

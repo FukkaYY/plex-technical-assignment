@@ -11,6 +11,7 @@
 | 認証 | Railsセッション + HttpOnly Cookie | 設計判断 |
 | 開発環境 | Docker Compose | 設計判断 |
 | CI | GitHub Actions | 設計判断 |
+| 本番公開 | 対象外。Docker ComposeとCIで再現・検証する | 設計判断 |
 
 ## 固定バージョン
 
@@ -38,8 +39,8 @@ repository/
 
 ## 通信
 
-- Next.jsから `/api` へアクセスし、同一サイトとしてRailsへ転送する構成を第一候補とする。
-- RailsとNext.jsを別オリジンにする場合は、Cookie、CORS、CSRFを本番環境で再検証する。
+- Next.jsから `/api` へアクセスし、ローカルとE2Eでは同一サイトとしてRailsへ転送する。
+- 本番公開は本課題の対象外とする。将来公開する場合は、同一オリジン構成、Cookie、CORS、CSRF、秘密情報、DB移行を改めて設計・検証する。
 - APIは `/api/v1` 配下へ置く。
 
 ## 2週間の実装順
@@ -49,7 +50,7 @@ repository/
 3. 企業seed、企業ログイン、認可
 4. 学生一覧・詳細
 5. メッセージ送信・受信
-6. テスト、UI調整、デプロイ、README
+6. テスト、UI調整、README
 7. 余裕があればP1
 
 P0実装完了後はPlaywrightで企業送信から学生受信までを通し、GitHub Actionsの独立したE2Eジョブで継続検証する。

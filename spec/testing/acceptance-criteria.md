@@ -1,5 +1,7 @@
 # 受け入れ条件
 
+本番公開は提出範囲に含めず、Docker Composeでの再現、frontendのlint・build、Rails spec、Playwright E2E、GitHub Actionsの成功を最終検証条件とする。
+
 ## 学生登録
 
 - 正しい入力で学生アカウントとプロフィールを同時作成できる。
