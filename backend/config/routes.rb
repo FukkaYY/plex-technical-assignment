@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resource :student_profile, only: :update
       resources :students, only: %i[index show] do
         resources :messages, only: %i[index create], controller: :student_messages
+        resources :schedule_proposals, only: :create, controller: :company_schedule_proposals
       end
       resources :conversations, only: %i[index show] do
         patch :read, on: :member, action: :mark_read
@@ -21,6 +22,9 @@ Rails.application.routes.draw do
           patch :close, on: :member
         end
       end
+      patch "company/schedule_proposals/:id/cancel", to: "company_schedule_proposals#cancel"
+      patch "schedule_proposals/:id/accept", to: "student_schedule_proposals#accept"
+      patch "schedule_proposals/:id/decline", to: "student_schedule_proposals#decline"
     end
   end
 end

@@ -5,6 +5,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const targetStudentName = "デモ学生 25";
   const targetStudentEmail = "student25@example.com";
   const jobTitle = `E2E募集 ${Date.now()}`;
+  const scheduleNote = `E2E面談 ${Date.now()}`;
 
   await page.goto("/");
   await page.getByRole("link", { name: "企業ログイン" }).click();
@@ -41,6 +42,13 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("メッセージ本文").fill(messageBody);
   await page.getByRole("button", { name: "メッセージを送信" }).click();
   await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
+  await page.getByLabel("開始日時（日本時間）").fill("2099-01-02T10:00");
+  await page.getByLabel("終了日時（日本時間）").fill("2099-01-02T11:00");
+  await page.getByLabel("実施方法・場所").fill("オンライン面談");
+  await page.getByLabel("補足（任意）").fill(scheduleNote);
+  await page.getByRole("button", { name: "面談予定を提案" }).click();
+  const companySchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });
+  await expect(companySchedule.getByText("回答待ち", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "学生詳細へ戻る" }).click();
   await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
@@ -75,6 +83,9 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await conversation.click();
   await expect(page.getByRole("heading", { name: "デモ企業株式会社" })).toBeVisible();
   await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
+  const studentSchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });
+  await studentSchedule.getByRole("button", { name: "承諾する" }).click();
+  await expect(studentSchedule.getByText("承諾", { exact: true })).toBeVisible();
   await page.getByLabel("返信本文").fill("E2Eテストからの返信です。");
   await page.getByRole("button", { name: "返信を送信" }).click();
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
@@ -96,4 +107,6 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(companyJobCard.getByText("募集終了", { exact: true })).toBeVisible();
   await page.goto(`${studentDetailPath}/messages`);
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
+  const acceptedSchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });
+  await expect(acceptedSchedule.getByText("承諾", { exact: true })).toBeVisible();
 });

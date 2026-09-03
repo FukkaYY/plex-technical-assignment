@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ApiRequestError, ConversationDetail, getConversation, markConversationRead, replyToConversation } from "@/lib/api";
+import { acceptScheduleProposal, ApiRequestError, ConversationDetail, declineScheduleProposal, getConversation, markConversationRead, replyToConversation } from "@/lib/api";
+import ScheduleProposalCard from "@/components/schedule-proposal-card";
 
 const MAX_BODY_LENGTH = 2_000;
 
@@ -18,6 +19,8 @@ export default function StudentMessageDetailPage() {
   const [body, setBody] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [scheduleError, setScheduleError] = useState("");
+  const [changingProposalId, setChangingProposalId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -64,6 +67,20 @@ export default function StudentMessageDetailPage() {
     setIsNotFound(false);
     setIsLoading(true);
     setRetryKey((current) => current + 1);
+  }
+
+  async function respondToProposal(id: number, response: "accept" | "decline") {
+    setChangingProposalId(id);
+    setScheduleError("");
+    try {
+      const result = response === "accept" ? await acceptScheduleProposal(id) : await declineScheduleProposal(id);
+      setConversation((current) => current ? { ...current, schedule_proposals: current.schedule_proposals.map((proposal) => proposal.id === id ? result.data : proposal) } : current);
+    } catch (requestError: unknown) {
+      if (requestError instanceof ApiRequestError) setScheduleError(requestError.errors[0]?.message ?? "予定への回答に失敗しました。");
+      else setScheduleError("予定への回答に失敗しました。");
+    } finally {
+      setChangingProposalId(null);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -141,6 +158,13 @@ export default function StudentMessageDetailPage() {
                 <time dateTime={message.sent_at}>{formatSentAt(message.sent_at)}</time>
               </div>
             ))}
+          </section>
+          <section className="schedule-section" aria-label="面談予定">
+            <h2>面談予定</h2>
+            {conversation.schedule_proposals.length === 0 ? <p className="message-empty">面談予定はまだありません。</p> : conversation.schedule_proposals.map((proposal) => (
+              <ScheduleProposalCard key={proposal.id} proposal={proposal} actions={proposal.status === "pending" ? <div className="schedule-actions"><button className="primary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "accept")} disabled={changingProposalId === proposal.id}>承諾する</button><button className="secondary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "decline")} disabled={changingProposalId === proposal.id}>辞退する</button></div> : undefined} />
+            ))}
+            {scheduleError && <div className="error-banner" role="alert">{scheduleError}</div>}
           </section>
           <form className="message-form" aria-label="返信フォーム" onSubmit={handleSubmit}>
             <label htmlFor="reply-body">返信本文</label>

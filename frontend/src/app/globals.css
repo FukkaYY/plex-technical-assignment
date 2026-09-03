@@ -934,6 +934,129 @@ a {
   white-space: pre-wrap;
 }
 
+.schedule-section {
+  display: grid;
+  gap: 14px;
+  padding: 28px;
+  border-top: 1px solid var(--line);
+  background: #f8faff;
+}
+
+.schedule-section > h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.schedule-card {
+  padding: 18px;
+  border: 1px solid #cfd8e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.schedule-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.schedule-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.schedule-card dl {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.schedule-card dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.schedule-card dd {
+  margin: 3px 0 0;
+  white-space: pre-wrap;
+}
+
+.schedule-status {
+  flex: none;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.schedule-status.pending {
+  color: #854d0e;
+  background: #fef9c3;
+}
+
+.schedule-status.accepted {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.schedule-status.declined,
+.schedule-status.cancelled {
+  color: #475467;
+  background: #e9edf3;
+}
+
+.schedule-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 20px;
+  border: 1px solid #cfd8e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.schedule-form h3 {
+  margin: 0;
+}
+
+.schedule-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.schedule-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.schedule-form input,
+.schedule-form textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid #b8c3d2;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.schedule-form .primary-button {
+  justify-self: start;
+}
+
+.schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.schedule-hint {
+  margin: 0;
+  color: var(--muted);
+}
+
 .inbox-item p {
   margin: 0;
   color: #475467;
@@ -1046,6 +1169,10 @@ a {
   }
 
   .job-detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-form-grid {
     grid-template-columns: 1fr;
   }
 

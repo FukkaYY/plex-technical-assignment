@@ -5,10 +5,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ApiRequestError,
+  cancelScheduleProposal,
+  createScheduleProposal,
   getStudentMessages,
   MessageItem,
+  ScheduleProposal,
   sendStudentMessage,
 } from "@/lib/api";
+import ScheduleProposalCard from "@/components/schedule-proposal-card";
 
 const MAX_BODY_LENGTH = 2_000;
 
@@ -17,6 +21,8 @@ export default function StudentMessagesPage() {
   const router = useRouter();
   const [studentName, setStudentName] = useState("");
   const [messages, setMessages] = useState<MessageItem[]>([]);
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const [proposals, setProposals] = useState<ScheduleProposal[]>([]);
   const [body, setBody] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isNotFound, setIsNotFound] = useState(false);
@@ -24,6 +30,10 @@ export default function StudentMessagesPage() {
   const [loadError, setLoadError] = useState("");
   const [sendError, setSendError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [scheduleFields, setScheduleFields] = useState({ starts_at: "", ends_at: "", location: "", note: "" });
+  const [scheduleError, setScheduleError] = useState("");
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [changingProposalId, setChangingProposalId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +43,8 @@ export default function StudentMessagesPage() {
         if (cancelled) return;
         setStudentName(data.student.name);
         setMessages(data.messages);
+        setConversationId(data.conversation_id);
+        setProposals(data.schedule_proposals);
       })
       .catch((requestError: unknown) => {
         if (cancelled) return;
@@ -57,11 +69,41 @@ export default function StudentMessagesPage() {
     try {
       const response = await sendStudentMessage(params.id, body);
       setMessages((current) => [...current, response.data.message]);
+      setConversationId(response.data.conversation_id);
       setBody("");
     } catch (requestError: unknown) {
       handleAccessError(requestError, router, () => setIsNotFound(true), setSendError);
     } finally {
       setIsSending(false);
+    }
+  }
+
+  async function submitSchedule(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isScheduling) return;
+    setScheduleError("");
+    setIsScheduling(true);
+    try {
+      const { data } = await createScheduleProposal(params.id, scheduleFields);
+      setProposals((current) => [...current, data]);
+      setScheduleFields({ starts_at: "", ends_at: "", location: "", note: "" });
+    } catch (requestError: unknown) {
+      handleAccessError(requestError, router, () => setIsNotFound(true), setScheduleError);
+    } finally {
+      setIsScheduling(false);
+    }
+  }
+
+  async function cancelProposal(id: number) {
+    setChangingProposalId(id);
+    setScheduleError("");
+    try {
+      const { data } = await cancelScheduleProposal(id);
+      setProposals((current) => current.map((proposal) => proposal.id === id ? data : proposal));
+    } catch (requestError: unknown) {
+      handleAccessError(requestError, router, () => setIsNotFound(true), setScheduleError);
+    } finally {
+      setChangingProposalId(null);
     }
   }
 
@@ -122,6 +164,26 @@ export default function StudentMessagesPage() {
                 ))}
               </ol>
             )}
+          </section>
+
+          <section className="schedule-section" aria-label="面談予定">
+            <h2>面談予定</h2>
+            {proposals.length === 0 ? <p className="message-empty">面談予定はまだありません。</p> : proposals.map((proposal) => (
+              <ScheduleProposalCard key={proposal.id} proposal={proposal} actions={proposal.status === "pending" ? <button className="secondary-button compact-button" type="button" onClick={() => cancelProposal(proposal.id)} disabled={changingProposalId === proposal.id}>{changingProposalId === proposal.id ? "取消中…" : "予定を取り消す"}</button> : undefined} />
+            ))}
+            {conversationId ? (
+              <form className="schedule-form" aria-label="面談予定の提案" onSubmit={submitSchedule}>
+                <h3>新しい面談予定を提案</h3>
+                <div className="schedule-form-grid">
+                  <label>開始日時（日本時間）<input type="datetime-local" value={scheduleFields.starts_at} onChange={(event) => setScheduleFields((current) => ({ ...current, starts_at: event.target.value }))} disabled={isScheduling} required /></label>
+                  <label>終了日時（日本時間）<input type="datetime-local" value={scheduleFields.ends_at} onChange={(event) => setScheduleFields((current) => ({ ...current, ends_at: event.target.value }))} disabled={isScheduling} required /></label>
+                  <label className="field-wide">実施方法・場所<input value={scheduleFields.location} onChange={(event) => setScheduleFields((current) => ({ ...current, location: event.target.value }))} maxLength={200} disabled={isScheduling} required /></label>
+                  <label className="field-wide">補足（任意）<textarea value={scheduleFields.note} onChange={(event) => setScheduleFields((current) => ({ ...current, note: event.target.value }))} maxLength={1000} rows={3} disabled={isScheduling} /></label>
+                </div>
+                <button className="primary-button" type="submit" disabled={isScheduling}>{isScheduling ? "提案中…" : "面談予定を提案"}</button>
+              </form>
+            ) : <p className="schedule-hint">面談予定を提案するには、先にメッセージを送信してください。</p>}
+            {scheduleError && <div className="error-banner" role="alert">{scheduleError}</div>}
           </section>
 
           <form className="message-form" onSubmit={handleSubmit}>

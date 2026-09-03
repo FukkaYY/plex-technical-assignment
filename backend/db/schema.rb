@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_000008) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_000009) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -76,6 +76,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000008) do
     t.index ["user_id"], name: "index_student_profiles_on_user_id", unique: true
   end
 
+  create_table "schedule_proposals", force: :cascade do |t|
+    t.bigint "conversation_id", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "location", limit: 200, null: false
+    t.text "note", default: "", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["conversation_id", "created_at", "id"], name: "index_schedule_proposals_on_conversation_and_created_at"
+    t.index ["conversation_id"], name: "index_schedule_proposals_on_conversation_id"
+    t.check_constraint "ends_at > starts_at", name: "schedule_proposals_valid_period"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'accepted'::character varying, 'declined'::character varying, 'cancelled'::character varying]::text[])", name: "schedule_proposals_status_check"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", null: false
@@ -92,5 +107,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000008) do
   add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "messages", "conversations", on_delete: :cascade
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
+  add_foreign_key "schedule_proposals", "conversations", on_delete: :cascade
   add_foreign_key "student_profiles", "users", on_delete: :cascade
 end

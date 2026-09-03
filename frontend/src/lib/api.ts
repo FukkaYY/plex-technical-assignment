@@ -77,10 +77,21 @@ export type MessageItem = {
   sender_role: "student" | "company";
 };
 
+export type ScheduleProposal = {
+  id: number;
+  starts_at: string;
+  ends_at: string;
+  location: string;
+  note: string;
+  status: "pending" | "accepted" | "declined" | "cancelled";
+  created_at: string;
+};
+
 export type StudentMessageHistory = {
   student: Pick<StudentDetail, "id" | "name">;
   conversation_id: number | null;
   messages: MessageItem[];
+  schedule_proposals: ScheduleProposal[];
 };
 
 export type ConversationCompany = {
@@ -99,6 +110,7 @@ export type ConversationDetail = {
   id: number;
   company: ConversationCompany;
   messages: MessageItem[];
+  schedule_proposals: ScheduleProposal[];
 };
 
 export type JobPostingFields = {
@@ -255,6 +267,44 @@ export async function sendStudentMessage(studentId: string, body: string) {
   });
 
   return parseResponse<{ data: { conversation_id: number; message: MessageItem } }>(response);
+}
+
+export async function createScheduleProposal(studentId: string, payload: {
+  starts_at: string;
+  ends_at: string;
+  location: string;
+  note: string;
+}) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/students/${encodeURIComponent(studentId)}/schedule_proposals`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+    body: JSON.stringify({ schedule_proposal: payload }),
+  });
+  return parseResponse<{ data: ScheduleProposal }>(response);
+}
+
+export async function cancelScheduleProposal(id: number) {
+  return updateScheduleProposalStatus(`/api/v1/company/schedule_proposals/${id}/cancel`);
+}
+
+export async function acceptScheduleProposal(id: number) {
+  return updateScheduleProposalStatus(`/api/v1/schedule_proposals/${id}/accept`);
+}
+
+export async function declineScheduleProposal(id: number) {
+  return updateScheduleProposalStatus(`/api/v1/schedule_proposals/${id}/decline`);
+}
+
+async function updateScheduleProposalStatus(path: string) {
+  const token = await csrfToken();
+  const response = await fetch(path, {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: { "X-CSRF-Token": token },
+  });
+  return parseResponse<{ data: ScheduleProposal }>(response);
 }
 
 export async function getConversations() {

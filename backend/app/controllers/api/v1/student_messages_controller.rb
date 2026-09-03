@@ -8,14 +8,15 @@ module Api
         return unless @student
 
         conversation = current_user.company_conversations
-          .includes(messages: :sender)
+          .includes(:schedule_proposals, messages: :sender)
           .find_by(student: @student)
 
         render json: {
           data: {
             student: student_json(@student),
             conversation_id: conversation&.id,
-            messages: conversation ? conversation.messages.map { |message| message_json(message) } : []
+            messages: conversation ? conversation.messages.map { |message| message_json(message) } : [],
+            schedule_proposals: conversation ? conversation.schedule_proposals.map { |proposal| schedule_proposal_json(proposal) } : []
           }
         }
       end
@@ -70,6 +71,10 @@ module Api
           sent_at: message.created_at.utc.iso8601,
           sender_role: message.sender.role
         }
+      end
+
+      def schedule_proposal_json(proposal)
+        proposal.as_json(only: %i[id starts_at ends_at location note status created_at])
       end
     end
   end

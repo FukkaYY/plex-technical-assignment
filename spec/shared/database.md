@@ -74,6 +74,20 @@
 
 公開中の募集を新着順で取得するため、`status, created_at, id` に複合indexを設定する。
 
+## schedule_proposals
+
+| カラム | 型 | 制約 |
+|---|---|---|
+| id | bigint | PK |
+| conversation_id | bigint | conversationsへのFK、NOT NULL |
+| starts_at / ends_at | datetime | NOT NULL、終了は開始より後 |
+| location | string | NOT NULL、200文字以内 |
+| note | text | NOT NULL、既定値空文字、1,000文字以内 |
+| status | string | NOT NULL、pending/accepted/declined/cancelled |
+| created_at / updated_at | datetime | NOT NULL |
+
+予定は `conversation_id, created_at, id` の順で安定して取得する。日時はUTCで保存し、日本時間への変換は入出力境界で行う。
+
 ## 共通制約
 
 - 外部キーと検索対象へ適切なindexを設定する。
@@ -84,5 +98,6 @@
 - `conversations.company_id` は企業ロール、`conversations.student_id` は学生ロールだけを関連付ける。
 - `messages.sender_id` は会話参加者だけを関連付ける。
 - `job_postings.company_id` は企業ロールだけを関連付ける。
+- `schedule_proposals` は既存会話へ関連付け、会話削除時に削除する。
 - ユーザー削除時は参加する会話と送信メッセージ、会話削除時は配下のメッセージを削除する。
 - 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。

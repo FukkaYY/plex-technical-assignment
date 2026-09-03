@@ -16,7 +16,7 @@ module Api
 
       def show
         conversation = current_user.student_conversations
-          .includes(company: :company_profile, messages: :sender)
+          .includes(:schedule_proposals, company: :company_profile, messages: :sender)
           .find_by(id: params[:id])
 
         unless conversation
@@ -30,7 +30,8 @@ module Api
           data: {
             id: conversation.id,
             company: company_json(conversation.company),
-            messages: conversation.messages.map { |message| message_json(message) }
+            messages: conversation.messages.map { |message| message_json(message) },
+            schedule_proposals: conversation.schedule_proposals.map { |proposal| schedule_proposal_json(proposal) }
           }
         }
       end
@@ -89,6 +90,10 @@ module Api
           sent_at: message.created_at.utc.iso8601,
           sender_role: message.sender.role
         }
+      end
+
+      def schedule_proposal_json(proposal)
+        proposal.as_json(only: %i[id starts_at ends_at location note status created_at])
       end
     end
   end
