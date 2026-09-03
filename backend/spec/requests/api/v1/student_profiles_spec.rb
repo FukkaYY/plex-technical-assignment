@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Student profiles", type: :request do
+  before { Rails.cache.clear }
+
   let!(:student) do
     user = User.create!(
       email: "student@example.com",
