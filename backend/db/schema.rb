@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_02_000007) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_000008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_000007) do
     t.index ["sender_id"], name: "index_messages_on_sender_id"
   end
 
+  create_table "job_postings", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.string "title", limit: 120, null: false
+    t.string "role_name", limit: 100, null: false
+    t.string "work_location", limit: 200, null: false
+    t.text "description", null: false
+    t.text "requirements", null: false
+    t.string "status", default: "published", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_job_postings_on_company_id"
+    t.index ["status", "created_at", "id"], name: "index_job_postings_on_status_and_created_at_and_id"
+    t.check_constraint "status::text = ANY (ARRAY['published'::character varying, 'closed'::character varying]::text[])", name: "job_postings_status_check"
+  end
+
   create_table "student_profiles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "desired_role", limit: 100, null: false
@@ -74,6 +89,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_000007) do
   add_foreign_key "company_profiles", "users", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
+  add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "messages", "conversations", on_delete: :cascade
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "student_profiles", "users", on_delete: :cascade

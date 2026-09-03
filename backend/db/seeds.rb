@@ -28,6 +28,16 @@ User.transaction do
   profile = company.company_profile || company.build_company_profile
   profile.company_name = "デモ企業株式会社"
   profile.save!
+
+  posting = company.job_postings.find_or_initialize_by(title: "Webサービス開発インターン")
+  posting.assign_attributes(
+    role_name: "バックエンドエンジニア",
+    work_location: "東京都・週2日リモート可",
+    description: "RailsとNext.jsを使ったWebサービスの企画・開発に参加します。",
+    requirements: "Web開発への関心があり、Gitを使った開発を学んでいること。",
+    status: :published
+  )
+  posting.save!
 end
 
 schools = ["東京デモ大学", "関西サンプル大学", "北海道テスト大学", "九州モック工科大学"]

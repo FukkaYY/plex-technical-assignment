@@ -101,6 +101,27 @@ export type ConversationDetail = {
   messages: MessageItem[];
 };
 
+export type JobPostingFields = {
+  title: string;
+  role_name: string;
+  work_location: string;
+  description: string;
+  requirements: string;
+};
+
+export type CompanyJobPosting = JobPostingFields & {
+  id: number;
+  status: "published" | "closed";
+  created_at: string;
+  updated_at: string;
+};
+
+export type StudentJobPosting = JobPostingFields & {
+  id: number;
+  company: ConversationCompany;
+  created_at: string;
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -282,6 +303,70 @@ export async function replyToConversation(id: string, body: string) {
   });
 
   return parseResponse<{ data: { message: MessageItem } }>(response);
+}
+
+export async function getCompanyJobPostings() {
+  const response = await fetch("/api/v1/company/job_postings", {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  return parseResponse<{ data: CompanyJobPosting[] }>(response);
+}
+
+export async function getCompanyJobPosting(id: string) {
+  const response = await fetch(`/api/v1/company/job_postings/${encodeURIComponent(id)}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  return parseResponse<{ data: CompanyJobPosting }>(response);
+}
+
+export async function createCompanyJobPosting(payload: JobPostingFields) {
+  const token = await csrfToken();
+  const response = await fetch("/api/v1/company/job_postings", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+    body: JSON.stringify({ job_posting: payload }),
+  });
+  return parseResponse<{ data: CompanyJobPosting }>(response);
+}
+
+export async function updateCompanyJobPosting(id: string, payload: JobPostingFields) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/company/job_postings/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+    body: JSON.stringify({ job_posting: payload }),
+  });
+  return parseResponse<{ data: CompanyJobPosting }>(response);
+}
+
+export async function closeCompanyJobPosting(id: number) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/company/job_postings/${id}/close`, {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: { "X-CSRF-Token": token },
+  });
+  return parseResponse<{ data: CompanyJobPosting }>(response);
+}
+
+export async function getStudentJobPostings() {
+  const response = await fetch("/api/v1/job_postings", {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  return parseResponse<{ data: StudentJobPosting[] }>(response);
+}
+
+export async function getStudentJobPosting(id: string) {
+  const response = await fetch(`/api/v1/job_postings/${encodeURIComponent(id)}`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  return parseResponse<{ data: StudentJobPosting }>(response);
 }
 
 export async function logout() {

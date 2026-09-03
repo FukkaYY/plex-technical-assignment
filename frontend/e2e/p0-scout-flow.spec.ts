@@ -4,6 +4,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const messageBody = "E2Eテストから送信したスカウトメッセージです。";
   const targetStudentName = "デモ学生 25";
   const targetStudentEmail = "student25@example.com";
+  const jobTitle = `E2E募集 ${Date.now()}`;
 
   await page.goto("/");
   await page.getByRole("link", { name: "企業ログイン" }).click();
@@ -12,6 +13,18 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "ログイン" }).click();
 
   await expect(page).toHaveURL(/\/students$/);
+  await page.getByRole("link", { name: "募集を管理" }).click();
+  await page.getByRole("link", { name: "新しい募集を作成" }).click();
+  await page.getByLabel("タイトル").fill(jobTitle);
+  await page.getByLabel("募集職種").fill("バックエンドエンジニア");
+  await page.getByLabel("勤務地・勤務形態").fill("東京都・リモート可");
+  await page.getByLabel("募集内容").fill("E2Eで作成した募集内容です。");
+  await page.getByLabel("応募条件").fill("Rubyの学習経験");
+  await page.getByRole("button", { name: "募集を公開" }).click();
+  await expect(page.getByRole("status")).toHaveText("募集を公開しました。");
+  await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
+  await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
+
   await page.getByLabel("キーワード").fill("Rails");
   await page.getByLabel("卒業予定年").fill(String(new Date().getFullYear() + 1));
   await page.getByRole("button", { name: "検索する" }).click();
@@ -46,6 +59,15 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByRole("status")).toHaveText("プロフィールを更新しました。");
   await expect(page.getByText("E2E更新済みエンジニア", { exact: true })).toBeVisible();
 
+  await page.getByRole("link", { name: "インターン募集を見る" }).click();
+  const jobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
+  await expect(jobCard).toBeVisible();
+  await jobCard.getByRole("link", { name: "募集詳細を見る" }).click();
+  await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
+  await expect(page.getByText("E2Eで作成した募集内容です。")).toBeVisible();
+  await page.getByRole("link", { name: "募集一覧へ戻る" }).click();
+  await page.getByRole("link", { name: "学生マイページへ戻る" }).click();
+
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
   await expect(conversation).toContainText(messageBody);
@@ -68,6 +90,10 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students$/);
+  await page.getByRole("link", { name: "募集を管理" }).click();
+  const companyJobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
+  await companyJobCard.getByRole("button", { name: "募集を終了" }).click();
+  await expect(companyJobCard.getByText("募集終了", { exact: true })).toBeVisible();
   await page.goto(`${studentDetailPath}/messages`);
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
 });

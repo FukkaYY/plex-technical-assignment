@@ -15,6 +15,12 @@ Rails.application.routes.draw do
         patch :read, on: :member, action: :mark_read
         resources :messages, only: :create, controller: :conversation_messages
       end
+      resources :job_postings, only: %i[index show]
+      namespace :company do
+        resources :job_postings, only: %i[index show create update] do
+          patch :close, on: :member
+        end
+      end
     end
   end
 end

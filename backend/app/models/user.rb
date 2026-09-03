@@ -18,6 +18,10 @@ class User < ApplicationRecord
     foreign_key: :sender_id,
     dependent: :destroy,
     inverse_of: :sender
+  has_many :job_postings,
+    foreign_key: :company_id,
+    dependent: :destroy,
+    inverse_of: :company
 
   enum :role, { student: "student", company: "company" }, validate: true
 

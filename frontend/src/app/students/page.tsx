@@ -150,9 +150,7 @@ function StudentsContent() {
           {companyProfile && <p className="company-context">{companyProfile.company_name}</p>}
         </div>
         {companyProfile && (
-          <button className="secondary-button header-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>
-            {isLoggingOut ? "ログアウト中…" : "ログアウト"}
-          </button>
+          <div className="header-actions"><Link className="secondary-link" href="/companies/job-postings">募集を管理</Link><button className="secondary-button header-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>{isLoggingOut ? "ログアウト中…" : "ログアウト"}</button></div>
         )}
       </header>
 

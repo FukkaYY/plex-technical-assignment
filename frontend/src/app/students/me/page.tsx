@@ -70,6 +70,7 @@ export default function StudentMyPage() {
             </dl>
             <div className="actions">
               <Link className="primary-link" href="/students/messages">受信メッセージを見る</Link>
+              <Link className="secondary-link" href="/students/jobs">インターン募集を見る</Link>
               <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>
               <button className="secondary-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>
                 {isLoggingOut ? "ログアウト中…" : "ログアウト"}

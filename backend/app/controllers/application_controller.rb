@@ -89,7 +89,12 @@ class ApplicationController < ActionController::API
       skills: "スキル",
       self_introduction: "自己紹介",
       company_name: "企業名",
-      body: "本文"
+      body: "本文",
+      title: "タイトル",
+      role_name: "募集職種",
+      work_location: "勤務地・勤務形態",
+      description: "募集内容",
+      requirements: "応募条件"
     }
     label = labels[field.to_sym] || field.to_s
 

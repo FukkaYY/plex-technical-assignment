@@ -800,6 +800,140 @@ a {
   font-weight: 700;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-actions .secondary-link,
+.header-actions .secondary-button {
+  margin: 0;
+}
+
+.jobs-shell {
+  width: min(980px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 36px 20px 70px;
+}
+
+.jobs-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.jobs-header h1 {
+  margin-bottom: 8px;
+}
+
+.jobs-header p:last-child {
+  margin: 0;
+  color: var(--muted);
+}
+
+.jobs-header .primary-link {
+  flex: none;
+}
+
+.job-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.job-card,
+.job-detail {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgb(30 52 88 / 7%);
+}
+
+.job-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.job-card h2 {
+  margin: 8px 0 10px;
+  font-size: 1.35rem;
+}
+
+.job-card time {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.job-role {
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.status-badge.published {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.status-badge.closed {
+  color: #475467;
+  background: #eef1f5;
+}
+
+.job-detail {
+  margin-top: 20px;
+}
+
+.job-detail .company-context {
+  margin-bottom: 8px;
+}
+
+.job-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 28px 0;
+}
+
+.job-detail-meta div {
+  padding: 16px;
+  border-radius: 10px;
+  background: #f5f7fb;
+}
+
+.job-detail-meta dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.job-detail-meta dd {
+  margin: 5px 0 0;
+  font-weight: 700;
+}
+
+.job-detail section {
+  margin-top: 30px;
+}
+
+.job-detail section p {
+  white-space: pre-wrap;
+}
+
 .inbox-item p {
   margin: 0;
   color: #475467;
@@ -903,6 +1037,16 @@ a {
   .inbox-item {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .jobs-header,
+  .job-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .job-detail-meta {
+    grid-template-columns: 1fr;
   }
 
   .received-message {

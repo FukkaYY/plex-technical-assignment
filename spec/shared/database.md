@@ -58,6 +58,22 @@
 
 メッセージは `conversation_id, created_at, id` の順で古いものから安定して取得できるindexを持つ。本文は前後空白除去後1文字以上2,000文字以内とする。
 
+## job_postings
+
+| カラム | 型 | 制約 |
+|---|---|---|
+| id | bigint | PK |
+| company_id | bigint | usersへのFK、NOT NULL |
+| title | string | NOT NULL、120文字以内 |
+| role_name | string | NOT NULL、100文字以内 |
+| work_location | string | NOT NULL、200文字以内 |
+| description | text | NOT NULL、5,000文字以内 |
+| requirements | text | NOT NULL、3,000文字以内 |
+| status | string | NOT NULL、published/closed、既定値published |
+| created_at / updated_at | datetime | NOT NULL |
+
+公開中の募集を新着順で取得するため、`status, created_at, id` に複合indexを設定する。
+
 ## 共通制約
 
 - 外部キーと検索対象へ適切なindexを設定する。
@@ -67,5 +83,6 @@
 - `company_profiles` は `company` ロールのユーザーにだけ関連付ける。
 - `conversations.company_id` は企業ロール、`conversations.student_id` は学生ロールだけを関連付ける。
 - `messages.sender_id` は会話参加者だけを関連付ける。
+- `job_postings.company_id` は企業ロールだけを関連付ける。
 - ユーザー削除時は参加する会話と送信メッセージ、会話削除時は配下のメッセージを削除する。
 - 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。
