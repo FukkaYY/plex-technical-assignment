@@ -1057,6 +1057,45 @@ a {
   color: var(--muted);
 }
 
+.student-selection {
+  display: grid;
+  gap: 8px;
+  max-height: 360px;
+  margin: 0;
+  padding: 18px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.student-selection legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.student-selection > p {
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+
+.student-selection label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.student-selection label:hover {
+  background: #f4f7fb;
+}
+
+.student-selection input {
+  width: 18px;
+  height: 18px;
+}
+
 .inbox-item p {
   margin: 0;
   color: #475467;

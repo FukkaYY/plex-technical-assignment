@@ -25,6 +25,13 @@ Rails.application.routes.draw do
       patch "company/schedule_proposals/:id/cancel", to: "company_schedule_proposals#cancel"
       patch "schedule_proposals/:id/accept", to: "student_schedule_proposals#accept"
       patch "schedule_proposals/:id/decline", to: "student_schedule_proposals#decline"
+      get "company/group_conversations", to: "company_group_conversations#index"
+      post "company/group_conversations", to: "company_group_conversations#create"
+      get "company/group_conversations/:id", to: "company_group_conversations#show"
+      post "company/group_conversations/:id/messages", to: "company_group_conversations#create_message"
+      get "group_conversations", to: "group_conversations#index"
+      get "group_conversations/:id", to: "group_conversations#show"
+      post "group_conversations/:id/messages", to: "group_conversations#create_message"
     end
   end
 end

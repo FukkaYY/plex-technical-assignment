@@ -22,6 +22,21 @@ class User < ApplicationRecord
     foreign_key: :company_id,
     dependent: :destroy,
     inverse_of: :company
+  has_many :company_group_conversations,
+    class_name: "GroupConversation",
+    foreign_key: :company_id,
+    dependent: :destroy,
+    inverse_of: :company
+  has_many :group_memberships,
+    foreign_key: :student_id,
+    dependent: :destroy,
+    inverse_of: :student
+  has_many :student_group_conversations, through: :group_memberships, source: :group_conversation
+  has_many :sent_group_messages,
+    class_name: "GroupMessage",
+    foreign_key: :sender_id,
+    dependent: :destroy,
+    inverse_of: :sender
 
   enum :role, { student: "student", company: "company" }, validate: true
 

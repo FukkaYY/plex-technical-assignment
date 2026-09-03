@@ -26,6 +26,7 @@
 | メッセージ | `features/messaging.md` | `shared/authorization.md`, `shared/database.md` |
 | 企業の募集掲載 | `features/job-postings.md` | `shared/authorization.md`, `shared/database.md`, `shared/validation.md` |
 | 面談予定の調整 | `features/scheduling.md` | `features/messaging.md`, `shared/authorization.md`, `shared/database.md` |
+| グループチャット | `features/group-chat.md` | `shared/authorization.md`, `shared/database.md`, `shared/validation.md` |
 | 画面遷移 | `ui/user-flows.md` | `ui/screen-list.md` |
 | DB変更 | 対象の機能仕様 | `shared/database.md` |
 | API共通処理 | 対象の機能仕様 | `shared/api-conventions.md` |

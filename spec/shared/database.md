@@ -88,6 +88,14 @@
 
 予定は `conversation_id, created_at, id` の順で安定して取得する。日時はUTCで保存し、日本時間への変換は入出力境界で行う。
 
+## group_conversations / group_memberships / group_messages
+
+- `group_conversations`: 所有企業と100文字以内のグループ名を持つ。
+- `group_memberships`: グループと学生を関連付け、組み合わせをUNIQUEにする。
+- `group_messages`: グループ、送信者、2,000文字以内の本文を持つ。
+- グループメッセージは `group_conversation_id, created_at, id` の順で取得する。
+- グループ作成時は本体、2〜20件の参加者、最初のメッセージを同一トランザクションで保存する。
+
 ## 共通制約
 
 - 外部キーと検索対象へ適切なindexを設定する。
@@ -99,5 +107,6 @@
 - `messages.sender_id` は会話参加者だけを関連付ける。
 - `job_postings.company_id` は企業ロールだけを関連付ける。
 - `schedule_proposals` は既存会話へ関連付け、会話削除時に削除する。
+- グループメッセージの送信者は所有企業または参加学生に限定する。
 - ユーザー削除時は参加する会話と送信メッセージ、会話削除時は配下のメッセージを削除する。
 - 学生一覧の `created_at DESC, id DESC` を安定して取得するため、`student_profiles(created_at, id)` に複合indexを設定する。

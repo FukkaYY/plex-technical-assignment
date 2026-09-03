@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_000009) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_03_000010) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000009) do
     t.index ["student_last_read_message_id"], name: "index_conversations_on_student_last_read_message_id"
     t.check_constraint "company_id <> student_id", name: "conversations_distinct_participants"
     t.check_constraint "student_last_read_message_id IS NULL OR student_last_read_message_id > 0", name: "conversations_student_last_read_message_id_positive"
+  end
+
+  create_table "group_conversations", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.string "name", limit: 100, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_group_conversations_on_company_id"
+  end
+
+  create_table "group_memberships", force: :cascade do |t|
+    t.bigint "group_conversation_id", null: false
+    t.bigint "student_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_conversation_id", "student_id"], name: "index_group_memberships_on_group_and_student", unique: true
+    t.index ["group_conversation_id"], name: "index_group_memberships_on_group_conversation_id"
+    t.index ["student_id"], name: "index_group_memberships_on_student_id"
+  end
+
+  create_table "group_messages", force: :cascade do |t|
+    t.bigint "group_conversation_id", null: false
+    t.bigint "sender_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_conversation_id", "created_at", "id"], name: "index_group_messages_on_group_and_created_at"
+    t.index ["group_conversation_id"], name: "index_group_messages_on_group_conversation_id"
+    t.index ["sender_id"], name: "index_group_messages_on_sender_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -104,6 +133,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000009) do
   add_foreign_key "company_profiles", "users", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
+  add_foreign_key "group_conversations", "users", column: "company_id", on_delete: :cascade
+  add_foreign_key "group_memberships", "group_conversations", on_delete: :cascade
+  add_foreign_key "group_memberships", "users", column: "student_id", on_delete: :cascade
+  add_foreign_key "group_messages", "group_conversations", on_delete: :cascade
+  add_foreign_key "group_messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "messages", "conversations", on_delete: :cascade
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade

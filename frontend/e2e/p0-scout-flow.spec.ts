@@ -6,6 +6,8 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const targetStudentEmail = "student25@example.com";
   const jobTitle = `E2E募集 ${Date.now()}`;
   const scheduleNote = `E2E面談 ${Date.now()}`;
+  const groupName = `E2Eグループ ${Date.now()}`;
+  const groupReply = `E2Eグループ返信 ${Date.now()}`;
 
   await page.goto("/");
   await page.getByRole("link", { name: "企業ログイン" }).click();
@@ -24,6 +26,17 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "募集を公開" }).click();
   await expect(page.getByRole("status")).toHaveText("募集を公開しました。");
   await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
+  await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
+  await page.getByRole("link", { name: "グループチャット" }).click();
+  await page.getByRole("link", { name: "グループを作成" }).click();
+  await page.getByLabel("グループ名").fill(groupName);
+  await page.getByLabel(/デモ学生 25/).check();
+  await page.getByLabel(/デモ学生 24/).check();
+  await page.getByLabel("最初のメッセージ").fill("グループへようこそ");
+  await page.getByRole("button", { name: "グループを作成" }).click();
+  await expect(page.getByRole("heading", { name: groupName })).toBeVisible();
+  await expect(page.getByLabel("グループ会話履歴")).toContainText("グループへようこそ");
+  await page.getByRole("link", { name: "グループ一覧へ戻る" }).click();
   await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
 
   await page.getByLabel("キーワード").fill("Rails");
@@ -75,6 +88,15 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByText("E2Eで作成した募集内容です。")).toBeVisible();
   await page.getByRole("link", { name: "募集一覧へ戻る" }).click();
   await page.getByRole("link", { name: "学生マイページへ戻る" }).click();
+  await page.getByRole("link", { name: "グループチャットを見る" }).click();
+  const studentGroupCard = page.locator("article.job-card").filter({ hasText: groupName });
+  await studentGroupCard.getByRole("link", { name: "会話を見る" }).click();
+  await expect(page.getByLabel("グループ会話履歴")).toContainText("グループへようこそ");
+  await page.getByLabel("メッセージ本文").fill(groupReply);
+  await page.getByRole("button", { name: "メッセージを送信" }).click();
+  await expect(page.getByLabel("グループ会話履歴")).toContainText(groupReply);
+  await page.getByRole("link", { name: "グループ一覧へ戻る" }).click();
+  await page.getByRole("link", { name: "学生マイページへ戻る" }).click();
 
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
@@ -105,6 +127,10 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const companyJobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
   await companyJobCard.getByRole("button", { name: "募集を終了" }).click();
   await expect(companyJobCard.getByText("募集終了", { exact: true })).toBeVisible();
+  await page.goto("/companies/groups");
+  const companyGroupCard = page.locator("article.job-card").filter({ hasText: groupName });
+  await companyGroupCard.getByRole("link", { name: "会話を見る" }).click();
+  await expect(page.getByLabel("グループ会話履歴")).toContainText(groupReply);
   await page.goto(`${studentDetailPath}/messages`);
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
   const acceptedSchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });

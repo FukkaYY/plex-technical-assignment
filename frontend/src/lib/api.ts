@@ -134,6 +134,27 @@ export type StudentJobPosting = JobPostingFields & {
   created_at: string;
 };
 
+export type GroupMessageItem = MessageItem & {
+  sender_name: string;
+};
+
+export type GroupListItem = {
+  id: number;
+  name: string;
+  company?: ConversationCompany;
+  student_count: number;
+  latest_message_excerpt: string | null;
+  latest_message_sent_at: string | null;
+};
+
+export type GroupConversationDetail = {
+  id: number;
+  name: string;
+  company?: ConversationCompany;
+  students: Array<{ id: number; name: string }>;
+  messages: GroupMessageItem[];
+};
+
 export class ApiRequestError extends Error {
   constructor(public readonly errors: ApiError[]) {
     super(errors[0]?.message ?? "リクエストに失敗しました");
@@ -417,6 +438,57 @@ export async function getStudentJobPosting(id: string) {
     cache: "no-store",
   });
   return parseResponse<{ data: StudentJobPosting }>(response);
+}
+
+export async function getAllStudents() {
+  const first = await getStudents(1);
+  const pages = Array.from({ length: Math.max(first.meta.total_pages - 1, 0) }, (_, index) => index + 2);
+  const rest = await Promise.all(pages.map((page) => getStudents(page)));
+  return [first.data, ...rest.map((response) => response.data)].flat();
+}
+
+export async function getCompanyGroups() {
+  const response = await fetch("/api/v1/company/group_conversations", { credentials: "same-origin", cache: "no-store" });
+  return parseResponse<{ data: GroupListItem[] }>(response);
+}
+
+export async function getCompanyGroup(id: string) {
+  const response = await fetch(`/api/v1/company/group_conversations/${encodeURIComponent(id)}`, { credentials: "same-origin", cache: "no-store" });
+  return parseResponse<{ data: GroupConversationDetail }>(response);
+}
+
+export async function createCompanyGroup(payload: { name: string; student_ids: number[]; body: string }) {
+  const token = await csrfToken();
+  const response = await fetch("/api/v1/company/group_conversations", {
+    method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRF-Token": token }, body: JSON.stringify({ group_conversation: payload }),
+  });
+  return parseResponse<{ data: GroupConversationDetail }>(response);
+}
+
+export async function sendCompanyGroupMessage(id: string, body: string) {
+  return sendGroupMessage(`/api/v1/company/group_conversations/${encodeURIComponent(id)}/messages`, body);
+}
+
+export async function getStudentGroups() {
+  const response = await fetch("/api/v1/group_conversations", { credentials: "same-origin", cache: "no-store" });
+  return parseResponse<{ data: GroupListItem[] }>(response);
+}
+
+export async function getStudentGroup(id: string) {
+  const response = await fetch(`/api/v1/group_conversations/${encodeURIComponent(id)}`, { credentials: "same-origin", cache: "no-store" });
+  return parseResponse<{ data: GroupConversationDetail }>(response);
+}
+
+export async function sendStudentGroupMessage(id: string, body: string) {
+  return sendGroupMessage(`/api/v1/group_conversations/${encodeURIComponent(id)}/messages`, body);
+}
+
+async function sendGroupMessage(path: string, body: string) {
+  const token = await csrfToken();
+  const response = await fetch(path, {
+    method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-CSRF-Token": token }, body: JSON.stringify({ message: { body } }),
+  });
+  return parseResponse<{ data: GroupMessageItem }>(response);
 }
 
 export async function logout() {
