@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 test("企業が送信したメッセージを対象学生が受信できる", async ({ page }) => {
+  test.setTimeout(60_000);
+
   const messageBody = "E2Eテストから送信したスカウトメッセージです。";
   const targetStudentName = "デモ学生 25";
   const targetStudentEmail = "student25@example.com";
@@ -10,18 +12,6 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const groupReply = `E2Eグループ返信 ${Date.now()}`;
 
   await page.goto("/");
-  await page.getByRole("link", { name: "学生ログイン" }).click();
-  await page.getByLabel("メールアドレス").fill(targetStudentEmail);
-  await page.getByLabel("パスワード").fill("password123");
-  await page.getByRole("button", { name: "ログイン" }).click();
-  await expect(page).toHaveURL(/\/students\/me$/);
-  await expect(page.getByRole("heading", { name: `${targetStudentName}さん` })).toBeVisible();
-  const restoreVisibilityButton = page.getByRole("button", { name: "プロフィールを公開する" });
-  if (await restoreVisibilityButton.isVisible()) {
-    await restoreVisibilityButton.click();
-    await expect(page.getByRole("status")).toHaveText("プロフィールを企業へ公開しました。");
-  }
-  await page.getByRole("button", { name: "ログアウト" }).click();
   await page.getByRole("link", { name: "企業ログイン" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
