@@ -3,15 +3,14 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="shell">
-      <section className="card">
+      <section className="card home-card">
         <p className="eyebrow">PLEX INTERN SCOUT</p>
         <h1>あなたの可能性と、企業をつなぐ。</h1>
         <p>プロフィールを登録して、インターンのスカウトを受け取りましょう。</p>
-        <div className="actions">
-          <Link className="primary-link" href="/students/register">インターン生として登録</Link>
-          <Link className="secondary-link" href="/students/login">学生ログイン</Link>
-          <Link className="secondary-link" href="/companies/login">企業ログイン</Link>
-        </div>
+        <nav className="home-actions" aria-label="ログインへの入口">
+          <Link className="primary-link" href="/students/login">学生の方はこちら</Link>
+          <Link className="home-company-link" href="/companies/login">企業の方はこちら</Link>
+        </nav>
       </section>
     </main>
   );

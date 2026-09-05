@@ -40,6 +40,29 @@ textarea {
   box-shadow: 0 20px 60px rgb(30 52 88 / 10%);
 }
 
+.home-card {
+  width: min(800px, 100%);
+}
+
+.home-card h1 {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  line-height: 1.4;
+}
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.home-actions .home-company-link {
+  margin-top: 0;
+  color: var(--muted);
+  text-underline-offset: 4px;
+}
+
 .eyebrow {
   margin: 0 0 12px;
   color: #4868db;

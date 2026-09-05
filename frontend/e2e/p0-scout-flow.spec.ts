@@ -12,7 +12,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   const groupReply = `E2Eグループ返信 ${Date.now()}`;
 
   await page.goto("/");
-  await page.getByRole("link", { name: "企業ログイン" }).click();
+  await page.getByRole("link", { name: "企業の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
@@ -70,7 +70,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "ログアウト" }).click();
   await expect(page).toHaveURL(/\/$/);
 
-  await page.getByRole("link", { name: "学生ログイン" }).click();
+  await page.getByRole("link", { name: "学生の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill(targetStudentEmail);
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
@@ -123,7 +123,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page).toHaveURL(/\/students\/me$/);
 
   await page.getByRole("button", { name: "ログアウト" }).click();
-  await page.getByRole("link", { name: "企業ログイン" }).click();
+  await page.getByRole("link", { name: "企業の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
@@ -149,14 +149,14 @@ test("企業が送信したメッセージを対象学生が受信できる", as
 
   await page.goto("/students");
   await page.getByRole("button", { name: "ログアウト" }).click();
-  await page.getByRole("link", { name: "学生ログイン" }).click();
+  await page.getByRole("link", { name: "学生の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill(targetStudentEmail);
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await page.getByRole("button", { name: "プロフィールを公開する" }).click();
   await expect(page.getByRole("status")).toHaveText("プロフィールを企業へ公開しました。");
   await page.getByRole("button", { name: "ログアウト" }).click();
-  await page.getByRole("link", { name: "企業ログイン" }).click();
+  await page.getByRole("link", { name: "企業の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
