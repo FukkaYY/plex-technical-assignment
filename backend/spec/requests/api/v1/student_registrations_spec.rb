@@ -1,17 +1,22 @@
 require "rails_helper"
 
 RSpec.describe "Student registrations", type: :request do
+  let!(:school) { School.create!(name: "プレックス大学", school_type: "university") }
+  let!(:faculty) { school.faculties.create!(name: "工学部") }
+  let!(:department) { faculty.departments.create!(name: "情報工学科") }
   let(:valid_attributes) do
     {
       email: " Student@Example.com ",
       password: "password123",
       password_confirmation: "password123",
-      name: " 山田 太郎 ",
-      school_name: " プレックス大学 ",
+      last_name: " 山田 ",
+      first_name: " 太郎 ",
+      school_id: school.id,
+      faculty_id: faculty.id,
+      department_id: department.id,
       graduation_year: Time.zone.today.year + 1,
       desired_role: " バックエンドエンジニア ",
       skills: [" Ruby ", "", "Ruby", "PostgreSQL"],
-      self_introduction: " 学生時代にWebアプリを開発しました。 "
     }
   end
 
@@ -38,10 +43,14 @@ RSpec.describe "Student registrations", type: :request do
     expect(response.parsed_body.dig("data", "user")).not_to have_key("password_digest")
     expect(response.parsed_body.dig("data", "student_profile")).to include(
       "name" => "山田 太郎",
+      "last_name" => "山田",
+      "first_name" => "太郎",
       "school_name" => "プレックス大学",
+      "faculty_name" => "工学部",
+      "department_name" => "情報工学科",
       "desired_role" => "バックエンドエンジニア",
       "skills" => ["Ruby", "PostgreSQL"],
-      "self_introduction" => "学生時代にWebアプリを開発しました。"
+      "self_introduction" => ""
     )
 
     get "/api/v1/me"
@@ -79,10 +88,20 @@ RSpec.describe "Student registrations", type: :request do
   end
 
   it "rolls back the user when the profile is invalid" do
-    expect { register(valid_attributes.merge(name: "")) }.not_to change(User, :count)
+    expect { register(valid_attributes.merge(last_name: "")) }.not_to change(User, :count)
 
     expect(response).to have_http_status(:unprocessable_entity)
     expect(StudentProfile.count).to eq(0)
+  end
+
+  it "rejects a faculty that does not belong to the selected school" do
+    other_school = School.create!(name: "別大学", school_type: "university")
+    other_faculty = other_school.faculties.create!(name: "文学部")
+
+    register(valid_attributes.merge(faculty_id: other_faculty.id, department_id: nil))
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch("errors")).to include(include("field" => "faculty_id", "code" => "invalid"))
   end
 
   it "rejects a mismatched password confirmation" do

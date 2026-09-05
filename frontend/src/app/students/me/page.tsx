@@ -84,9 +84,12 @@ export default function StudentMyPage() {
             <p className="intro">登録プロフィールと企業から届いたメッセージを確認できます。</p>
             <dl className="profile-summary">
               <div><dt>学校名</dt><dd>{profile.school_name}</dd></div>
+              {profile.faculty_name && <div><dt>{profile.school_type === "graduate_school" ? "研究科" : "学部"}</dt><dd>{profile.faculty_name}</dd></div>}
+              {profile.department_name && <div><dt>学科・専攻</dt><dd>{profile.department_name}</dd></div>}
               <div><dt>卒業予定</dt><dd>{profile.graduation_year}年</dd></div>
               <div><dt>希望職種</dt><dd>{profile.desired_role}</dd></div>
             </dl>
+            {!profile.self_introduction && <div className="notice-banner" role="status">自己紹介が未登録です。プロフィール編集から追加すると、企業に経験や関心を伝えられます。</div>}
             <section className="profile-visibility" aria-labelledby="profile-visibility-heading">
               <div>
                 <h2 id="profile-visibility-heading">企業への公開状態</h2>

@@ -1,31 +1,32 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiRequestError, registerStudent } from "@/lib/api";
+import { ApiRequestError, getEducationOptions, registerStudent, type EducationOptions } from "@/lib/api";
+import { EducationFields, type EducationValues } from "@/components/EducationFields";
 
 type FormValues = {
-  name: string;
+  lastName: string;
+  firstName: string;
   email: string;
   password: string;
   passwordConfirmation: string;
-  schoolName: string;
+  education: EducationValues;
   graduationYear: string;
   desiredRole: string;
   skills: string;
-  selfIntroduction: string;
 };
 
 const initialValues: FormValues = {
-  name: "",
+  lastName: "",
+  firstName: "",
   email: "",
   password: "",
   passwordConfirmation: "",
-  schoolName: "",
+  education: { schoolType: "", schoolQuery: "", schoolId: "", facultyId: "", departmentId: "" },
   graduationYear: "",
   desiredRole: "",
   skills: "",
-  selfIntroduction: "",
 };
 
 export default function StudentRegistrationPage() {
@@ -33,6 +34,11 @@ export default function StudentRegistrationPage() {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [educationOptions, setEducationOptions] = useState<EducationOptions | null>(null);
+
+  useEffect(() => {
+    void getEducationOptions().then(({ data }) => setEducationOptions(data)).catch(() => setErrors((current) => ({ ...current, base: "学校情報の読み込みに失敗しました。" })));
+  }, []);
 
   function update(field: keyof FormValues, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -50,15 +56,17 @@ export default function StudentRegistrationPage() {
 
     try {
       await registerStudent({
-        name: values.name,
+        last_name: values.lastName,
+        first_name: values.firstName,
         email: values.email,
         password: values.password,
         password_confirmation: values.passwordConfirmation,
-        school_name: values.schoolName,
+        school_id: Number(values.education.schoolId),
+        faculty_id: values.education.facultyId ? Number(values.education.facultyId) : null,
+        department_id: values.education.departmentId ? Number(values.education.departmentId) : null,
         graduation_year: Number(values.graduationYear),
         desired_role: values.desiredRole,
         skills: values.skills.split(","),
-        self_introduction: values.selfIntroduction,
       });
       router.push("/students/me");
     } catch (error) {
@@ -87,10 +95,11 @@ export default function StudentRegistrationPage() {
         {errors.base && <div className="error-banner" role="alert">{errors.base}</div>}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="form-grid">
-            <Field label="氏名" name="name" required error={errors.name}>
-              <input id="name" value={values.name} onChange={(event) => update("name", event.target.value)} maxLength={100} autoComplete="name" required />
-            </Field>
+          <div className="form-grid single-column">
+            <div className="name-fields">
+              <Field label="姓（Family name）" name="lastName" required error={errors.lastName}><input id="lastName" value={values.lastName} onChange={(event) => update("lastName", event.target.value)} maxLength={50} autoComplete="family-name" required /></Field>
+              <Field label="名（Given name）" name="firstName" required error={errors.firstName}><input id="firstName" value={values.firstName} onChange={(event) => update("firstName", event.target.value)} maxLength={50} autoComplete="given-name" required /></Field>
+            </div>
 
             <Field label="メールアドレス" name="email" required error={errors.email} wide>
               <input id="email" type="email" value={values.email} onChange={(event) => update("email", event.target.value)} autoComplete="email" required />
@@ -104,12 +113,10 @@ export default function StudentRegistrationPage() {
               <input id="passwordConfirmation" type="password" value={values.passwordConfirmation} onChange={(event) => update("passwordConfirmation", event.target.value)} minLength={8} autoComplete="new-password" required />
             </Field>
 
-            <Field label="学校名" name="schoolName" required error={errors.schoolName}>
-              <input id="schoolName" value={values.schoolName} onChange={(event) => update("schoolName", event.target.value)} maxLength={200} autoComplete="organization" required />
-            </Field>
+            <EducationFields options={educationOptions} values={values.education} errors={errors} onChange={(education) => setValues((current) => ({ ...current, education }))} />
 
             <Field label="卒業予定年" name="graduationYear" required error={errors.graduationYear}>
-              <input id="graduationYear" type="number" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} min={new Date().getFullYear()} max={new Date().getFullYear() + 10} inputMode="numeric" required />
+              <select id="graduationYear" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} required><option value="">選択してください</option>{[0, 1, 2].map((offset) => { const year = new Date().getFullYear() + offset; return <option key={year} value={year}>{year}年</option>; })}</select>
             </Field>
 
             <Field label="希望職種" name="desiredRole" required error={errors.desiredRole} wide>
@@ -120,9 +127,6 @@ export default function StudentRegistrationPage() {
               <input id="skills" value={values.skills} onChange={(event) => update("skills", event.target.value)} placeholder="Ruby, TypeScript, PostgreSQL" />
             </Field>
 
-            <Field label="自己紹介" name="selfIntroduction" hint="2,000文字以内" required error={errors.selfIntroduction} wide>
-              <textarea id="selfIntroduction" value={values.selfIntroduction} onChange={(event) => update("selfIntroduction", event.target.value)} maxLength={2000} rows={6} required />
-            </Field>
           </div>
 
           <button className="primary-button" type="submit" disabled={isSubmitting}>

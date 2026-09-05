@@ -33,11 +33,13 @@ module Api
 
       def profile_params
         params.require(:student_registration).permit(
-          :name,
-          :school_name,
+          :last_name,
+          :first_name,
+          :school_id,
+          :faculty_id,
+          :department_id,
           :graduation_year,
           :desired_role,
-          :self_introduction,
           skills: []
         )
       end

@@ -87,6 +87,7 @@ export default function StudentDetailPage() {
               <p className="eyebrow">STUDENT PROFILE</p>
               <h1>{student.name}</h1>
               <p className="student-affiliation">{student.school_name} / {student.graduation_year}年卒業予定</p>
+              {(student.faculty_name || student.department_name) && <p className="student-affiliation">{[student.faculty_name, student.department_name].filter(Boolean).join(" / ")}</p>}
             </div>
             <div className="message-action">
               <Link className="primary-link" href={`/students/${student.id}/messages`}>この学生にメッセージを送る</Link>
@@ -107,7 +108,7 @@ export default function StudentDetailPage() {
 
           <section className="detail-section">
             <h2>自己紹介</h2>
-            <p className="self-introduction-full">{student.self_introduction}</p>
+            <p className="self-introduction-full">{student.self_introduction || "自己紹介はまだ登録されていません。"}</p>
           </section>
         </article>
       )}

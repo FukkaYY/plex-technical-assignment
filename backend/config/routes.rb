@@ -3,6 +3,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "health", to: "health#show"
       get "csrf", to: "csrf#show"
+      get "education_options", to: "education_options#index"
       post "student_registrations", to: "student_registrations#create"
       post "session", to: "sessions#create"
       get "me", to: "sessions#show"

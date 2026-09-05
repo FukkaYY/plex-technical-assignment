@@ -186,6 +186,12 @@ a {
   grid-column: 1 / -1;
 }
 
+.name-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
 .field label {
   display: block;
   margin-bottom: 7px;
@@ -244,10 +250,17 @@ a {
 }
 
 .error-banner,
-.success-banner {
+.success-banner,
+.notice-banner {
   margin-bottom: 24px;
   padding: 12px 14px;
   border-radius: 8px;
+}
+
+.notice-banner {
+  color: #344054;
+  border: 1px solid #b2ccff;
+  background: #eff4ff;
 }
 
 .profile-visibility {
@@ -296,6 +309,10 @@ a {
 }
 
 @media (max-width: 640px) {
+  .name-fields {
+    grid-template-columns: 1fr;
+  }
+
   .profile-visibility {
     align-items: stretch;
     flex-direction: column;

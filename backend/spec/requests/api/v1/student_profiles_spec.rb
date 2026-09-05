@@ -3,6 +3,10 @@ require "rails_helper"
 RSpec.describe "Student profiles", type: :request do
   before { Rails.cache.clear }
 
+  let!(:school) { School.create!(name: "更新後大学", school_type: "university") }
+  let!(:faculty) { school.faculties.create!(name: "情報学部") }
+  let!(:department) { faculty.departments.create!(name: "情報学科") }
+
   let!(:student) do
     user = User.create!(
       email: "student@example.com",
@@ -63,8 +67,11 @@ RSpec.describe "Student profiles", type: :request do
     login(student)
 
     update_profile(
-      name: "  更新後 学生  ",
-      school_name: " 更新後大学 ",
+      last_name: "  更新後  ",
+      first_name: " 学生 ",
+      school_id: school.id,
+      faculty_id: faculty.id,
+      department_id: department.id,
       graduation_year: Time.zone.today.year + 2,
       desired_role: " バックエンドエンジニア ",
       skills: [" Rails ", "PostgreSQL", "Rails", ""],
@@ -79,6 +86,8 @@ RSpec.describe "Student profiles", type: :request do
       "user_id" => student.id,
       "name" => "更新後 学生",
       "school_name" => "更新後大学",
+      "faculty_name" => "情報学部",
+      "department_name" => "情報学科",
       "graduation_year" => Time.zone.today.year + 2,
       "desired_role" => "バックエンドエンジニア",
       "skills" => ["Rails", "PostgreSQL"],
@@ -92,12 +101,12 @@ RSpec.describe "Student profiles", type: :request do
     login(student)
 
     expect {
-      update_profile(name: "", graduation_year: Time.zone.today.year - 1)
+      update_profile(last_name: "更新", first_name: "", school_id: school.id, graduation_year: Time.zone.today.year - 1)
     }.not_to change { student.student_profile.reload.name }
 
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body.fetch("errors")).to include(
-      include("field" => "name", "code" => "blank"),
+      include("field" => "first_name", "code" => "blank"),
       include("field" => "graduation_year", "code" => "greater_than_or_equal_to")
     )
   end

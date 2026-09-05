@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiRequestError, getCurrentUser, updateStudentProfile } from "@/lib/api";
+import { ApiRequestError, getCurrentUser, getEducationOptions, updateStudentProfile, type EducationOptions } from "@/lib/api";
+import { EducationFields, type EducationValues } from "@/components/EducationFields";
 
 type FormValues = {
-  name: string;
-  schoolName: string;
+  lastName: string;
+  firstName: string;
+  education: EducationValues;
   graduationYear: string;
   desiredRole: string;
   skills: string;
@@ -15,8 +17,9 @@ type FormValues = {
 };
 
 const initialValues: FormValues = {
-  name: "",
-  schoolName: "",
+  lastName: "",
+  firstName: "",
+  education: { schoolType: "", schoolQuery: "", schoolId: "", facultyId: "", departmentId: "" },
   graduationYear: "",
   desiredRole: "",
   skills: "",
@@ -29,12 +32,13 @@ export default function StudentProfileEditPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [educationOptions, setEducationOptions] = useState<EducationOptions | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    void getCurrentUser()
-      .then(({ data }) => {
+    void Promise.all([getCurrentUser(), getEducationOptions()])
+      .then(([{ data }, { data: options }]) => {
         if (cancelled) return;
         if (data.user.role !== "student") {
           router.replace("/students");
@@ -46,9 +50,11 @@ export default function StudentProfileEditPage() {
         }
 
         const profile = data.student_profile;
+        setEducationOptions(options);
         setValues({
-          name: profile.name,
-          schoolName: profile.school_name,
+          lastName: profile.last_name ?? profile.name.split(" ")[0] ?? "",
+          firstName: profile.first_name ?? profile.name.split(" ").slice(1).join(" "),
+          education: { schoolType: profile.school_type ?? "", schoolQuery: "", schoolId: profile.school_id ? String(profile.school_id) : "", facultyId: profile.faculty_id ? String(profile.faculty_id) : "", departmentId: profile.department_id ? String(profile.department_id) : "" },
           graduationYear: String(profile.graduation_year),
           desiredRole: profile.desired_role,
           skills: profile.skills.join(", "),
@@ -88,8 +94,11 @@ export default function StudentProfileEditPage() {
 
     try {
       await updateStudentProfile({
-        name: values.name,
-        school_name: values.schoolName,
+        last_name: values.lastName,
+        first_name: values.firstName,
+        school_id: Number(values.education.schoolId),
+        faculty_id: values.education.facultyId ? Number(values.education.facultyId) : null,
+        department_id: values.education.departmentId ? Number(values.education.departmentId) : null,
         graduation_year: Number(values.graduationYear),
         desired_role: values.desiredRole,
         skills: values.skills.split(","),
@@ -133,17 +142,16 @@ export default function StudentProfileEditPage() {
 
         {!isLoading && !errors.base && (
           <form onSubmit={handleSubmit} noValidate>
-            <div className="form-grid">
-              <Field label="氏名" name="name" required error={errors.name}>
-                <input id="name" value={values.name} onChange={(event) => update("name", event.target.value)} maxLength={100} autoComplete="name" required />
-              </Field>
+            <div className="form-grid single-column">
+              <div className="name-fields">
+                <Field label="姓（Family name）" name="lastName" required error={errors.lastName}><input id="lastName" value={values.lastName} onChange={(event) => update("lastName", event.target.value)} maxLength={50} autoComplete="family-name" required /></Field>
+                <Field label="名（Given name）" name="firstName" required error={errors.firstName}><input id="firstName" value={values.firstName} onChange={(event) => update("firstName", event.target.value)} maxLength={50} autoComplete="given-name" required /></Field>
+              </div>
 
-              <Field label="学校名" name="schoolName" required error={errors.schoolName}>
-                <input id="schoolName" value={values.schoolName} onChange={(event) => update("schoolName", event.target.value)} maxLength={200} autoComplete="organization" required />
-              </Field>
+              <EducationFields options={educationOptions} values={values.education} errors={errors} onChange={(education) => setValues((current) => ({ ...current, education }))} />
 
               <Field label="卒業予定年" name="graduationYear" required error={errors.graduationYear}>
-                <input id="graduationYear" type="number" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} min={new Date().getFullYear()} max={new Date().getFullYear() + 10} inputMode="numeric" required />
+                <select id="graduationYear" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} required>{[0, 1, 2].map((offset) => { const year = new Date().getFullYear() + offset; return <option key={year} value={year}>{year}年</option>; })}</select>
               </Field>
 
               <Field label="希望職種" name="desiredRole" required error={errors.desiredRole} wide>
@@ -154,8 +162,8 @@ export default function StudentProfileEditPage() {
                 <input id="skills" value={values.skills} onChange={(event) => update("skills", event.target.value)} />
               </Field>
 
-              <Field label="自己紹介" name="selfIntroduction" hint="2,000文字以内" required error={errors.selfIntroduction} wide>
-                <textarea id="selfIntroduction" value={values.selfIntroduction} onChange={(event) => update("selfIntroduction", event.target.value)} maxLength={2000} rows={6} required />
+              <Field label="自己紹介" name="selfIntroduction" hint="任意・2,000文字以内" error={errors.selfIntroduction} wide>
+                <textarea id="selfIntroduction" value={values.selfIntroduction} onChange={(event) => update("selfIntroduction", event.target.value)} maxLength={2000} rows={6} />
               </Field>
             </div>
 

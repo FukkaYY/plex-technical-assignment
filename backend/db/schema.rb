@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_000012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_company_profiles_on_user_id", unique: true
+  end
+
+  create_table "departments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "faculty_id", null: false
+    t.string "name", limit: 200, null: false
+    t.datetime "updated_at", null: false
+    t.index ["faculty_id", "name"], name: "index_departments_on_faculty_id_and_name", unique: true
+    t.index ["faculty_id"], name: "index_departments_on_faculty_id"
+  end
+
+  create_table "faculties", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", limit: 200, null: false
+    t.bigint "school_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["school_id", "name"], name: "index_faculties_on_school_id_and_name", unique: true
+    t.index ["school_id"], name: "index_faculties_on_school_id"
   end
 
   create_table "conversations", force: :cascade do |t|
@@ -94,16 +112,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
   create_table "student_profiles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "desired_role", limit: 100, null: false
+    t.bigint "department_id"
+    t.bigint "faculty_id"
+    t.string "first_name", limit: 50
     t.integer "graduation_year", null: false
-    t.string "name", limit: 100, null: false
+    t.string "last_name", limit: 50
+    t.string "name", limit: 101, null: false
     t.string "school_name", limit: 200, null: false
+    t.bigint "school_id"
     t.text "self_introduction", null: false
     t.jsonb "skills", default: [], null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.boolean "visible_to_companies", default: true, null: false
+    t.index ["department_id"], name: "index_student_profiles_on_department_id"
+    t.index ["faculty_id"], name: "index_student_profiles_on_faculty_id"
+    t.index ["school_id"], name: "index_student_profiles_on_school_id"
     t.index ["user_id"], name: "index_student_profiles_on_user_id", unique: true
     t.index ["visible_to_companies", "created_at", "id"], name: "index_student_profiles_on_visibility_and_list_order"
+  end
+
+  create_table "schools", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", limit: 200, null: false
+    t.string "school_type", limit: 30, null: false
+    t.datetime "updated_at", null: false
+    t.index ["school_type", "name"], name: "index_schools_on_school_type_and_name", unique: true
   end
 
   create_table "schedule_proposals", force: :cascade do |t|
@@ -132,6 +166,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
   end
 
   add_foreign_key "company_profiles", "users", on_delete: :cascade
+  add_foreign_key "departments", "faculties", on_delete: :cascade
+  add_foreign_key "faculties", "schools", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
   add_foreign_key "group_conversations", "users", column: "company_id", on_delete: :cascade
@@ -144,4 +180,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_000011) do
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "schedule_proposals", "conversations", on_delete: :cascade
   add_foreign_key "student_profiles", "users", on_delete: :cascade
+  add_foreign_key "student_profiles", "departments", on_delete: :restrict
+  add_foreign_key "student_profiles", "faculties", on_delete: :restrict
+  add_foreign_key "student_profiles", "schools", on_delete: :restrict
 end

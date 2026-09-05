@@ -40,7 +40,33 @@ User.transaction do
   posting.save!
 end
 
-schools = ["東京デモ大学", "関西サンプル大学", "北海道テスト大学", "九州モック工科大学"]
+education_seed = {
+  "technical_college" => { "東京デモ高専" => {} },
+  "vocational_school" => { "デモ情報専門学校" => {} },
+  "junior_college" => { "サンプル短期大学" => {} },
+  "university" => {
+    "東京デモ大学" => { "工学部" => ["情報工学科", "機械工学科"], "経済学部" => ["経済学科"] },
+    "関西サンプル大学" => { "情報学部" => ["情報システム学科", "データ科学科"] },
+    "北海道テスト大学" => { "理学部" => ["数学科", "物理学科"] },
+    "九州モック工科大学" => { "工学部" => ["情報通信工学科"] }
+  },
+  "graduate_school" => {
+    "東京デモ大学大学院" => { "工学研究科" => ["情報工学専攻", "機械工学専攻"] },
+    "関西サンプル大学大学院" => { "情報学研究科" => ["情報システム専攻"] }
+  }
+}
+
+education_seed.each do |school_type, schools|
+  schools.each do |school_name, faculties|
+    school = School.find_or_create_by!(school_type: school_type, name: school_name)
+    faculties.each do |faculty_name, departments|
+      faculty = school.faculties.find_or_create_by!(name: faculty_name)
+      departments.each { |department_name| faculty.departments.find_or_create_by!(name: department_name) }
+    end
+  end
+end
+
+student_schools = School.where(school_type: "university").order(:id).to_a
 desired_roles = ["バックエンドエンジニア", "フロントエンドエンジニア", "プロダクトマネージャー", "データエンジニア"]
 skill_sets = [
   ["Ruby", "Rails", "PostgreSQL", "Docker"],
@@ -67,10 +93,15 @@ skill_sets = [
     student.save!
 
     profile = student.student_profile || student.build_student_profile
+    school = student_schools[index % student_schools.length]
+    faculty = school.faculties.first
     profile.assign_attributes(
-      name: "デモ学生 #{format('%02d', number)}",
-      school_name: schools[index % schools.length],
-      graduation_year: Time.zone.today.year + (index % 4) + 1,
+      last_name: "デモ学生",
+      first_name: format("%02d", number),
+      school: school,
+      faculty: faculty,
+      department: faculty&.departments&.first,
+      graduation_year: Time.zone.today.year + ((index + 1) % 3),
       desired_role: desired_roles[index % desired_roles.length],
       skills: skill_sets[index % skill_sets.length],
       self_introduction: "架空のデモ学生#{number}です。学業と個人開発を両立し、チームで価値を届けることに関心があります。"

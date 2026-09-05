@@ -14,7 +14,15 @@ export type StudentProfile = {
   id: number;
   user_id: number;
   name: string;
+  last_name: string | null;
+  first_name: string | null;
+  school_id: number | null;
   school_name: string;
+  school_type: string | null;
+  faculty_id: number | null;
+  faculty_name: string | null;
+  department_id: number | null;
+  department_name: string | null;
   graduation_year: number;
   desired_role: string;
   skills: string[];
@@ -65,10 +73,21 @@ export type StudentDetail = {
   id: number;
   name: string;
   school_name: string;
+  school_type: string | null;
+  faculty_name: string | null;
+  department_name: string | null;
   graduation_year: number;
   desired_role: string;
   skills: string[];
   self_introduction: string;
+};
+
+export type EducationDepartment = { id: number; name: string };
+export type EducationFaculty = { id: number; name: string; departments: EducationDepartment[] };
+export type EducationSchool = { id: number; name: string; school_type: string; faculties: EducationFaculty[] };
+export type EducationOptions = {
+  school_types: Array<{ value: string; label: string }>;
+  schools: EducationSchool[];
 };
 
 export type MessageItem = {
@@ -203,6 +222,11 @@ export async function registerStudent(payload: Record<string, unknown>) {
   });
 
   return parseResponse<{ data: { user: User; student_profile: StudentProfile } }>(response);
+}
+
+export async function getEducationOptions() {
+  const response = await fetch("/api/v1/education_options", { credentials: "same-origin", cache: "no-store" });
+  return parseResponse<{ data: EducationOptions }>(response);
 }
 
 export async function updateStudentProfile(payload: Record<string, unknown>) {

@@ -11,7 +11,7 @@ module Api
         filters = parsed_filters
         return unless filters
 
-        scope = StudentProfile.visible_to_companies.includes(:user).order(created_at: :desc, id: :desc)
+        scope = StudentProfile.visible_to_companies.includes(:user, :school, :faculty, :department).order(created_at: :desc, id: :desc)
         scope = apply_filters(scope, filters)
         total_count = scope.count
         total_pages = (total_count.to_f / PER_PAGE).ceil
@@ -115,9 +115,9 @@ module Api
           desired_role: profile.desired_role,
           skills: profile.skills.first(3),
           skills_count: profile.skills.length,
-          self_introduction_excerpt: profile.self_introduction.truncate(120, omission: "…"),
+          self_introduction_excerpt: profile.self_introduction.present? ? profile.self_introduction.truncate(120, omission: "…") : "自己紹介はまだ登録されていません。",
           registered_at: profile.created_at.utc.iso8601
-        }
+        }.merge(education_json(profile))
       end
 
       def detail_json(profile)
@@ -129,7 +129,11 @@ module Api
           desired_role: profile.desired_role,
           skills: profile.skills,
           self_introduction: profile.self_introduction
-        }
+        }.merge(education_json(profile))
+      end
+
+      def education_json(profile)
+        { school_type: profile.school&.school_type, faculty_name: profile.faculty&.name, department_name: profile.department&.name }
       end
     end
   end

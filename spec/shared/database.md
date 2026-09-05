@@ -16,14 +16,24 @@
 |---|---|---|
 | id | bigint | PK |
 | user_id | bigint | FK、NOT NULL、UNIQUE |
-| name | string | NOT NULL |
-| school_name | string | NOT NULL |
+| last_name / first_name | string | 新規登録では必須、各50文字以内 |
+| name | string | NOT NULL、姓と名を結合した互換表示値 |
+| school_id | bigint | schoolsへのFK、新規登録では必須 |
+| faculty_id / department_id | bigint | 各マスターへのFK、大学・大学院のみ任意 |
+| school_name | string | NOT NULL、選択学校名を同期した互換表示値 |
 | graduation_year | integer | NOT NULL |
 | desired_role | string | NOT NULL |
 | skills | jsonb | NOT NULL、既定値 `[]` |
 | self_introduction | text | NOT NULL |
 | visible_to_companies | boolean | NOT NULL、既定値 `true` |
 | created_at / updated_at | datetime | NOT NULL |
+
+## schools / faculties / departments
+
+- `schools`: 学校名と `technical_college`, `vocational_school`, `junior_college`, `university`, `graduate_school` の学校種別を持つ。
+- `faculties`: 学校に属する学部または研究科。学校内で名称を一意にする。
+- `departments`: 学部・研究科に属する学科または専攻。親の中で名称を一意にする。
+- プロフィール保存時にも各マスターの親子関係を検証する。
 
 ## company_profiles
 
