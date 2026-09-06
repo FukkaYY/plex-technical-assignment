@@ -15,7 +15,11 @@ export default function CompanyLoginPage() {
   useEffect(() => {
     getCurrentUser()
       .then(({ data }) => {
-        router.replace(data.user.role === "company" ? "/students" : "/students/me");
+        if (data.user.role === "company") {
+          router.replace("/students");
+          return;
+        }
+        setIsCheckingSession(false);
       })
       .catch((requestError: unknown) => {
         if (!(requestError instanceof ApiRequestError) || !requestError.errors.some((item) => item.code === "unauthenticated")) {
@@ -48,7 +52,7 @@ export default function CompanyLoginPage() {
       <section className="form-card login-card" aria-labelledby="company-login-title">
         <p className="eyebrow">COMPANY LOGIN</p>
         <h1 id="company-login-title">企業ログイン</h1>
-        <p className="intro">登録済みの企業アカウントでログインしてください。</p>
+        <p className="intro">登録済みの企業アカウントでログインしてください。学生としてログイン中でも、企業アカウントへ切り替えられます。</p>
 
         {error && <div className="error-banner" role="alert">{error}</div>}
 

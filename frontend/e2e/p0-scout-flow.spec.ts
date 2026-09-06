@@ -122,6 +122,11 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.goto("/students");
   await expect(page).toHaveURL(/\/students\/me$/);
 
+  await page.goto("/");
+  await page.getByRole("link", { name: "企業の方はこちら" }).click();
+  await expect(page.getByRole("heading", { name: "企業ログイン" })).toBeVisible();
+  await page.goto("/students/me");
+
   await page.getByRole("button", { name: "ログアウト" }).click();
   await page.getByRole("link", { name: "企業の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
