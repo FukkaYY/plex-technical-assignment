@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiRequestError, getCurrentUser, getEducationOptions, updateStudentProfile, type EducationOptions } from "@/lib/api";
@@ -188,7 +187,7 @@ export default function StudentProfileEditPage() {
               <button className="primary-button" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "更新中…" : "プロフィールを更新"}
               </button>
-              <Link className="secondary-link" href="/students/me">キャンセル</Link>
+              <button className="secondary-button" type="button" onClick={() => router.push("/students/me")}>キャンセル</button>
             </div>
           </form>
         )}

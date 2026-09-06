@@ -77,6 +77,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page).toHaveURL(/\/students\/me$/);
 
   await page.getByRole("link", { name: "プロフィールを編集" }).click();
+  await expect(page.getByRole("button", { name: "キャンセル" })).toHaveCSS("white-space", "nowrap");
   await page.getByLabel("ソフトウェアエンジニア").uncheck();
   await page.getByLabel("AI・機械学習エンジニア").check();
   await page.getByRole("button", { name: "プロフィールを更新" }).click();

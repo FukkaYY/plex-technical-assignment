@@ -96,8 +96,10 @@ a {
   margin-top: 28px;
 }
 
+.actions .primary-button,
 .actions .secondary-button {
   margin-top: 0;
+  white-space: nowrap;
 }
 
 .actions .secondary-link {
