@@ -38,14 +38,14 @@ module Api
           :faculty_id,
           :department_id,
           :graduation_year,
-          :desired_role,
           :self_introduction,
           :self_promotion,
           :student_achievement,
           :research_summary,
           :english_skills,
           :qualifications,
-          skills: []
+          skills: [],
+          interested_roles: []
         )
       end
 

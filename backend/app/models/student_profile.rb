@@ -1,6 +1,18 @@
 class StudentProfile < ApplicationRecord
   MAX_SKILLS = 20
   MAX_SKILL_LENGTH = 50
+  INTERESTED_ROLE_OPTIONS = [
+    "ソフトウェアエンジニア",
+    "データサイエンティスト",
+    "AI・機械学習エンジニア",
+    "プロダクトマネージャー",
+    "UI・UXデザイナー",
+    "セールス",
+    "マーケティング",
+    "コーポレート",
+    "まだ決めていない"
+  ].freeze
+  MAX_INTERESTED_ROLES = 3
 
   belongs_to :user
   belongs_to :school, optional: true
@@ -28,6 +40,7 @@ class StudentProfile < ApplicationRecord
   validate :skills_are_valid
   validate :user_is_student
   validate :education_selection_is_consistent
+  validate :interested_roles_are_valid
 
   def introduction_excerpt
     (self_promotion.presence || self_introduction.presence || "自己PRはまだ登録されていません。").truncate(120, omission: "…")
@@ -43,6 +56,8 @@ class StudentProfile < ApplicationRecord
     self.school_name = school.name if school
     self.school_name = school_name.to_s.strip
     self.desired_role = desired_role.to_s.strip
+    self.interested_roles = normalize_interested_roles
+    self.desired_role = interested_roles.join("、") if interested_roles.present?
     self.self_introduction = self_introduction.to_s.strip
     self.self_promotion = self_promotion.to_s.strip
     self.student_achievement = student_achievement.to_s.strip
@@ -79,6 +94,25 @@ class StudentProfile < ApplicationRecord
       normalized = skill.is_a?(String) ? skill.strip : skill
       normalized unless normalized == ""
     end.uniq
+  end
+
+  def normalize_interested_roles
+    return interested_roles unless interested_roles.is_a?(Array)
+
+    interested_roles.filter_map { |role| role.is_a?(String) ? role.strip.presence : role }.uniq
+  end
+
+  def interested_roles_are_valid
+    unless interested_roles.is_a?(Array)
+      errors.add(:interested_roles, :invalid)
+      return
+    end
+    errors.add(:interested_roles, :blank) if uses_education_master? && interested_roles.empty?
+    errors.add(:interested_roles, :too_many, count: MAX_INTERESTED_ROLES) if interested_roles.length > MAX_INTERESTED_ROLES
+    errors.add(:interested_roles, :invalid) unless interested_roles.all? { |role| INTERESTED_ROLE_OPTIONS.include?(role) }
+    if interested_roles.include?("まだ決めていない") && interested_roles.length > 1
+      errors.add(:interested_roles, :invalid)
+    end
   end
 
   def skills_are_valid

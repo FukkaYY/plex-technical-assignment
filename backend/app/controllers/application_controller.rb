@@ -46,7 +46,7 @@ class ApplicationController < ActionController::API
   end
 
   def student_profile_json(profile)
-    profile.as_json(only: %i[id user_id name last_name first_name school_id school_name faculty_id department_id graduation_year desired_role skills self_introduction self_promotion student_achievement research_summary english_skills qualifications visible_to_companies]).merge(
+    profile.as_json(only: %i[id user_id name last_name first_name school_id school_name faculty_id department_id graduation_year desired_role interested_roles skills self_introduction self_promotion student_achievement research_summary english_skills qualifications visible_to_companies]).merge(
       school_type: profile.school&.school_type,
       faculty_name: profile.faculty&.name,
       department_name: profile.department&.name
@@ -95,6 +95,7 @@ class ApplicationController < ActionController::API
       school_name: "学校名",
       graduation_year: "卒業予定年",
       desired_role: "希望職種",
+      interested_roles: "興味のある職種",
       skills: "スキル",
       self_introduction: "自己紹介",
       self_promotion: "自己PR",

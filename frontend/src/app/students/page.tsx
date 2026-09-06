@@ -12,6 +12,7 @@ import {
   StudentListItem,
   StudentListMeta,
 } from "@/lib/api";
+import { INTERESTED_ROLE_OPTIONS } from "@/components/InterestedRolesField";
 
 export default function StudentsPage() {
   return (
@@ -26,7 +27,7 @@ function StudentsContent() {
   const searchParams = useSearchParams();
   const appliedQuery = searchParams.get("query") ?? "";
   const appliedGraduationYear = searchParams.get("graduation_year") ?? "";
-  const appliedDesiredRole = searchParams.get("desired_role") ?? "";
+  const appliedInterestedRole = searchParams.get("interested_role") ?? "";
   const requestedPage = searchParams.get("page") ?? "1";
   const page = /^\d+$/.test(requestedPage) && Number(requestedPage) > 0 ? Number(requestedPage) : 1;
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
@@ -34,7 +35,7 @@ function StudentsContent() {
   const [meta, setMeta] = useState<StudentListMeta | null>(null);
   const [query, setQuery] = useState(appliedQuery);
   const [graduationYear, setGraduationYear] = useState(appliedGraduationYear);
-  const [desiredRole, setDesiredRole] = useState(appliedDesiredRole);
+  const [interestedRole, setInterestedRole] = useState(appliedInterestedRole);
   const [retryKey, setRetryKey] = useState(0);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -48,7 +49,7 @@ function StudentsContent() {
       getStudents(page, {
         query: appliedQuery,
         graduationYear: appliedGraduationYear,
-        desiredRole: appliedDesiredRole,
+        interestedRole: appliedInterestedRole,
       }),
     ])
       .then(([currentUserResponse, studentsResponse]) => {
@@ -89,7 +90,7 @@ function StudentsContent() {
     return () => {
       cancelled = true;
     };
-  }, [appliedDesiredRole, appliedGraduationYear, appliedQuery, page, retryKey, router]);
+  }, [appliedInterestedRole, appliedGraduationYear, appliedQuery, page, retryKey, router]);
 
   function changePage(nextPage: number) {
     setError("");
@@ -105,10 +106,10 @@ function StudentsContent() {
     const params = new URLSearchParams();
     const normalizedQuery = query.trim();
     const normalizedGraduationYear = graduationYear.trim();
-    const normalizedDesiredRole = desiredRole.trim();
+    const normalizedInterestedRole = interestedRole.trim();
     if (normalizedQuery) params.set("query", normalizedQuery);
     if (normalizedGraduationYear) params.set("graduation_year", normalizedGraduationYear);
-    if (normalizedDesiredRole) params.set("desired_role", normalizedDesiredRole);
+    if (normalizedInterestedRole) params.set("interested_role", normalizedInterestedRole);
     setError("");
     setIsLoading(true);
     router.push(`/students${params.size > 0 ? `?${params.toString()}` : ""}`);
@@ -117,7 +118,7 @@ function StudentsContent() {
   function clearSearch() {
     setQuery("");
     setGraduationYear("");
-    setDesiredRole("");
+    setInterestedRole("");
     setError("");
     setIsLoading(true);
     router.push("/students");
@@ -158,15 +159,15 @@ function StudentsContent() {
         <div className="student-search-fields">
           <label>
             <span>キーワード</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} maxLength={100} placeholder="氏名・学校名・希望職種・スキル" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} maxLength={100} placeholder="氏名・学校名・興味のある職種・スキル" />
           </label>
           <label>
             <span>卒業予定年</span>
             <input type="number" value={graduationYear} onChange={(event) => setGraduationYear(event.target.value)} min={new Date().getFullYear()} max={new Date().getFullYear() + 10} placeholder="例: 2028" />
           </label>
           <label>
-            <span>希望職種</span>
-            <input value={desiredRole} onChange={(event) => setDesiredRole(event.target.value)} maxLength={100} placeholder="完全一致" />
+            <span>興味のある職種</span>
+            <select value={interestedRole} onChange={(event) => setInterestedRole(event.target.value)}><option value="">すべて</option>{INTERESTED_ROLE_OPTIONS.map((role) => <option key={role} value={role}>{role}</option>)}</select>
           </label>
         </div>
         <div className="student-search-actions">
@@ -187,15 +188,15 @@ function StudentsContent() {
       {!isLoading && !error && meta && (
         <>
           <div className="list-summary">
-            <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedDesiredRole) ? `${meta.total_count}人が検索条件に一致しました` : `${meta.total_count}人の学生が登録されています`}</p>
+            <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? `${meta.total_count}人が検索条件に一致しました` : `${meta.total_count}人の学生が登録されています`}</p>
             {meta.total_pages > 0 && <p>{meta.page} / {meta.total_pages}ページ</p>}
           </div>
 
           {students.length === 0 ? (
             <section className="list-state empty-state">
-              <h2>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedDesiredRole) ? "検索条件に一致する学生がいません" : "表示できる学生がいません"}</h2>
-              <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedDesiredRole) ? "条件を変更するか、条件をクリアしてください。" : meta.total_count === 0 ? "学生が登録されるとここに表示されます。" : "このページには学生がいません。"}</p>
-              {hasSearchConditions(appliedQuery, appliedGraduationYear, appliedDesiredRole) && <button className="secondary-button compact-button" type="button" onClick={clearSearch}>条件をクリア</button>}
+              <h2>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? "検索条件に一致する学生がいません" : "表示できる学生がいません"}</h2>
+              <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? "条件を変更するか、条件をクリアしてください。" : meta.total_count === 0 ? "学生が登録されるとここに表示されます。" : "このページには学生がいません。"}</p>
+              {hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) && <button className="secondary-button compact-button" type="button" onClick={clearSearch}>条件をクリア</button>}
             </section>
           ) : (
             <section className="student-grid" aria-label="学生一覧">
@@ -216,8 +217,8 @@ function StudentsContent() {
   );
 }
 
-function hasSearchConditions(query: string, graduationYear: string, desiredRole: string) {
-  return Boolean(query || graduationYear || desiredRole);
+function hasSearchConditions(query: string, graduationYear: string, interestedRole: string) {
+  return Boolean(query || graduationYear || interestedRole);
 }
 
 function StudentCard({ student }: { student: StudentListItem }) {
@@ -233,7 +234,7 @@ function StudentCard({ student }: { student: StudentListItem }) {
         </div>
         <span className="registered-at">{registeredAt}登録</span>
       </div>
-      <p className="desired-role">{student.desired_role}</p>
+      <p className="desired-role">{student.interested_roles.length > 0 ? student.interested_roles.join(" / ") : student.desired_role}</p>
       <div className="skill-list" aria-label={`スキル ${student.skills_count}件`}>
         {student.skills.map((skill) => <span key={skill}>{skill}</span>)}
         {hiddenSkillCount > 0 && <span>+{hiddenSkillCount}</span>}

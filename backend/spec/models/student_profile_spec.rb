@@ -46,6 +46,16 @@ RSpec.describe StudentProfile, type: :model do
     expect(profile.errors.of_kind?(:english_skills, :too_long)).to be(true)
   end
 
+  it "normalizes and validates interested roles" do
+    profile = build_profile(interested_roles: [" ソフトウェアエンジニア ", "ソフトウェアエンジニア"])
+    expect(profile).to be_valid
+    expect(profile.interested_roles).to eq(["ソフトウェアエンジニア"])
+
+    profile.interested_roles = ["まだ決めていない", "セールス"]
+    expect(profile).not_to be_valid
+    expect(profile.errors.of_kind?(:interested_roles, :invalid)).to be(true)
+  end
+
   it "rejects a company profile association" do
     profile = build_profile
     profile.user.role = :company

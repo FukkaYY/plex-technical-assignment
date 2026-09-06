@@ -57,11 +57,13 @@ module Api
 
       def parsed_filters
         query = params[:query].to_s.strip
-        desired_role = params[:desired_role].to_s.strip
+        interested_role = (params[:interested_role].presence || params[:desired_role]).to_s.strip
         graduation_year = params[:graduation_year].to_s.strip
 
         return render_filter_error("query", "キーワードは100文字以内で指定してください") if query.length > 100
-        return render_filter_error("desired_role", "希望職種は100文字以内で指定してください") if desired_role.length > 100
+        if interested_role.present? && !StudentProfile::INTERESTED_ROLE_OPTIONS.include?(interested_role)
+          return render_filter_error("interested_role", "興味のある職種が正しくありません")
+        end
 
         if graduation_year.present?
           minimum_year = Time.zone.today.year
@@ -74,7 +76,7 @@ module Api
         {
           query: query,
           graduation_year: graduation_year.presence&.to_i,
-          desired_role: desired_role
+          interested_role: interested_role
         }
       end
 
@@ -102,7 +104,10 @@ module Api
         end
 
         scope = scope.where(graduation_year: filters[:graduation_year]) if filters[:graduation_year]
-        scope = scope.where(desired_role: filters[:desired_role]) if filters[:desired_role].present?
+        if filters[:interested_role].present?
+          role_json = [filters[:interested_role]].to_json
+          scope = scope.where("student_profiles.interested_roles @> ?::jsonb OR (jsonb_array_length(student_profiles.interested_roles) = 0 AND student_profiles.desired_role = ?)", role_json, filters[:interested_role])
+        end
         scope
       end
 
@@ -113,6 +118,7 @@ module Api
           school_name: profile.school_name,
           graduation_year: profile.graduation_year,
           desired_role: profile.desired_role,
+          interested_roles: profile.interested_roles,
           skills: profile.skills.first(3),
           skills_count: profile.skills.length,
           self_introduction_excerpt: profile.introduction_excerpt,
@@ -127,6 +133,7 @@ module Api
           school_name: profile.school_name,
           graduation_year: profile.graduation_year,
           desired_role: profile.desired_role,
+          interested_roles: profile.interested_roles,
           skills: profile.skills,
           self_introduction: profile.self_promotion.presence || profile.self_introduction,
           self_promotion: profile.self_promotion.presence || profile.self_introduction,

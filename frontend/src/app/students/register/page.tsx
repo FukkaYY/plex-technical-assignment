@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiRequestError, getEducationOptions, registerStudent, type EducationOptions } from "@/lib/api";
 import { EducationFields, type EducationValues } from "@/components/EducationFields";
+import { InterestedRolesField } from "@/components/InterestedRolesField";
 
 type FormValues = {
   lastName: string;
@@ -13,7 +14,7 @@ type FormValues = {
   passwordConfirmation: string;
   education: EducationValues;
   graduationYear: string;
-  desiredRole: string;
+  interestedRoles: string[];
   skills: string;
 };
 
@@ -25,7 +26,7 @@ const initialValues: FormValues = {
   passwordConfirmation: "",
   education: { schoolType: "", schoolQuery: "", schoolId: "", facultyId: "", departmentId: "" },
   graduationYear: "",
-  desiredRole: "",
+  interestedRoles: [],
   skills: "",
 };
 
@@ -65,7 +66,7 @@ export default function StudentRegistrationPage() {
         faculty_id: values.education.facultyId ? Number(values.education.facultyId) : null,
         department_id: values.education.departmentId ? Number(values.education.departmentId) : null,
         graduation_year: Number(values.graduationYear),
-        desired_role: values.desiredRole,
+        interested_roles: values.interestedRoles,
         skills: values.skills.split(","),
       });
       router.push("/students/me");
@@ -119,9 +120,7 @@ export default function StudentRegistrationPage() {
               <select id="graduationYear" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} required><option value="">選択してください</option>{[0, 1, 2].map((offset) => { const year = new Date().getFullYear() + offset; return <option key={year} value={year}>{year}年</option>; })}</select>
             </Field>
 
-            <Field label="希望職種" name="desiredRole" required error={errors.desiredRole} wide>
-              <input id="desiredRole" value={values.desiredRole} onChange={(event) => update("desiredRole", event.target.value)} maxLength={100} placeholder="例: バックエンドエンジニア" required />
-            </Field>
+            <InterestedRolesField value={values.interestedRoles} error={errors.interestedRoles} onChange={(interestedRoles) => setValues((current) => ({ ...current, interestedRoles }))} />
 
             <Field label="スキル" name="skills" hint="カンマ区切り、最大20件" error={errors.skills} wide>
               <input id="skills" value={values.skills} onChange={(event) => update("skills", event.target.value)} placeholder="Ruby, TypeScript, PostgreSQL" />

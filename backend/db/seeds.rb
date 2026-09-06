@@ -67,7 +67,12 @@ education_seed.each do |school_type, schools|
 end
 
 student_schools = School.where(school_type: "university").order(:id).to_a
-desired_roles = ["バックエンドエンジニア", "フロントエンドエンジニア", "プロダクトマネージャー", "データエンジニア"]
+interested_role_sets = [
+  ["ソフトウェアエンジニア"],
+  ["ソフトウェアエンジニア", "UI・UXデザイナー"],
+  ["データサイエンティスト", "AI・機械学習エンジニア"],
+  ["プロダクトマネージャー"]
+]
 skill_sets = [
   ["Ruby", "Rails", "PostgreSQL", "Docker"],
   ["TypeScript", "React", "Next.js"],
@@ -102,7 +107,7 @@ skill_sets = [
       faculty: faculty,
       department: faculty&.departments&.first,
       graduation_year: Time.zone.today.year + ((index + 1) % 3),
-      desired_role: desired_roles[index % desired_roles.length],
+      interested_roles: interested_role_sets[index % interested_role_sets.length],
       skills: skill_sets[index % skill_sets.length],
       self_promotion: "架空のデモ学生#{number}です。学業と個人開発を両立し、チームで価値を届けることに関心があります。"
     )

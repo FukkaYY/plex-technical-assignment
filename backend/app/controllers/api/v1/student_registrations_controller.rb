@@ -39,8 +39,8 @@ module Api
           :faculty_id,
           :department_id,
           :graduation_year,
-          :desired_role,
-          skills: []
+          skills: [],
+          interested_roles: []
         )
       end
     end

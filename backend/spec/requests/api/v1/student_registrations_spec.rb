@@ -15,7 +15,7 @@ RSpec.describe "Student registrations", type: :request do
       faculty_id: faculty.id,
       department_id: department.id,
       graduation_year: Time.zone.today.year + 1,
-      desired_role: " バックエンドエンジニア ",
+      interested_roles: [" ソフトウェアエンジニア ", "データサイエンティスト"],
       skills: [" Ruby ", "", "Ruby", "PostgreSQL"],
     }
   end
@@ -48,7 +48,8 @@ RSpec.describe "Student registrations", type: :request do
       "school_name" => "プレックス大学",
       "faculty_name" => "工学部",
       "department_name" => "情報工学科",
-      "desired_role" => "バックエンドエンジニア",
+      "desired_role" => "ソフトウェアエンジニア、データサイエンティスト",
+      "interested_roles" => ["ソフトウェアエンジニア", "データサイエンティスト"],
       "skills" => ["Ruby", "PostgreSQL"],
       "self_introduction" => ""
     )
@@ -120,6 +121,13 @@ RSpec.describe "Student registrations", type: :request do
     expect(response.parsed_body.fetch("errors")).to include(
       include("field" => "graduation_year", "code" => "less_than_or_equal_to")
     )
+  end
+
+  it "rejects invalid interested role combinations" do
+    register(valid_attributes.merge(interested_roles: ["まだ決めていない", "ソフトウェアエンジニア"]))
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body.fetch("errors")).to include(include("field" => "interested_roles", "code" => "invalid"))
   end
 
   it "logs the current student out" do

@@ -25,6 +25,7 @@ export type StudentProfile = {
   department_name: string | null;
   graduation_year: number;
   desired_role: string;
+  interested_roles: string[];
   skills: string[];
   self_introduction: string;
   self_promotion: string;
@@ -53,6 +54,7 @@ export type StudentListItem = {
   school_name: string;
   graduation_year: number;
   desired_role: string;
+  interested_roles: string[];
   skills: string[];
   skills_count: number;
   self_introduction_excerpt: string;
@@ -71,7 +73,7 @@ export type StudentListMeta = {
 export type StudentSearchFilters = {
   query?: string;
   graduationYear?: string;
-  desiredRole?: string;
+  interestedRole?: string;
 };
 
 export type StudentDetail = {
@@ -83,6 +85,7 @@ export type StudentDetail = {
   department_name: string | null;
   graduation_year: number;
   desired_role: string;
+  interested_roles: string[];
   skills: string[];
   self_introduction: string;
   self_promotion: string;
@@ -297,7 +300,7 @@ export async function getStudents(page = 1, filters: StudentSearchFilters = {}) 
   const params = new URLSearchParams({ page: String(page) });
   if (filters.query) params.set("query", filters.query);
   if (filters.graduationYear) params.set("graduation_year", filters.graduationYear);
-  if (filters.desiredRole) params.set("desired_role", filters.desiredRole);
+  if (filters.interestedRole) params.set("interested_role", filters.interestedRole);
 
   const response = await fetch(`/api/v1/students?${params.toString()}`, {
     credentials: "same-origin",

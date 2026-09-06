@@ -123,6 +123,7 @@ RSpec.describe "Students", type: :request do
       school_name: "東京大学",
       graduation_year: Time.zone.today.year + 2,
       desired_role: "バックエンドエンジニア",
+      interested_roles: ["ソフトウェアエンジニア"],
       skills: ["Ruby", "PostgreSQL"]
     )
     create_student(2, created_at: 2.minutes.ago).student_profile.update!(
@@ -130,6 +131,7 @@ RSpec.describe "Students", type: :request do
       school_name: "大阪大学",
       graduation_year: Time.zone.today.year + 1,
       desired_role: "フロントエンドエンジニア",
+      interested_roles: ["UI・UXデザイナー"],
       skills: ["TypeScript"]
     )
     login_as(company)
@@ -137,7 +139,7 @@ RSpec.describe "Students", type: :request do
     get "/api/v1/students", params: {
       query: " ruby ",
       graduation_year: Time.zone.today.year + 2,
-      desired_role: " バックエンドエンジニア "
+      interested_role: " ソフトウェアエンジニア "
     }
 
     expect(response).to have_http_status(:ok)
@@ -172,7 +174,7 @@ RSpec.describe "Students", type: :request do
 
     [
       { params: { query: "a" * 101 }, field: "query" },
-      { params: { desired_role: "a" * 101 }, field: "desired_role" },
+      { params: { interested_role: "存在しない職種" }, field: "interested_role" },
       { params: { graduation_year: "not-a-year" }, field: "graduation_year" },
       { params: { graduation_year: Time.zone.today.year + 11 }, field: "graduation_year" }
     ].each do |example|
@@ -265,6 +267,7 @@ RSpec.describe "Students", type: :request do
         "department_name" => nil,
         "graduation_year" => Time.zone.today.year + 1,
         "desired_role" => "エンジニア",
+        "interested_roles" => [],
         "skills" => ["Ruby", "Rails", "PostgreSQL", "Docker"],
         "self_introduction" => ("あ" * 130),
         "self_promotion" => ("あ" * 130),

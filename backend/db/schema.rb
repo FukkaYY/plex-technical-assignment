@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_000013) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_06_000014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -140,6 +140,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_000013) do
     t.bigint "faculty_id"
     t.string "first_name", limit: 50
     t.integer "graduation_year", null: false
+    t.jsonb "interested_roles", default: [], null: false
     t.string "last_name", limit: 50
     t.string "name", limit: 101, null: false
     t.text "qualifications", default: "", null: false

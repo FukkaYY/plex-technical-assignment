@@ -95,8 +95,8 @@ export default function StudentDetailPage() {
           </header>
 
           <section className="detail-section">
-            <h2>希望職種</h2>
-            <p className="desired-role detail-value">{student.desired_role}</p>
+            <h2>興味のある職種</h2>
+            <p className="desired-role detail-value">{student.interested_roles.length > 0 ? student.interested_roles.join(" / ") : student.desired_role}</p>
           </section>
 
           <section className="detail-section">

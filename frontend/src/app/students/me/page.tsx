@@ -87,7 +87,7 @@ export default function StudentMyPage() {
               {profile.faculty_name && <div><dt>{profile.school_type === "graduate_school" ? "研究科" : "学部"}</dt><dd>{profile.faculty_name}</dd></div>}
               {profile.department_name && <div><dt>学科・専攻</dt><dd>{profile.department_name}</dd></div>}
               <div><dt>卒業予定</dt><dd>{profile.graduation_year}年</dd></div>
-              <div><dt>希望職種</dt><dd>{profile.desired_role}</dd></div>
+              <div><dt>興味のある職種</dt><dd>{profile.interested_roles.length > 0 ? profile.interested_roles.join(" / ") : profile.desired_role}</dd></div>
             </dl>
             {![profile.self_promotion, profile.student_achievement, profile.research_summary, profile.english_skills, profile.qualifications].some(Boolean) && <div className="notice-banner" role="status">アピール情報が未登録です。プロフィール編集から追加すると、企業に経験や関心を伝えられます。</div>}
             <section className="profile-visibility" aria-labelledby="profile-visibility-heading">

@@ -23,6 +23,7 @@
 | school_name | string | NOT NULL、選択学校名を同期した互換表示値 |
 | graduation_year | integer | NOT NULL |
 | desired_role | string | NOT NULL |
+| interested_roles | jsonb | NOT NULL、既定値 `[]`、新規登録では1〜3件 |
 | skills | jsonb | NOT NULL、既定値 `[]` |
 | self_introduction | text | NOT NULL |
 | self_promotion / student_achievement / research_summary | text | NOT NULL、既定値空文字、各2,000文字以内 |

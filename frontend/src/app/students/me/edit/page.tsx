@@ -5,13 +5,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiRequestError, getCurrentUser, getEducationOptions, updateStudentProfile, type EducationOptions } from "@/lib/api";
 import { EducationFields, type EducationValues } from "@/components/EducationFields";
+import { InterestedRolesField } from "@/components/InterestedRolesField";
 
 type FormValues = {
   lastName: string;
   firstName: string;
   education: EducationValues;
   graduationYear: string;
-  desiredRole: string;
+  interestedRoles: string[];
   skills: string;
   selfPromotion: string;
   studentAchievement: string;
@@ -25,7 +26,7 @@ const initialValues: FormValues = {
   firstName: "",
   education: { schoolType: "", schoolQuery: "", schoolId: "", facultyId: "", departmentId: "" },
   graduationYear: "",
-  desiredRole: "",
+  interestedRoles: [],
   skills: "",
   selfPromotion: "",
   studentAchievement: "",
@@ -64,7 +65,7 @@ export default function StudentProfileEditPage() {
           firstName: profile.first_name ?? profile.name.split(" ").slice(1).join(" "),
           education: { schoolType: profile.school_type ?? "", schoolQuery: "", schoolId: profile.school_id ? String(profile.school_id) : "", facultyId: profile.faculty_id ? String(profile.faculty_id) : "", departmentId: profile.department_id ? String(profile.department_id) : "" },
           graduationYear: String(profile.graduation_year),
-          desiredRole: profile.desired_role,
+          interestedRoles: profile.interested_roles,
           skills: profile.skills.join(", "),
           selfPromotion: profile.self_promotion || profile.self_introduction,
           studentAchievement: profile.student_achievement,
@@ -112,7 +113,7 @@ export default function StudentProfileEditPage() {
         faculty_id: values.education.facultyId ? Number(values.education.facultyId) : null,
         department_id: values.education.departmentId ? Number(values.education.departmentId) : null,
         graduation_year: Number(values.graduationYear),
-        desired_role: values.desiredRole,
+        interested_roles: values.interestedRoles,
         skills: values.skills.split(","),
         self_promotion: values.selfPromotion,
         student_achievement: values.studentAchievement,
@@ -170,9 +171,7 @@ export default function StudentProfileEditPage() {
                 <select id="graduationYear" value={values.graduationYear} onChange={(event) => update("graduationYear", event.target.value)} required>{[0, 1, 2].map((offset) => { const year = new Date().getFullYear() + offset; return <option key={year} value={year}>{year}年</option>; })}</select>
               </Field>
 
-              <Field label="希望職種" name="desiredRole" required error={errors.desiredRole} wide>
-                <input id="desiredRole" value={values.desiredRole} onChange={(event) => update("desiredRole", event.target.value)} maxLength={100} required />
-              </Field>
+              <InterestedRolesField value={values.interestedRoles} error={errors.interestedRoles} onChange={(interestedRoles) => setValues((current) => ({ ...current, interestedRoles }))} />
 
               <Field label="スキル" name="skills" hint="カンマ区切り、最大20件" error={errors.skills} wide>
                 <input id="skills" value={values.skills} onChange={(event) => update("skills", event.target.value)} />
