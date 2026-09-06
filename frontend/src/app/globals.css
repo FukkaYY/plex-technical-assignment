@@ -178,6 +178,10 @@ a {
   gap: 22px 18px;
 }
 
+.form-grid.single-column {
+  grid-template-columns: 1fr;
+}
+
 .field {
   min-width: 0;
 }
@@ -190,6 +194,12 @@ a {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.name-fields .field > label {
+  display: flex;
+  min-height: 2.8em;
+  align-items: flex-end;
 }
 
 .field label {
@@ -311,6 +321,10 @@ a {
 @media (max-width: 640px) {
   .name-fields {
     grid-template-columns: 1fr;
+  }
+
+  .name-fields .field > label {
+    min-height: auto;
   }
 
   .profile-visibility {
