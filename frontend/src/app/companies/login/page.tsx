@@ -52,7 +52,7 @@ export default function CompanyLoginPage() {
       <section className="form-card login-card" aria-labelledby="company-login-title">
         <p className="eyebrow">COMPANY LOGIN</p>
         <h1 id="company-login-title">企業ログイン</h1>
-        <p className="intro">登録済みの企業アカウントでログインしてください。学生としてログイン中でも、企業アカウントへ切り替えられます。</p>
+        <p className="intro">登録済みの企業アカウントでログインしてください。</p>
 
         {error && <div className="error-banner" role="alert">{error}</div>}
 
