@@ -266,7 +266,12 @@ RSpec.describe "Students", type: :request do
         "graduation_year" => Time.zone.today.year + 1,
         "desired_role" => "エンジニア",
         "skills" => ["Ruby", "Rails", "PostgreSQL", "Docker"],
-        "self_introduction" => ("あ" * 130)
+        "self_introduction" => ("あ" * 130),
+        "self_promotion" => ("あ" * 130),
+        "student_achievement" => "",
+        "research_summary" => "",
+        "english_skills" => "",
+        "qualifications" => ""
       )
       expect(response.body).not_to include(student.email)
       expect(response.body).not_to include("password_digest")

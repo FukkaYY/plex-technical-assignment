@@ -75,7 +75,11 @@ RSpec.describe "Student profiles", type: :request do
       graduation_year: Time.zone.today.year + 2,
       desired_role: " バックエンドエンジニア ",
       skills: [" Rails ", "PostgreSQL", "Rails", ""],
-      self_introduction: " 更新後の自己紹介 ",
+      self_promotion: " 更新後の自己PR ",
+      student_achievement: " 学園祭アプリを開発しました。 ",
+      research_summary: " 分散システムを研究しています。 ",
+      english_skills: " TOEIC 800点 ",
+      qualifications: " 基本情報技術者 ",
       email: "changed@example.com",
       password: "changed-password",
       role: "company"
@@ -91,7 +95,11 @@ RSpec.describe "Student profiles", type: :request do
       "graduation_year" => Time.zone.today.year + 2,
       "desired_role" => "バックエンドエンジニア",
       "skills" => ["Rails", "PostgreSQL"],
-      "self_introduction" => "更新後の自己紹介"
+      "self_promotion" => "更新後の自己PR",
+      "student_achievement" => "学園祭アプリを開発しました。",
+      "research_summary" => "分散システムを研究しています。",
+      "english_skills" => "TOEIC 800点",
+      "qualifications" => "基本情報技術者"
     )
     expect(student.reload).to have_attributes(email: "student@example.com", role: "student")
     expect(student.authenticate("password123")).to eq(student)

@@ -13,7 +13,11 @@ type FormValues = {
   graduationYear: string;
   desiredRole: string;
   skills: string;
-  selfIntroduction: string;
+  selfPromotion: string;
+  studentAchievement: string;
+  researchSummary: string;
+  englishSkills: string;
+  qualifications: string;
 };
 
 const initialValues: FormValues = {
@@ -23,7 +27,11 @@ const initialValues: FormValues = {
   graduationYear: "",
   desiredRole: "",
   skills: "",
-  selfIntroduction: "",
+  selfPromotion: "",
+  studentAchievement: "",
+  researchSummary: "",
+  englishSkills: "",
+  qualifications: "",
 };
 
 export default function StudentProfileEditPage() {
@@ -58,7 +66,11 @@ export default function StudentProfileEditPage() {
           graduationYear: String(profile.graduation_year),
           desiredRole: profile.desired_role,
           skills: profile.skills.join(", "),
-          selfIntroduction: profile.self_introduction,
+          selfPromotion: profile.self_promotion || profile.self_introduction,
+          studentAchievement: profile.student_achievement,
+          researchSummary: profile.research_summary,
+          englishSkills: profile.english_skills,
+          qualifications: profile.qualifications,
         });
       })
       .catch((requestError: unknown) => {
@@ -102,7 +114,11 @@ export default function StudentProfileEditPage() {
         graduation_year: Number(values.graduationYear),
         desired_role: values.desiredRole,
         skills: values.skills.split(","),
-        self_introduction: values.selfIntroduction,
+        self_promotion: values.selfPromotion,
+        student_achievement: values.studentAchievement,
+        research_summary: values.researchSummary,
+        english_skills: values.englishSkills,
+        qualifications: values.qualifications,
       });
       router.push("/students/me?updated=1");
     } catch (error) {
@@ -135,7 +151,7 @@ export default function StudentProfileEditPage() {
       <section className="form-card" aria-labelledby="profile-edit-title">
         <p className="eyebrow">EDIT STUDENT PROFILE</p>
         <h1 id="profile-edit-title">プロフィール編集</h1>
-        <p className="intro">企業に表示されるプロフィール情報を更新できます。</p>
+        <p className="intro">企業に表示されるプロフィール情報を更新できます。より良い企業さんとマッチするために、あなたについてアピールしましょう！</p>
 
         {errors.base && <div className="error-banner" role="alert">{errors.base}</div>}
         {isLoading && <p className="loading">プロフィールを読み込んでいます…</p>}
@@ -162,9 +178,11 @@ export default function StudentProfileEditPage() {
                 <input id="skills" value={values.skills} onChange={(event) => update("skills", event.target.value)} />
               </Field>
 
-              <Field label="自己紹介" name="selfIntroduction" hint="任意・2,000文字以内" error={errors.selfIntroduction} wide>
-                <textarea id="selfIntroduction" value={values.selfIntroduction} onChange={(event) => update("selfIntroduction", event.target.value)} maxLength={2000} rows={6} />
-              </Field>
+              <Field label="自己PR" name="selfPromotion" hint="任意・2,000文字以内" error={errors.selfPromotion} wide><textarea id="selfPromotion" value={values.selfPromotion} onChange={(event) => update("selfPromotion", event.target.value)} maxLength={2000} rows={6} /></Field>
+              <Field label="学生時代に力を入れたこと" name="studentAchievement" hint="任意・2,000文字以内" error={errors.studentAchievement} wide><textarea id="studentAchievement" value={values.studentAchievement} onChange={(event) => update("studentAchievement", event.target.value)} maxLength={2000} rows={6} /></Field>
+              <Field label="研究・ゼミ内容" name="researchSummary" hint="任意・2,000文字以内" error={errors.researchSummary} wide><textarea id="researchSummary" value={values.researchSummary} onChange={(event) => update("researchSummary", event.target.value)} maxLength={2000} rows={6} /></Field>
+              <Field label="英語スキル" name="englishSkills" hint="任意・1,000文字以内" error={errors.englishSkills} wide><textarea id="englishSkills" value={values.englishSkills} onChange={(event) => update("englishSkills", event.target.value)} maxLength={1000} rows={4} /></Field>
+              <Field label="保有資格" name="qualifications" hint="任意・1,000文字以内" error={errors.qualifications} wide><textarea id="qualifications" value={values.qualifications} onChange={(event) => update("qualifications", event.target.value)} maxLength={1000} rows={4} /></Field>
             </div>
 
             <div className="actions">

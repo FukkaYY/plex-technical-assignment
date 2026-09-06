@@ -106,10 +106,14 @@ export default function StudentDetailPage() {
             </div>
           </section>
 
-          <section className="detail-section">
-            <h2>自己紹介</h2>
-            <p className="self-introduction-full">{student.self_introduction || "自己紹介はまだ登録されていません。"}</p>
-          </section>
+          {[
+            ["自己PR", student.self_promotion],
+            ["学生時代に力を入れたこと", student.student_achievement],
+            ["研究・ゼミ内容", student.research_summary],
+            ["英語スキル", student.english_skills],
+            ["保有資格", student.qualifications],
+          ].filter(([, value]) => value).map(([label, value]) => <section className="detail-section" key={label}><h2>{label}</h2><p className="self-introduction-full">{value}</p></section>)}
+          {![student.self_promotion, student.student_achievement, student.research_summary, student.english_skills, student.qualifications].some(Boolean) && <section className="detail-section"><h2>アピール情報</h2><p className="self-introduction-full">まだ登録されていません。</p></section>}
         </article>
       )}
     </main>

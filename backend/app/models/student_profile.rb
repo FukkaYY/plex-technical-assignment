@@ -17,6 +17,8 @@ class StudentProfile < ApplicationRecord
   validates :school_name, presence: true, length: { maximum: 200 }
   validates :desired_role, presence: true, length: { maximum: 100 }
   validates :self_introduction, length: { maximum: 2_000 }
+  validates :self_promotion, :student_achievement, :research_summary, length: { maximum: 2_000 }
+  validates :english_skills, :qualifications, length: { maximum: 1_000 }
   validates :graduation_year,
     numericality: {
       only_integer: true,
@@ -26,6 +28,10 @@ class StudentProfile < ApplicationRecord
   validate :skills_are_valid
   validate :user_is_student
   validate :education_selection_is_consistent
+
+  def introduction_excerpt
+    (self_promotion.presence || self_introduction.presence || "自己PRはまだ登録されていません。").truncate(120, omission: "…")
+  end
 
   private
 
@@ -38,6 +44,12 @@ class StudentProfile < ApplicationRecord
     self.school_name = school_name.to_s.strip
     self.desired_role = desired_role.to_s.strip
     self.self_introduction = self_introduction.to_s.strip
+    self.self_promotion = self_promotion.to_s.strip
+    self.student_achievement = student_achievement.to_s.strip
+    self.research_summary = research_summary.to_s.strip
+    self.english_skills = english_skills.to_s.strip
+    self.qualifications = qualifications.to_s.strip
+    self.self_introduction = self_promotion if self_promotion.present?
     self.skills = normalize_skills
   end
 

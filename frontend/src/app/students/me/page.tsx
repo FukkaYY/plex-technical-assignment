@@ -89,7 +89,7 @@ export default function StudentMyPage() {
               <div><dt>卒業予定</dt><dd>{profile.graduation_year}年</dd></div>
               <div><dt>希望職種</dt><dd>{profile.desired_role}</dd></div>
             </dl>
-            {!profile.self_introduction && <div className="notice-banner" role="status">自己紹介が未登録です。プロフィール編集から追加すると、企業に経験や関心を伝えられます。</div>}
+            {![profile.self_promotion, profile.student_achievement, profile.research_summary, profile.english_skills, profile.qualifications].some(Boolean) && <div className="notice-banner" role="status">アピール情報が未登録です。プロフィール編集から追加すると、企業に経験や関心を伝えられます。</div>}
             <section className="profile-visibility" aria-labelledby="profile-visibility-heading">
               <div>
                 <h2 id="profile-visibility-heading">企業への公開状態</h2>

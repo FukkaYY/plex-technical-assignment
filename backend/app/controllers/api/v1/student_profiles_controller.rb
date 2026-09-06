@@ -40,6 +40,11 @@ module Api
           :graduation_year,
           :desired_role,
           :self_introduction,
+          :self_promotion,
+          :student_achievement,
+          :research_summary,
+          :english_skills,
+          :qualifications,
           skills: []
         )
       end

@@ -38,6 +38,14 @@ RSpec.describe StudentProfile, type: :model do
     expect(profile.errors.of_kind?(:skills, :too_long)).to be(true)
   end
 
+  it "validates the limits of the separated appeal fields" do
+    profile = build_profile(self_promotion: "a" * 2_001, english_skills: "a" * 1_001)
+
+    expect(profile).not_to be_valid
+    expect(profile.errors.of_kind?(:self_promotion, :too_long)).to be(true)
+    expect(profile.errors.of_kind?(:english_skills, :too_long)).to be(true)
+  end
+
   it "rejects a company profile association" do
     profile = build_profile
     profile.user.role = :company

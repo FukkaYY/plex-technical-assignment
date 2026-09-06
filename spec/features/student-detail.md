@@ -16,7 +16,7 @@
 - 卒業予定年
 - 希望職種
 - スキル一覧
-- 自己紹介全文
+- 自己PR、学生時代に力を入れたこと、研究・ゼミ内容、英語スキル、保有資格（入力済みの項目だけ）
 - メッセージ作成導線
 
 学生のメールアドレス、内部ユーザーID以外の認証情報は表示しない。
@@ -32,7 +32,7 @@
 - 学生ロール: `403 Forbidden`
 - 対象なし: `404 Not Found`
 
-成功レスポンスの `data` は `id`, `name`, `school_name`, `graduation_year`, `desired_role`, `skills`, `self_introduction` を返す。`skills` と `self_introduction` は省略しない。
+成功レスポンスの `data` は基本プロフィールに加え、`self_promotion`, `student_achievement`, `research_summary`, `english_skills`, `qualifications` を返す。画面では空のアピール項目を表示しない。移行互換用の `self_introduction` も当面返す。
 
 ## 画面状態
 

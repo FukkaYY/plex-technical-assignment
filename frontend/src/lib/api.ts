@@ -27,6 +27,11 @@ export type StudentProfile = {
   desired_role: string;
   skills: string[];
   self_introduction: string;
+  self_promotion: string;
+  student_achievement: string;
+  research_summary: string;
+  english_skills: string;
+  qualifications: string;
   visible_to_companies: boolean;
 };
 
@@ -80,6 +85,11 @@ export type StudentDetail = {
   desired_role: string;
   skills: string[];
   self_introduction: string;
+  self_promotion: string;
+  student_achievement: string;
+  research_summary: string;
+  english_skills: string;
+  qualifications: string;
 };
 
 export type EducationDepartment = { id: number; name: string };

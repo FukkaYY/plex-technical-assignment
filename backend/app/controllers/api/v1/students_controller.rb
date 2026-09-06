@@ -115,7 +115,7 @@ module Api
           desired_role: profile.desired_role,
           skills: profile.skills.first(3),
           skills_count: profile.skills.length,
-          self_introduction_excerpt: profile.self_introduction.present? ? profile.self_introduction.truncate(120, omission: "…") : "自己紹介はまだ登録されていません。",
+          self_introduction_excerpt: profile.introduction_excerpt,
           registered_at: profile.created_at.utc.iso8601
         }.merge(education_json(profile))
       end
@@ -128,7 +128,12 @@ module Api
           graduation_year: profile.graduation_year,
           desired_role: profile.desired_role,
           skills: profile.skills,
-          self_introduction: profile.self_introduction
+          self_introduction: profile.self_promotion.presence || profile.self_introduction,
+          self_promotion: profile.self_promotion.presence || profile.self_introduction,
+          student_achievement: profile.student_achievement,
+          research_summary: profile.research_summary,
+          english_skills: profile.english_skills,
+          qualifications: profile.qualifications
         }.merge(education_json(profile))
       end
 

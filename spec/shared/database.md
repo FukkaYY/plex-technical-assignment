@@ -25,6 +25,8 @@
 | desired_role | string | NOT NULL |
 | skills | jsonb | NOT NULL、既定値 `[]` |
 | self_introduction | text | NOT NULL |
+| self_promotion / student_achievement / research_summary | text | NOT NULL、既定値空文字、各2,000文字以内 |
+| english_skills / qualifications | text | NOT NULL、既定値空文字、各1,000文字以内 |
 | visible_to_companies | boolean | NOT NULL、既定値 `true` |
 | created_at / updated_at | datetime | NOT NULL |
 
