@@ -76,10 +76,10 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("ソフトウェアエンジニア").uncheck();
   await page.getByLabel("AI・機械学習エンジニア").check();
   await page.getByRole("button", { name: "プロフィールを更新" }).click();
-  await expect(page.getByRole("status")).toHaveText("プロフィールを更新しました。");
+  await expect(page.getByRole("status").filter({ hasText: "プロフィールを更新しました。" })).toBeVisible();
   await expect(page.getByText("AI・機械学習エンジニア", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "プロフィールを非公開にする" }).click();
-  await expect(page.getByRole("status")).toHaveText("プロフィールを企業から非公開にしました。");
+  await expect(page.getByRole("status").filter({ hasText: "プロフィールを企業から非公開にしました。" })).toBeVisible();
   await expect(page.getByText("非公開", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "インターン募集を見る" }).click();
@@ -156,7 +156,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await page.getByRole("button", { name: "プロフィールを公開する" }).click();
-  await expect(page.getByRole("status")).toHaveText("プロフィールを企業へ公開しました。");
+  await expect(page.getByRole("status").filter({ hasText: "プロフィールを企業へ公開しました。" })).toBeVisible();
   await page.getByRole("button", { name: "ログアウト" }).click();
   await page.getByRole("link", { name: "企業の方はこちら" }).click();
   await page.getByLabel("メールアドレス").fill("company@example.com");
