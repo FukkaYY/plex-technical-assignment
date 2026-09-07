@@ -188,6 +188,40 @@ a {
   background: #f8faff;
 }
 
+.unread-notification {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 28px;
+  padding: 14px 16px;
+  border: 1px solid #fda29b;
+  border-radius: 10px;
+  color: #7a271a;
+  background: #fef3f2;
+}
+
+.unread-status-error {
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.mypage-inbox-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.mypage-unread-badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #7a271a;
+  background: #fff;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 .danger-button {
   flex: 0 0 auto;
   margin: 0;

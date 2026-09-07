@@ -68,6 +68,8 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students\/me$/);
+  await expect(page.getByText("企業から未読メッセージが1件届いています。")).toBeVisible();
+  await expect(page.getByText("未読 1件", { exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "プロフィールを編集" }).click();
   await expect(page.getByRole("button", { name: "キャンセル" })).toHaveCSS("white-space", "nowrap");
@@ -110,6 +112,8 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
   await page.getByRole("link", { name: "受信メッセージへ戻る" }).click();
   await expect(page.getByRole("link", { name: /デモ企業株式会社/ }).getByText(/未読/)).toHaveCount(0);
+  await page.getByRole("link", { name: "学生マイページへ戻る" }).click();
+  await expect(page.getByText(/企業から未読メッセージが\d+件届いています/)).toHaveCount(0);
 
   await page.goto("/students");
   await expect(page).toHaveURL(/\/students\/me$/);

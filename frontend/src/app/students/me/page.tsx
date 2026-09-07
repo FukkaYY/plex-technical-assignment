@@ -3,19 +3,24 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ApiRequestError, getCurrentUser, logout, StudentProfile, updateStudentProfileVisibility } from "@/lib/api";
+import { ApiRequestError, getConversations, getCurrentUser, logout, StudentProfile, updateStudentProfileVisibility } from "@/lib/api";
 
 export default function StudentMyPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [unreadCount, setUnreadCount] = useState<number | null>(null);
+  const [unreadError, setUnreadError] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     getCurrentUser()
       .then(({ data }) => {
+        if (cancelled) return;
         if (data.user.role !== "student") {
           router.replace("/students");
           return;
@@ -25,18 +30,30 @@ export default function StudentMyPage() {
           return;
         }
         setProfile(data.student_profile);
+        void getConversations()
+          .then(({ data: conversations }) => {
+            if (!cancelled) setUnreadCount(conversations.reduce((total, conversation) => total + conversation.unread_count, 0));
+          })
+          .catch(() => {
+            if (!cancelled) setUnreadError(true);
+          });
         if (new URLSearchParams(window.location.search).get("updated") === "1") {
           setNotice("プロフィールを更新しました。");
           window.history.replaceState(null, "", "/students/me");
         }
       })
       .catch((requestError: unknown) => {
+        if (cancelled) return;
         if (requestError instanceof ApiRequestError && requestError.errors.some((item) => item.code === "unauthenticated")) {
           router.replace("/students/login");
           return;
         }
         setError("プロフィールの読み込みに失敗しました。");
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   async function handleLogout() {
@@ -89,8 +106,17 @@ export default function StudentMyPage() {
                 {isLoggingOut ? "ログアウト中…" : "ログアウト"}
               </button>
             </header>
+            {unreadCount !== null && unreadCount > 0 && (
+              <div className="unread-notification" role="status">
+                企業から未読メッセージが<strong>{unreadCount}件</strong>届いています。
+              </div>
+            )}
+            {unreadError && <p className="unread-status-error">未読状況を取得できませんでした。</p>}
             <nav className="student-mypage-navigation" aria-label="学生マイページのメニュー">
-              <Link className="primary-link" href="/students/messages">受信メッセージを見る</Link>
+              <Link className="primary-link mypage-inbox-link" href="/students/messages">
+                受信メッセージを見る
+                {unreadCount !== null && unreadCount > 0 && <span className="mypage-unread-badge">未読 {unreadCount}件</span>}
+              </Link>
               <Link className="secondary-link" href="/students/jobs">インターン募集を見る</Link>
               <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>
             </nav>
