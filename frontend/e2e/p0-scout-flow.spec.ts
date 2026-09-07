@@ -25,6 +25,11 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("勤務地・勤務形態").fill("東京都・リモート可");
   await page.getByLabel("募集内容").fill("E2Eで作成した募集内容です。");
   await page.getByLabel("応募条件").fill("Rubyの学習経験");
+  await page.getByLabel("サムネイル画像").setInputFiles({
+    name: "thumbnail.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+  });
   await page.getByRole("button", { name: "募集を公開" }).click();
   await expect(page.getByRole("status")).toHaveText("募集を公開しました。");
   await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
@@ -90,8 +95,14 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("link", { name: "インターン募集を見る" }).click();
   const jobCard = page.locator("article.job-card").filter({ hasText: jobTitle });
   await expect(jobCard).toBeVisible();
+  await expect(jobCard.getByAltText(`${jobTitle}のサムネイル`)).toBeVisible();
+  await jobCard.getByRole("button", { name: "気になる！", exact: true }).click();
+  await expect(jobCard.getByRole("button", { name: "気になる！済み" })).toBeVisible();
+  await page.getByRole("group", { name: "募集の表示切り替え" }).getByRole("button", { name: "気になる！" }).click();
+  await expect(jobCard).toBeVisible();
   await jobCard.getByRole("link", { name: "募集詳細を見る" }).click();
   await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
+  await expect(page.getByRole("button", { name: "気になる！済み" })).toBeVisible();
   await expect(page.getByText("E2Eで作成した募集内容です。")).toBeVisible();
   await page.getByRole("link", { name: "募集一覧へ戻る" }).click();
   await page.getByRole("link", { name: "学生マイページへ戻る" }).click();

@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_06_000014) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_000016) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "company_profiles", force: :cascade do |t|
     t.string "company_name", limit: 200, null: false
@@ -98,6 +126,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_000014) do
     t.check_constraint "status::text = ANY (ARRAY['published'::character varying::text, 'closed'::character varying::text])", name: "job_postings_status_check"
   end
 
+  create_table "job_posting_interests", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "job_posting_id", null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_posting_id"], name: "index_job_posting_interests_on_job_posting_id"
+    t.index ["student_id", "job_posting_id"], name: "index_job_posting_interests_on_student_id_and_job_posting_id", unique: true
+    t.index ["student_id"], name: "index_job_posting_interests_on_student_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.text "body", null: false
     t.bigint "conversation_id", null: false
@@ -171,6 +209,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_000014) do
     t.check_constraint "role::text = ANY (ARRAY['student'::character varying::text, 'company'::character varying::text])", name: "users_role_check"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id", on_delete: :cascade
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id", on_delete: :cascade
   add_foreign_key "company_profiles", "users", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
@@ -182,6 +222,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_06_000014) do
   add_foreign_key "group_messages", "group_conversations", on_delete: :cascade
   add_foreign_key "group_messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
+  add_foreign_key "job_posting_interests", "job_postings", on_delete: :cascade
+  add_foreign_key "job_posting_interests", "users", column: "student_id", on_delete: :cascade
   add_foreign_key "messages", "conversations", on_delete: :cascade
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "schedule_proposals", "conversations", on_delete: :cascade

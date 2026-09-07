@@ -3,7 +3,7 @@
 ## 基本方針
 
 - ベースパス: `/api/v1`
-- 形式: JSON
+- 形式: 原則JSON。募集の画像アップロードだけは `multipart/form-data`、画像取得は画像バイナリを返す。
 - 日時: ISO 8601、UTC
 - 認証: セッションCookie
 - JSONキー: `snake_case`

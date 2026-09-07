@@ -18,7 +18,11 @@ Rails.application.routes.draw do
         patch :read, on: :member, action: :mark_read
         resources :messages, only: :create, controller: :conversation_messages
       end
-      resources :job_postings, only: %i[index show]
+      resources :job_postings, only: %i[index show] do
+        get :thumbnail, on: :member
+      end
+      post "job_postings/:id/interest", to: "job_postings#interest"
+      delete "job_postings/:id/interest", to: "job_postings#destroy_interest"
       namespace :company do
         resources :job_postings, only: %i[index show create update] do
           patch :close, on: :member

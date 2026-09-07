@@ -25,6 +25,7 @@ services:
     volumes:
       - ./backend:/app
       - bundle_cache:/usr/local/bundle
+      - active_storage:/app/storage
     ports:
       - "3001:3001"
     depends_on:
@@ -51,3 +52,4 @@ volumes:
   bundle_cache:
   frontend_node_modules:
   frontend_next:
+  active_storage:

@@ -87,6 +87,18 @@
 | created_at / updated_at | datetime | NOT NULL |
 
 公開中の募集を新着順で取得するため、`status, created_at, id` に複合indexを設定する。
+サムネイル画像1枚をActive Storageで関連付け、画像本体はDockerの永続ボリュームへ保存する。
+
+## job_posting_interests
+
+| カラム | 型 | 制約 |
+|---|---|---|
+| id | bigint | PK |
+| student_id | bigint | usersへのFK、NOT NULL |
+| job_posting_id | bigint | job_postingsへのFK、NOT NULL |
+| created_at / updated_at | datetime | NOT NULL |
+
+`student_id, job_posting_id` に複合UNIQUE制約を設定し、同じ学生と募集の重複登録を防ぐ。学生または募集が削除された場合は関連も削除する。募集終了だけでは削除しない。
 
 ## schedule_proposals
 

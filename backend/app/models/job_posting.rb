@@ -1,5 +1,7 @@
 class JobPosting < ApplicationRecord
   belongs_to :company, class_name: "User", inverse_of: :job_postings
+  has_many :job_posting_interests, dependent: :destroy, inverse_of: :job_posting
+  has_one_attached :thumbnail
 
   enum :status, { published: "published", closed: "closed" }, validate: true
 
@@ -11,6 +13,7 @@ class JobPosting < ApplicationRecord
   validates :description, presence: true, length: { maximum: 5_000 }
   validates :requirements, presence: true, length: { maximum: 3_000 }
   validate :company_has_company_role
+  validate :acceptable_thumbnail
 
   private
 
@@ -22,5 +25,12 @@ class JobPosting < ApplicationRecord
 
   def company_has_company_role
     errors.add(:company, :invalid) if company.present? && !company.company?
+  end
+
+  def acceptable_thumbnail
+    return unless thumbnail.attached?
+
+    errors.add(:thumbnail, :invalid) unless thumbnail.blob.content_type.in?(%w[image/jpeg image/png image/webp])
+    errors.add(:thumbnail, :too_large) if thumbnail.blob.byte_size > 5.megabytes
   end
 end

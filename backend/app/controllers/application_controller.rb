@@ -109,7 +109,8 @@ class ApplicationController < ActionController::API
       role_name: "募集職種",
       work_location: "勤務地・勤務形態",
       description: "募集内容",
-      requirements: "応募条件"
+      requirements: "応募条件",
+      thumbnail: "サムネイル画像"
     }
     label = labels[field.to_sym] || field.to_s
 
@@ -121,6 +122,7 @@ class ApplicationController < ActionController::API
     when :too_short then "#{label}は8文字以上で入力してください"
     when :too_long then "#{label}が上限文字数を超えています"
     when :too_many then "#{label}が上限件数を超えています"
+    when :too_large then "#{label}は5MB以下にしてください"
     when :greater_than_or_equal_to, :less_than_or_equal_to then "#{label}が許可範囲外です"
     when :not_a_number, :not_an_integer then "#{label}は整数で入力してください"
     else fallback

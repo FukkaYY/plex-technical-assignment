@@ -6,4 +6,5 @@ Rails.application.configure do
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.log_tags = [:request_id]
   config.active_support.report_deprecations = false
+  config.active_storage.service = :local
 end

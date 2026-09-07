@@ -16,6 +16,7 @@ module Api
 
         def create
           posting = current_user.job_postings.new(job_posting_params.merge(status: :published))
+          posting.thumbnail.attach(params.dig(:job_posting, :thumbnail)) if params.dig(:job_posting, :thumbnail).present?
 
           if posting.save
             render json: { data: posting_json(posting) }, status: :created
@@ -25,7 +26,9 @@ module Api
         end
 
         def update
+          @job_posting.thumbnail.attach(params.dig(:job_posting, :thumbnail)) if params.dig(:job_posting, :thumbnail).present?
           if @job_posting.update(job_posting_params)
+            @job_posting.thumbnail.purge if remove_thumbnail?
             render json: { data: posting_json(@job_posting) }
           else
             render json: { errors: validation_errors(@job_posting.errors) }, status: :unprocessable_entity
@@ -52,8 +55,14 @@ module Api
           params.require(:job_posting).permit(:title, :role_name, :work_location, :description, :requirements)
         end
 
+        def remove_thumbnail?
+          ActiveModel::Type::Boolean.new.cast(params.dig(:job_posting, :remove_thumbnail)) && params.dig(:job_posting, :thumbnail).blank?
+        end
+
         def posting_json(posting)
-          posting.as_json(only: %i[id title role_name work_location description requirements status created_at updated_at])
+          posting.as_json(only: %i[id title role_name work_location description requirements status created_at updated_at]).merge(
+            thumbnail_url: posting.thumbnail.attached? ? "/api/v1/job_postings/#{posting.id}/thumbnail" : nil
+          )
         end
       end
     end

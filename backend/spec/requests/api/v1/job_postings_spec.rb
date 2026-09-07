@@ -1,4 +1,5 @@
 require "rails_helper"
+require "base64"
 
 RSpec.describe "Job postings", type: :request do
   before { Rails.cache.clear }
@@ -30,6 +31,14 @@ RSpec.describe "Job postings", type: :request do
     expect(response).to have_http_status(:ok)
   end
 
+  def uploaded_thumbnail
+    tempfile = Tempfile.new(["thumbnail", ".png"])
+    tempfile.binmode
+    tempfile.write(Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="))
+    tempfile.rewind
+    ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, filename: "thumbnail.png", type: "image/png")
+  end
+
   it "lets a company create, list, update, and close its posting" do
     login_as(company)
 
@@ -58,6 +67,22 @@ RSpec.describe "Job postings", type: :request do
     expect(response.parsed_body.dig("errors", 0, "field")).to eq("title")
   end
 
+  it "lets a company attach, replace, and remove a thumbnail" do
+    login_as(company)
+    post "/api/v1/company/job_postings", params: { job_posting: valid_attributes.merge(thumbnail: uploaded_thumbnail) }, headers: { "X-CSRF-Token" => csrf_token }
+
+    expect(response).to have_http_status(:created)
+    posting_id = response.parsed_body.dig("data", "id")
+    expect(response.parsed_body.dig("data", "thumbnail_url")).to eq("/api/v1/job_postings/#{posting_id}/thumbnail")
+
+    get "/api/v1/job_postings/#{posting_id}/thumbnail"
+    expect(response).to have_http_status(:ok)
+    expect(response.media_type).to eq("image/png")
+
+    patch "/api/v1/company/job_postings/#{posting_id}", params: { job_posting: valid_attributes.merge(remove_thumbnail: true) }, headers: { "X-CSRF-Token" => csrf_token }
+    expect(response.parsed_body.dig("data", "thumbnail_url")).to be_nil
+  end
+
   it "does not expose or update another company's posting" do
     posting = other_company.job_postings.create!(valid_attributes)
     login_as(company)
@@ -80,6 +105,41 @@ RSpec.describe "Job postings", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch("data").pluck("id")).to eq([newer.id, older.id])
     expect(response.parsed_body.dig("data", 0, "company", "company_name")).to eq("other@example.com株式会社")
+    expect(response.parsed_body.dig("data", 0, "interested")).to be(false)
+  end
+
+  it "lets a student add, filter, and remove interested postings" do
+    interested_posting = company.job_postings.create!(valid_attributes)
+    other_posting = other_company.job_postings.create!(valid_attributes.merge(title: "別の募集"))
+    login_as(student)
+
+    expect {
+      post "/api/v1/job_postings/#{interested_posting.id}/interest", headers: { "X-CSRF-Token" => csrf_token }
+    }.to change(JobPostingInterest, :count).by(1)
+    expect(response).to have_http_status(:created)
+
+    post "/api/v1/job_postings/#{interested_posting.id}/interest", headers: { "X-CSRF-Token" => csrf_token }
+    expect(JobPostingInterest.count).to eq(1)
+
+    get "/api/v1/job_postings", params: { interested: "true" }
+    expect(response.parsed_body.fetch("data").pluck("id")).to eq([interested_posting.id])
+    expect(response.parsed_body.dig("data", 0, "interested")).to be(true)
+    expect(response.parsed_body.fetch("data").pluck("id")).not_to include(other_posting.id)
+
+    delete "/api/v1/job_postings/#{interested_posting.id}/interest", headers: { "X-CSRF-Token" => csrf_token }
+    expect(response).to have_http_status(:ok)
+    expect(JobPostingInterest.count).to eq(0)
+  end
+
+  it "keeps interest data but hides a posting after it closes" do
+    posting = company.job_postings.create!(valid_attributes)
+    student.job_posting_interests.create!(job_posting: posting)
+    posting.closed!
+    login_as(student)
+
+    get "/api/v1/job_postings", params: { interested: "true" }
+    expect(response.parsed_body.fetch("data")).to be_empty
+    expect(student.job_posting_interests.exists?(job_posting: posting)).to be(true)
   end
 
   it "returns 404 for a closed posting on the student API" do

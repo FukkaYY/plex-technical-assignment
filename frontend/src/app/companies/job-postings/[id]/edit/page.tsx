@@ -22,5 +22,5 @@ export default function EditJobPostingPage() {
     });
   }, [id, router]);
 
-  return <main className="page-shell"><section className="form-card"><Link className="back-link" href="/companies/job-postings">← 募集管理へ戻る</Link><p className="eyebrow">EDIT JOB POSTING</p><h1>募集を編集</h1>{error && <div className="error-banner" role="alert">{error}</div>}{!posting && !error && <p className="loading">募集を読み込んでいます…</p>}{posting && <JobPostingForm id={id} initialValues={posting} />}</section></main>;
+  return <main className="page-shell"><section className="form-card"><Link className="back-link" href="/companies/job-postings">← 募集管理へ戻る</Link><p className="eyebrow">EDIT JOB POSTING</p><h1>募集を編集</h1>{error && <div className="error-banner" role="alert">{error}</div>}{!posting && !error && <p className="loading">募集を読み込んでいます…</p>}{posting && <JobPostingForm id={id} initialValues={posting} initialThumbnailUrl={posting.thumbnail_url} />}</section></main>;
 }

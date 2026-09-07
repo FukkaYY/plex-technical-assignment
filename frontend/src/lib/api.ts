@@ -159,12 +159,15 @@ export type CompanyJobPosting = JobPostingFields & {
   status: "published" | "closed";
   created_at: string;
   updated_at: string;
+  thumbnail_url: string | null;
 };
 
 export type StudentJobPosting = JobPostingFields & {
   id: number;
   company: ConversationCompany;
   created_at: string;
+  interested: boolean;
+  thumbnail_url: string | null;
 };
 
 export type GroupMessageItem = MessageItem & {
@@ -445,24 +448,32 @@ export async function getCompanyJobPosting(id: string) {
   return parseResponse<{ data: CompanyJobPosting }>(response);
 }
 
-export async function createCompanyJobPosting(payload: JobPostingFields) {
+function jobPostingFormData(payload: JobPostingFields, thumbnail?: File | null, removeThumbnail = false) {
+  const body = new FormData();
+  Object.entries(payload).forEach(([field, value]) => body.append(`job_posting[${field}]`, value));
+  if (thumbnail) body.append("job_posting[thumbnail]", thumbnail);
+  if (removeThumbnail) body.append("job_posting[remove_thumbnail]", "true");
+  return body;
+}
+
+export async function createCompanyJobPosting(payload: JobPostingFields, thumbnail?: File | null) {
   const token = await csrfToken();
   const response = await fetch("/api/v1/company/job_postings", {
     method: "POST",
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
-    body: JSON.stringify({ job_posting: payload }),
+    headers: { "X-CSRF-Token": token },
+    body: jobPostingFormData(payload, thumbnail),
   });
   return parseResponse<{ data: CompanyJobPosting }>(response);
 }
 
-export async function updateCompanyJobPosting(id: string, payload: JobPostingFields) {
+export async function updateCompanyJobPosting(id: string, payload: JobPostingFields, thumbnail?: File | null, removeThumbnail = false) {
   const token = await csrfToken();
   const response = await fetch(`/api/v1/company/job_postings/${encodeURIComponent(id)}`, {
     method: "PATCH",
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
-    body: JSON.stringify({ job_posting: payload }),
+    headers: { "X-CSRF-Token": token },
+    body: jobPostingFormData(payload, thumbnail, removeThumbnail),
   });
   return parseResponse<{ data: CompanyJobPosting }>(response);
 }
@@ -477,12 +488,22 @@ export async function closeCompanyJobPosting(id: number) {
   return parseResponse<{ data: CompanyJobPosting }>(response);
 }
 
-export async function getStudentJobPostings() {
-  const response = await fetch("/api/v1/job_postings", {
+export async function getStudentJobPostings(interested = false) {
+  const response = await fetch(`/api/v1/job_postings${interested ? "?interested=true" : ""}`, {
     credentials: "same-origin",
     cache: "no-store",
   });
   return parseResponse<{ data: StudentJobPosting[] }>(response);
+}
+
+export async function setJobPostingInterest(id: number, interested: boolean) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/job_postings/${id}/interest`, {
+    method: interested ? "POST" : "DELETE",
+    credentials: "same-origin",
+    headers: { "X-CSRF-Token": token },
+  });
+  return parseResponse<{ data: { job_posting_id: number; interested: boolean } }>(response);
 }
 
 export async function getStudentJobPosting(id: string) {

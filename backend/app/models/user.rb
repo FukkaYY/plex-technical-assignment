@@ -22,6 +22,11 @@ class User < ApplicationRecord
     foreign_key: :company_id,
     dependent: :destroy,
     inverse_of: :company
+  has_many :job_posting_interests,
+    foreign_key: :student_id,
+    dependent: :destroy,
+    inverse_of: :student
+  has_many :interested_job_postings, through: :job_posting_interests, source: :job_posting
   has_many :company_group_conversations,
     class_name: "GroupConversation",
     foreign_key: :company_id,

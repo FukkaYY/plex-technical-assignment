@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiRequestError, closeCompanyJobPosting, CompanyJobPosting, getCompanyJobPostings } from "@/lib/api";
@@ -55,10 +56,13 @@ export default function CompanyJobPostingsPage() {
       {!isLoading && postings.length > 0 && (
         <section className="job-list" aria-label="自社の募集">
           {postings.map((posting) => (
-            <article className="job-card" key={posting.id}>
+            <article className="job-card job-posting-card" key={posting.id}>
+              {posting.thumbnail_url ? <Image className="job-thumbnail" src={posting.thumbnail_url} alt={`${posting.title}のサムネイル`} width={960} height={480} unoptimized /> : <div className="job-thumbnail-placeholder" aria-hidden="true">INTERNSHIP</div>}
+              <div className="job-card-body">
               <div className="job-card-heading"><div><span className={`status-badge ${posting.status}`}>{posting.status === "published" ? "公開中" : "募集終了"}</span><h2>{posting.title}</h2></div><time dateTime={posting.created_at}>{formatDate(posting.created_at)}</time></div>
               <p className="job-role">{posting.role_name}</p><p>{posting.work_location}</p>
               <div className="actions"><Link className="secondary-link" href={`/companies/job-postings/${posting.id}/edit`}>編集する</Link>{posting.status === "published" && <button className="secondary-button" type="button" onClick={() => closePosting(posting.id)} disabled={closingId === posting.id}>{closingId === posting.id ? "終了処理中…" : "募集を終了"}</button>}</div>
+              </div>
             </article>
           ))}
         </section>

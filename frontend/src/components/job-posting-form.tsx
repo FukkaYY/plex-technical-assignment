@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -19,17 +20,19 @@ const EMPTY_FIELDS: JobPostingFields = {
   requirements: "",
 };
 
-export default function JobPostingForm({ id, initialValues }: { id?: string; initialValues?: JobPostingFields }) {
+export default function JobPostingForm({ id, initialValues, initialThumbnailUrl }: { id?: string; initialValues?: JobPostingFields; initialThumbnailUrl?: string | null }) {
   const router = useRouter();
   const [fields, setFields] = useState(initialValues ?? EMPTY_FIELDS);
   const [errors, setErrors] = useState<ApiError[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [removeThumbnail, setRemoveThumbnail] = useState(false);
 
   function updateField(field: keyof JobPostingFields, value: string) {
     setFields((current) => ({ ...current, [field]: value }));
   }
 
-  function fieldError(field: keyof JobPostingFields) {
+  function fieldError(field: keyof JobPostingFields | "thumbnail") {
     return errors.find((error) => error.field === field)?.message;
   }
 
@@ -40,8 +43,8 @@ export default function JobPostingForm({ id, initialValues }: { id?: string; ini
     setIsSubmitting(true);
 
     try {
-      if (id) await updateCompanyJobPosting(id, fields);
-      else await createCompanyJobPosting(fields);
+      if (id) await updateCompanyJobPosting(id, fields, thumbnail, removeThumbnail);
+      else await createCompanyJobPosting(fields, thumbnail);
       router.push(`/companies/job-postings?saved=${id ? "updated" : "created"}`);
     } catch (error: unknown) {
       if (error instanceof ApiRequestError) {
@@ -71,6 +74,15 @@ export default function JobPostingForm({ id, initialValues }: { id?: string; ini
       <JobField label="勤務地・勤務形態" field="work_location" value={fields.work_location} maxLength={200} error={fieldError("work_location")} onChange={updateField} />
       <JobField label="募集内容" field="description" value={fields.description} maxLength={5000} rows={8} error={fieldError("description")} onChange={updateField} />
       <JobField label="応募条件" field="requirements" value={fields.requirements} maxLength={3000} rows={6} error={fieldError("requirements")} onChange={updateField} />
+      <div className="field field-wide">
+        <label htmlFor="job-thumbnail">サムネイル画像<span className="optional-label">任意</span></label>
+        {initialThumbnailUrl && !removeThumbnail && !thumbnail && <Image className="thumbnail-preview" src={initialThumbnailUrl} alt="現在のサムネイル" width={960} height={480} unoptimized />}
+        {thumbnail && <p className="selected-file">選択中: {thumbnail.name}</p>}
+        <input id="job-thumbnail" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { setThumbnail(event.target.files?.[0] ?? null); setRemoveThumbnail(false); }} />
+        <span className="field-hint">JPEG・PNG・WebP、5MB以下</span>
+        {initialThumbnailUrl && !thumbnail && <label className="checkbox-line"><input type="checkbox" checked={removeThumbnail} onChange={(event) => setRemoveThumbnail(event.target.checked)} />現在の画像を削除する</label>}
+        {fieldError("thumbnail") && <p className="field-error">{fieldError("thumbnail")}</p>}
+      </div>
       <div className="actions">
         <button className="primary-button" type="submit" disabled={isSubmitting}>{isSubmitting ? "保存中…" : id ? "募集を更新" : "募集を公開"}</button>
         <Link className="secondary-link" href="/companies/job-postings">キャンセル</Link>
