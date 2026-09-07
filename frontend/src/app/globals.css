@@ -162,6 +162,54 @@ a {
   box-shadow: 0 20px 60px rgb(30 52 88 / 10%);
 }
 
+.student-mypage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.student-mypage-header h1 {
+  margin-bottom: 14px;
+}
+
+.student-mypage-header .intro {
+  margin-bottom: 0;
+}
+
+.student-mypage-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 30px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f8faff;
+}
+
+.danger-button {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 11px 17px;
+  border: 1px solid #e5a39d;
+  border-radius: 10px;
+  color: var(--danger);
+  background: #fff4f2;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-button:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: #fee4e2;
+}
+
+.danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .login-card {
   width: min(520px, 100%);
 }
@@ -1418,11 +1466,22 @@ a {
   }
 
   .dashboard-header,
+  .student-mypage-header,
   .student-card-heading,
   .list-summary,
   .student-detail-heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .student-mypage-navigation {
+    flex-direction: column;
+  }
+
+  .student-mypage-navigation a,
+  .student-mypage-header .danger-button {
+    width: 100%;
+    text-align: center;
   }
 
   .student-grid {

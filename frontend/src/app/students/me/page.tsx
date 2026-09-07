@@ -79,9 +79,21 @@ export default function StudentMyPage() {
 
         {profile && (
           <>
-            <p className="eyebrow">STUDENT MY PAGE</p>
-            <h1>{profile.name}さん</h1>
-            <p className="intro">登録プロフィールと企業から届いたメッセージを確認できます。</p>
+            <header className="student-mypage-header">
+              <div>
+                <p className="eyebrow">STUDENT MY PAGE</p>
+                <h1>{profile.name}さん</h1>
+                <p className="intro">登録プロフィールと企業から届いたメッセージを確認できます。</p>
+              </div>
+              <button className="danger-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>
+                {isLoggingOut ? "ログアウト中…" : "ログアウト"}
+              </button>
+            </header>
+            <nav className="student-mypage-navigation" aria-label="学生マイページのメニュー">
+              <Link className="primary-link" href="/students/messages">受信メッセージを見る</Link>
+              <Link className="secondary-link" href="/students/jobs">インターン募集を見る</Link>
+              <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>
+            </nav>
             <dl className="profile-summary">
               <div><dt>学校名</dt><dd>{profile.school_name}</dd></div>
               {profile.faculty_name && <div><dt>{profile.school_type === "graduate_school" ? "研究科" : "学部"}</dt><dd>{profile.faculty_name}</dd></div>}
@@ -102,14 +114,6 @@ export default function StudentMyPage() {
                 {isUpdatingVisibility ? "変更中…" : profile.visible_to_companies ? "プロフィールを非公開にする" : "プロフィールを公開する"}
               </button>
             </section>
-            <div className="actions">
-              <Link className="primary-link" href="/students/messages">受信メッセージを見る</Link>
-              <Link className="secondary-link" href="/students/jobs">インターン募集を見る</Link>
-              <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>
-              <button className="secondary-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>
-                {isLoggingOut ? "ログアウト中…" : "ログアウト"}
-              </button>
-            </div>
           </>
         )}
       </section>
