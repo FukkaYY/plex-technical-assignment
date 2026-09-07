@@ -71,7 +71,8 @@ export type StudentListMeta = {
 };
 
 export type StudentSearchFilters = {
-  query?: string;
+  schoolType?: string;
+  schoolId?: string;
   graduationYear?: string;
   interestedRole?: string;
 };
@@ -280,7 +281,8 @@ export async function login(email: string, password: string, role: User["role"])
 
 export async function getStudents(page = 1, filters: StudentSearchFilters = {}) {
   const params = new URLSearchParams({ page: String(page) });
-  if (filters.query) params.set("query", filters.query);
+  if (filters.schoolType) params.set("school_type", filters.schoolType);
+  if (filters.schoolId) params.set("school_id", filters.schoolId);
   if (filters.graduationYear) params.set("graduation_year", filters.graduationYear);
   if (filters.interestedRole) params.set("interested_role", filters.interestedRole);
 

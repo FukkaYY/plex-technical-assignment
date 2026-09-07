@@ -102,7 +102,7 @@ RSpec.describe "Students", type: :request do
     hidden_student.student_profile.update!(visible_to_companies: false)
     login_as(company)
 
-    get "/api/v1/students", params: { query: "学生" }
+    get "/api/v1/students"
 
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch("data").pluck("id")).to eq([visible_student.id])
@@ -116,19 +116,23 @@ RSpec.describe "Students", type: :request do
     expect(response).to have_http_status(:ok)
   end
 
-  it "searches public profile fields and combines exact filters" do
+  it "combines school and profile filters" do
+    university = School.create!(name: "東京大学", school_type: "university")
+    graduate_school = School.create!(name: "大阪大学大学院", school_type: "graduate_school")
     ruby_student = create_student(1, created_at: 1.minute.ago)
     ruby_student.student_profile.update!(
-      name: "山田 花子",
-      school_name: "東京大学",
+      last_name: "山田",
+      first_name: "花子",
+      school: university,
       graduation_year: Time.zone.today.year + 2,
       desired_role: "バックエンドエンジニア",
       interested_roles: ["ソフトウェアエンジニア"],
       skills: ["Ruby", "PostgreSQL"]
     )
     create_student(2, created_at: 2.minutes.ago).student_profile.update!(
-      name: "佐藤 太郎",
-      school_name: "大阪大学",
+      last_name: "佐藤",
+      first_name: "太郎",
+      school: graduate_school,
       graduation_year: Time.zone.today.year + 1,
       desired_role: "フロントエンドエンジニア",
       interested_roles: ["UI・UXデザイナー"],
@@ -137,7 +141,8 @@ RSpec.describe "Students", type: :request do
     login_as(company)
 
     get "/api/v1/students", params: {
-      query: " ruby ",
+      school_type: " university ",
+      school_id: university.id,
       graduation_year: Time.zone.today.year + 2,
       interested_role: " ソフトウェアエンジニア "
     }
@@ -147,22 +152,12 @@ RSpec.describe "Students", type: :request do
     expect(response.parsed_body.fetch("meta")).to include("total_count" => 1, "total_pages" => 1)
   end
 
-  it "treats SQL wildcard characters in a keyword as literal text" do
-    create_student(1).student_profile.update!(name: "100% 学生")
-    create_student(2).student_profile.update!(name: "1000 学生")
-    login_as(company)
-
-    get "/api/v1/students", params: { query: "%" }
-
-    expect(response).to have_http_status(:ok)
-    expect(response.parsed_body.fetch("data").pluck("name")).to eq(["100% 学生"])
-  end
-
   it "returns an empty result with pagination metadata when no profile matches" do
     create_student(1)
+    school = School.create!(name: "該当者のいない大学", school_type: "university")
     login_as(company)
 
-    get "/api/v1/students", params: { query: "該当しない語句" }
+    get "/api/v1/students", params: { school_id: school.id }
 
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.fetch("data")).to eq([])
@@ -173,10 +168,12 @@ RSpec.describe "Students", type: :request do
     login_as(company)
 
     [
-      { params: { query: "a" * 101 }, field: "query" },
+      { params: { school_type: "存在しない学校種別" }, field: "school_type" },
+      { params: { school_id: "not-an-id" }, field: "school_id" },
+      { params: { school_id: 99_999 }, field: "school_id" },
       { params: { interested_role: "存在しない職種" }, field: "interested_role" },
       { params: { graduation_year: "not-a-year" }, field: "graduation_year" },
-      { params: { graduation_year: Time.zone.today.year + 11 }, field: "graduation_year" }
+      { params: { graduation_year: Time.zone.today.year + 3 }, field: "graduation_year" }
     ].each do |example|
       get "/api/v1/students", params: example.fetch(:params)
 

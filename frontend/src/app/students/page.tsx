@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   ApiRequestError,
   CompanyProfile,
+  EducationOptions,
+  getEducationOptions,
   getCurrentUser,
   getStudents,
   logout,
@@ -25,7 +27,8 @@ export default function StudentsPage() {
 function StudentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const appliedQuery = searchParams.get("query") ?? "";
+  const appliedSchoolType = searchParams.get("school_type") ?? "";
+  const appliedSchoolId = searchParams.get("school_id") ?? "";
   const appliedGraduationYear = searchParams.get("graduation_year") ?? "";
   const appliedInterestedRole = searchParams.get("interested_role") ?? "";
   const requestedPage = searchParams.get("page") ?? "1";
@@ -33,7 +36,9 @@ function StudentsContent() {
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null);
   const [students, setStudents] = useState<StudentListItem[]>([]);
   const [meta, setMeta] = useState<StudentListMeta | null>(null);
-  const [query, setQuery] = useState(appliedQuery);
+  const [educationOptions, setEducationOptions] = useState<EducationOptions | null>(null);
+  const [schoolType, setSchoolType] = useState(appliedSchoolType);
+  const [schoolId, setSchoolId] = useState(appliedSchoolId);
   const [graduationYear, setGraduationYear] = useState(appliedGraduationYear);
   const [interestedRole, setInterestedRole] = useState(appliedInterestedRole);
   const [retryKey, setRetryKey] = useState(0);
@@ -46,13 +51,15 @@ function StudentsContent() {
 
     void Promise.all([
       getCurrentUser(),
+      getEducationOptions(),
       getStudents(page, {
-        query: appliedQuery,
+        schoolType: appliedSchoolType,
+        schoolId: appliedSchoolId,
         graduationYear: appliedGraduationYear,
         interestedRole: appliedInterestedRole,
       }),
     ])
-      .then(([currentUserResponse, studentsResponse]) => {
+      .then(([currentUserResponse, educationOptionsResponse, studentsResponse]) => {
         if (cancelled) return;
         if (currentUserResponse.data.user.role !== "company") {
           router.replace("/students/me");
@@ -64,6 +71,7 @@ function StudentsContent() {
         }
 
         setCompanyProfile(currentUserResponse.data.company_profile);
+        setEducationOptions(educationOptionsResponse.data);
         setStudents(studentsResponse.data);
         setMeta(studentsResponse.meta);
       })
@@ -90,7 +98,7 @@ function StudentsContent() {
     return () => {
       cancelled = true;
     };
-  }, [appliedInterestedRole, appliedGraduationYear, appliedQuery, page, retryKey, router]);
+  }, [appliedInterestedRole, appliedGraduationYear, appliedSchoolId, appliedSchoolType, page, retryKey, router]);
 
   function changePage(nextPage: number) {
     setError("");
@@ -104,10 +112,12 @@ function StudentsContent() {
   function applySearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const params = new URLSearchParams();
-    const normalizedQuery = query.trim();
+    const normalizedSchoolType = schoolType.trim();
+    const normalizedSchoolId = schoolId.trim();
     const normalizedGraduationYear = graduationYear.trim();
     const normalizedInterestedRole = interestedRole.trim();
-    if (normalizedQuery) params.set("query", normalizedQuery);
+    if (normalizedSchoolType) params.set("school_type", normalizedSchoolType);
+    if (normalizedSchoolId) params.set("school_id", normalizedSchoolId);
     if (normalizedGraduationYear) params.set("graduation_year", normalizedGraduationYear);
     if (normalizedInterestedRole) params.set("interested_role", normalizedInterestedRole);
     setError("");
@@ -116,7 +126,8 @@ function StudentsContent() {
   }
 
   function clearSearch() {
-    setQuery("");
+    setSchoolType("");
+    setSchoolId("");
     setGraduationYear("");
     setInterestedRole("");
     setError("");
@@ -147,23 +158,36 @@ function StudentsContent() {
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">STUDENT CANDIDATES</p>
-          <h1>インターン生一覧</h1>
+          <h1>学生一覧</h1>
           {companyProfile && <p className="company-context">{companyProfile.company_name}</p>}
         </div>
         {companyProfile && (
-          <div className="header-actions"><Link className="secondary-link" href="/companies/job-postings">募集を管理</Link><button className="secondary-button header-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>{isLoggingOut ? "ログアウト中…" : "ログアウト"}</button></div>
+          <div className="header-actions"><Link className="secondary-link" href="/companies/job-postings">募集を管理</Link><button className="danger-button header-button" type="button" onClick={handleLogout} disabled={isLoggingOut}>{isLoggingOut ? "ログアウト中…" : "ログアウト"}</button></div>
         )}
       </header>
 
-      <form className="student-search" aria-label="学生検索・絞り込み" onSubmit={applySearch}>
+      <form className="student-search" aria-label="学生の絞り込み" onSubmit={applySearch}>
         <div className="student-search-fields">
           <label>
-            <span>キーワード</span>
-            <input value={query} onChange={(event) => setQuery(event.target.value)} maxLength={100} placeholder="氏名・学校名・興味のある職種・スキル" />
+            <span>学校の種類</span>
+            <select value={schoolType} onChange={(event) => { setSchoolType(event.target.value); setSchoolId(""); }}>
+              <option value="">すべて</option>
+              {educationOptions?.school_types.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>学校名</span>
+            <select value={schoolId} onChange={(event) => setSchoolId(event.target.value)} disabled={!schoolType}>
+              <option value="">すべて</option>
+              {educationOptions?.schools.filter((school) => school.school_type === schoolType).map((school) => <option key={school.id} value={school.id}>{school.name}</option>)}
+            </select>
           </label>
           <label>
             <span>卒業予定年</span>
-            <input type="number" value={graduationYear} onChange={(event) => setGraduationYear(event.target.value)} min={new Date().getFullYear()} max={new Date().getFullYear() + 10} placeholder="例: 2028" />
+            <select value={graduationYear} onChange={(event) => setGraduationYear(event.target.value)}>
+              <option value="">すべて</option>
+              {[0, 1, 2].map((offset) => { const year = new Date().getFullYear() + offset; return <option key={year} value={year}>{year}年</option>; })}
+            </select>
           </label>
           <label>
             <span>興味のある職種</span>
@@ -171,7 +195,7 @@ function StudentsContent() {
           </label>
         </div>
         <div className="student-search-actions">
-          <button className="primary-button" type="submit">検索する</button>
+          <button className="primary-button" type="submit">絞り込む</button>
           <button className="secondary-button" type="button" onClick={clearSearch}>条件をクリア</button>
         </div>
       </form>
@@ -188,15 +212,15 @@ function StudentsContent() {
       {!isLoading && !error && meta && (
         <>
           <div className="list-summary">
-            <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? `${meta.total_count}人が検索条件に一致しました` : `${meta.total_count}人の学生が登録されています`}</p>
+            <p>{hasSearchConditions(appliedSchoolType, appliedSchoolId, appliedGraduationYear, appliedInterestedRole) ? `${meta.total_count}人が絞り込み条件に一致しました` : `${meta.total_count}人の学生が登録されています`}</p>
             {meta.total_pages > 0 && <p>{meta.page} / {meta.total_pages}ページ</p>}
           </div>
 
           {students.length === 0 ? (
             <section className="list-state empty-state">
-              <h2>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? "検索条件に一致する学生がいません" : "表示できる学生がいません"}</h2>
-              <p>{hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) ? "条件を変更するか、条件をクリアしてください。" : meta.total_count === 0 ? "学生が登録されるとここに表示されます。" : "このページには学生がいません。"}</p>
-              {hasSearchConditions(appliedQuery, appliedGraduationYear, appliedInterestedRole) && <button className="secondary-button compact-button" type="button" onClick={clearSearch}>条件をクリア</button>}
+              <h2>{hasSearchConditions(appliedSchoolType, appliedSchoolId, appliedGraduationYear, appliedInterestedRole) ? "絞り込み条件に一致する学生がいません" : "表示できる学生がいません"}</h2>
+              <p>{hasSearchConditions(appliedSchoolType, appliedSchoolId, appliedGraduationYear, appliedInterestedRole) ? "条件を変更するか、条件をクリアしてください。" : meta.total_count === 0 ? "学生が登録されるとここに表示されます。" : "このページには学生がいません。"}</p>
+              {hasSearchConditions(appliedSchoolType, appliedSchoolId, appliedGraduationYear, appliedInterestedRole) && <button className="secondary-button compact-button" type="button" onClick={clearSearch}>条件をクリア</button>}
             </section>
           ) : (
             <section className="student-grid" aria-label="学生一覧">
@@ -217,8 +241,8 @@ function StudentsContent() {
   );
 }
 
-function hasSearchConditions(query: string, graduationYear: string, interestedRole: string) {
-  return Boolean(query || graduationYear || interestedRole);
+function hasSearchConditions(schoolType: string, schoolId: string, graduationYear: string, interestedRole: string) {
+  return Boolean(schoolType || schoolId || graduationYear || interestedRole);
 }
 
 function StudentCard({ student }: { student: StudentListItem }) {

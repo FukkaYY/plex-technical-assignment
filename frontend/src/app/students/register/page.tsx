@@ -90,7 +90,7 @@ export default function StudentRegistrationPage() {
     <main className="page-shell">
       <section className="form-card" aria-labelledby="registration-title">
         <p className="eyebrow">STUDENT REGISTRATION</p>
-        <h1 id="registration-title">インターン生登録</h1>
+        <h1 id="registration-title">学生登録</h1>
         <p className="intro">企業があなたの経験を知れるように、プロフィールを登録してください。</p>
 
         {errors.base && <div className="error-banner" role="alert">{errors.base}</div>}

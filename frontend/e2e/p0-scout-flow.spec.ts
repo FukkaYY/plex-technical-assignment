@@ -33,11 +33,12 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByRole("heading", { name: jobTitle })).toBeVisible();
   await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
 
-  await page.getByLabel("キーワード").fill("Rails");
-  await page.getByLabel("卒業予定年").fill(String(new Date().getFullYear() + 1));
-  await page.getByRole("button", { name: "検索する" }).click();
-  await expect(page).toHaveURL(/query=Rails/);
-  await expect(page.getByText(/人が検索条件に一致しました/)).toBeVisible();
+  await page.getByLabel("学校の種類").selectOption("university");
+  await page.getByLabel("学校名").selectOption({ label: "東京デモ大学" });
+  await page.getByLabel("卒業予定年").selectOption(String(new Date().getFullYear() + 1));
+  await page.getByRole("button", { name: "絞り込む" }).click();
+  await expect(page).toHaveURL(/school_type=university/);
+  await expect(page.getByText(/人が絞り込み条件に一致しました/)).toBeVisible();
   const studentCard = page.locator("article.student-card").filter({ hasText: targetStudentName });
   await expect(studentCard).toBeVisible();
   const studentDetailPath = await studentCard.getByRole("link", { name: "詳細を見る" }).getAttribute("href");
@@ -124,9 +125,11 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students$/);
-  await page.getByLabel("キーワード").fill(targetStudentName);
-  await page.getByRole("button", { name: "検索する" }).click();
-  await expect(page.getByText("0人が検索条件に一致しました")).toBeVisible();
+  await page.getByLabel("学校の種類").selectOption("university");
+  await page.getByLabel("学校名").selectOption({ label: "東京デモ大学" });
+  await page.getByLabel("卒業予定年").selectOption(String(new Date().getFullYear() + 1));
+  await page.getByLabel("興味のある職種").selectOption("ソフトウェアエンジニア");
+  await page.getByRole("button", { name: "絞り込む" }).click();
   await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toHaveCount(0);
   await page.goto(studentDetailPath);
   await expect(page.getByRole("heading", { name: "学生が見つかりません" })).toBeVisible();
@@ -152,7 +155,10 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("メールアドレス").fill("company@example.com");
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
-  await page.getByLabel("キーワード").fill(targetStudentName);
-  await page.getByRole("button", { name: "検索する" }).click();
+  await page.getByLabel("学校の種類").selectOption("university");
+  await page.getByLabel("学校名").selectOption({ label: "東京デモ大学" });
+  await page.getByLabel("卒業予定年").selectOption(String(new Date().getFullYear() + 1));
+  await page.getByLabel("興味のある職種").selectOption("ソフトウェアエンジニア");
+  await page.getByRole("button", { name: "絞り込む" }).click();
   await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toBeVisible();
 });

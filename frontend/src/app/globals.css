@@ -541,7 +541,7 @@ a {
 
 .student-search-fields {
   display: grid;
-  grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(160px, 1fr));
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 16px;
 }
 
@@ -1441,6 +1441,12 @@ a {
   display: block;
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .student-search-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
