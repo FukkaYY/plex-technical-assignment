@@ -12,7 +12,7 @@
 
 - **P0 / MVP**: 学生登録、企業ログイン、学生一覧・詳細、企業からのメッセージ送信、学生の受信確認
 - **P1**: プロフィール編集・公開管理、検索・絞り込み、学生からの返信、未読管理
-- **P2**: 企業の募集掲載、予定調整、グループチャット
+- **P2**: 企業の募集掲載、予定調整
 
 ## 作業別の参照ファイル
 
@@ -27,7 +27,6 @@
 | メッセージ | `features/messaging.md` | `shared/authorization.md`, `shared/database.md` |
 | 企業の募集掲載 | `features/job-postings.md` | `shared/authorization.md`, `shared/database.md`, `shared/validation.md` |
 | 面談予定の調整 | `features/scheduling.md` | `features/messaging.md`, `shared/authorization.md`, `shared/database.md` |
-| グループチャット | `features/group-chat.md` | `shared/authorization.md`, `shared/database.md`, `shared/validation.md` |
 | 画面遷移 | `ui/user-flows.md` | `ui/screen-list.md` |
 | DB変更 | 対象の機能仕様 | `shared/database.md` |
 | API共通処理 | 対象の機能仕様 | `shared/api-conventions.md` |

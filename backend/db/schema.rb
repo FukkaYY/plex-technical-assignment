@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_000016) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_000017) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -82,33 +82,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_000016) do
     t.index ["school_id"], name: "index_faculties_on_school_id"
   end
 
-  create_table "group_conversations", force: :cascade do |t|
-    t.bigint "company_id", null: false
+  create_table "job_posting_interests", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.string "name", limit: 100, null: false
-    t.datetime "updated_at", null: false
-    t.index ["company_id"], name: "index_group_conversations_on_company_id"
-  end
-
-  create_table "group_memberships", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "group_conversation_id", null: false
+    t.bigint "job_posting_id", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["group_conversation_id", "student_id"], name: "index_group_memberships_on_group_and_student", unique: true
-    t.index ["group_conversation_id"], name: "index_group_memberships_on_group_conversation_id"
-    t.index ["student_id"], name: "index_group_memberships_on_student_id"
-  end
-
-  create_table "group_messages", force: :cascade do |t|
-    t.text "body", null: false
-    t.datetime "created_at", null: false
-    t.bigint "group_conversation_id", null: false
-    t.bigint "sender_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["group_conversation_id", "created_at", "id"], name: "index_group_messages_on_group_and_created_at"
-    t.index ["group_conversation_id"], name: "index_group_messages_on_group_conversation_id"
-    t.index ["sender_id"], name: "index_group_messages_on_sender_id"
+    t.index ["job_posting_id"], name: "index_job_posting_interests_on_job_posting_id"
+    t.index ["student_id", "job_posting_id"], name: "index_job_posting_interests_on_student_id_and_job_posting_id", unique: true
+    t.index ["student_id"], name: "index_job_posting_interests_on_student_id"
   end
 
   create_table "job_postings", force: :cascade do |t|
@@ -124,16 +105,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_000016) do
     t.index ["company_id"], name: "index_job_postings_on_company_id"
     t.index ["status", "created_at", "id"], name: "index_job_postings_on_status_and_created_at_and_id"
     t.check_constraint "status::text = ANY (ARRAY['published'::character varying::text, 'closed'::character varying::text])", name: "job_postings_status_check"
-  end
-
-  create_table "job_posting_interests", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "job_posting_id", null: false
-    t.bigint "student_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["job_posting_id"], name: "index_job_posting_interests_on_job_posting_id"
-    t.index ["student_id", "job_posting_id"], name: "index_job_posting_interests_on_student_id_and_job_posting_id", unique: true
-    t.index ["student_id"], name: "index_job_posting_interests_on_student_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -216,14 +187,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_000016) do
   add_foreign_key "conversations", "users", column: "student_id", on_delete: :cascade
   add_foreign_key "departments", "faculties", on_delete: :cascade
   add_foreign_key "faculties", "schools", on_delete: :cascade
-  add_foreign_key "group_conversations", "users", column: "company_id", on_delete: :cascade
-  add_foreign_key "group_memberships", "group_conversations", on_delete: :cascade
-  add_foreign_key "group_memberships", "users", column: "student_id", on_delete: :cascade
-  add_foreign_key "group_messages", "group_conversations", on_delete: :cascade
-  add_foreign_key "group_messages", "users", column: "sender_id", on_delete: :cascade
-  add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "job_posting_interests", "job_postings", on_delete: :cascade
   add_foreign_key "job_posting_interests", "users", column: "student_id", on_delete: :cascade
+  add_foreign_key "job_postings", "users", column: "company_id", on_delete: :cascade
   add_foreign_key "messages", "conversations", on_delete: :cascade
   add_foreign_key "messages", "users", column: "sender_id", on_delete: :cascade
   add_foreign_key "schedule_proposals", "conversations", on_delete: :cascade
