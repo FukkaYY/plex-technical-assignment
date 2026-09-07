@@ -128,7 +128,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("学校の種類").selectOption("university");
   await page.getByLabel("学校名").selectOption({ label: "東京デモ大学" });
   await page.getByLabel("卒業予定年").selectOption(String(new Date().getFullYear() + 1));
-  await page.getByLabel("興味のある職種").selectOption("ソフトウェアエンジニア");
+  await page.getByLabel("興味のある職種").selectOption("AI・機械学習エンジニア");
   await page.getByRole("button", { name: "絞り込む" }).click();
   await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toHaveCount(0);
   await page.goto(studentDetailPath);
@@ -158,7 +158,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("学校の種類").selectOption("university");
   await page.getByLabel("学校名").selectOption({ label: "東京デモ大学" });
   await page.getByLabel("卒業予定年").selectOption(String(new Date().getFullYear() + 1));
-  await page.getByLabel("興味のある職種").selectOption("ソフトウェアエンジニア");
+  await page.getByLabel("興味のある職種").selectOption("AI・機械学習エンジニア");
   await page.getByRole("button", { name: "絞り込む" }).click();
   await expect(page.locator("article.student-card").filter({ hasText: targetStudentName })).toBeVisible();
 });
