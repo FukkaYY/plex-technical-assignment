@@ -58,8 +58,7 @@ jobs:
           test_status=0
           bundle exec rspec --format progress --format json --out rspec-results.json || test_status=$?
           ruby -rjson -e '
-            next unless File.exist?("rspec-results.json")
-            result = JSON.parse(File.read("rspec-results.json"))
+            result = File.exist?("rspec-results.json") ? JSON.parse(File.read("rspec-results.json")) : {}
             result.fetch("messages", []).each do |message|
               escaped = message.to_s.gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")
               puts "::error file=backend/spec/rails_helper.rb,line=1::#{escaped}"

@@ -36,7 +36,7 @@ RSpec.describe "Job postings", type: :request do
     tempfile.binmode
     tempfile.write(Base64.decode64("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="))
     tempfile.rewind
-    ActionDispatch::Http::UploadedFile.new(tempfile: tempfile, filename: "thumbnail.png", type: "image/png")
+    Rack::Test::UploadedFile.new(tempfile.path, "image/png", true, original_filename: "thumbnail.png")
   end
 
   it "lets a company create, list, update, and close its posting" do
