@@ -1402,12 +1402,22 @@ a {
 }
 
 .schedule-form input,
+.schedule-form select,
 .schedule-form textarea {
   width: 100%;
   padding: 10px 11px;
   border: 1px solid #b8c3d2;
   border-radius: 8px;
   background: #fff;
+}
+
+.message-sender-label {
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #344054;
+  background: #eef2f7;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .schedule-form .primary-button {

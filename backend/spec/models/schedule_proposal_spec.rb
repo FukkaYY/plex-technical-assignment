@@ -9,9 +9,9 @@ RSpec.describe ScheduleProposal, type: :model do
     Conversation.create!(company: company, student: student)
   end
 
-  it "accepts a future proposal up to eight hours" do
+  it "accepts a future proposal up to two hours" do
     start_time = 1.day.from_now
-    proposal = described_class.new(conversation: conversation, starts_at: start_time, ends_at: start_time + 8.hours, location: " オンライン ", note: " 補足 ")
+    proposal = described_class.new(conversation: conversation, starts_at: start_time, ends_at: start_time + 2.hours, location: " オンライン ", note: " 補足 ")
 
     expect(proposal).to be_valid
     proposal.save!
@@ -20,13 +20,13 @@ RSpec.describe ScheduleProposal, type: :model do
     expect(proposal).to be_pending
   end
 
-  it "rejects past, reversed, and over-eight-hour periods" do
+  it "rejects past, reversed, and over-two-hour periods" do
     past = described_class.new(conversation: conversation, starts_at: 1.hour.ago, ends_at: 1.hour.from_now, location: "オンライン")
     expect(past).not_to be_valid
     expect(past.errors.of_kind?(:starts_at, :future)).to be(true)
 
     start_time = 1.day.from_now
-    too_long = described_class.new(conversation: past.conversation, starts_at: start_time, ends_at: start_time + 9.hours, location: "オンライン")
+    too_long = described_class.new(conversation: past.conversation, starts_at: start_time, ends_at: start_time + 3.hours, location: "オンライン")
     expect(too_long).not_to be_valid
     expect(too_long.errors.of_kind?(:ends_at, :duration)).to be(true)
   end

@@ -24,6 +24,7 @@ Rails.application.routes.draw do
       post "job_postings/:id/interest", to: "job_postings#interest"
       delete "job_postings/:id/interest", to: "job_postings#destroy_interest"
       namespace :company do
+        resources :conversations, only: :index
         resources :job_postings, only: %i[index show create update] do
           patch :close, on: :member
         end

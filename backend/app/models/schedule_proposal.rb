@@ -1,5 +1,5 @@
 class ScheduleProposal < ApplicationRecord
-  MAX_DURATION = 8.hours
+  MAX_DURATION = 2.hours
 
   belongs_to :conversation, inverse_of: :schedule_proposals
 

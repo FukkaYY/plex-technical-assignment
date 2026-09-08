@@ -2,6 +2,7 @@ module Api
   module V1
     class CompanyScheduleProposalsController < ApplicationController
       JAPAN_TIME_ZONE = ActiveSupport::TimeZone["Asia/Tokyo"]
+      ALLOWED_DURATIONS = (15..120).step(15).to_a.freeze
 
       before_action :require_company
 
@@ -20,7 +21,10 @@ module Api
           return
         end
 
-        proposal = conversation.schedule_proposals.new(parsed_params)
+        attributes = parsed_params
+        return unless attributes
+
+        proposal = conversation.schedule_proposals.new(attributes)
         if proposal.save
           render json: { data: schedule_proposal_json(proposal) }, status: :created
         else
@@ -46,14 +50,30 @@ module Api
       private
 
       def proposal_params
-        params.require(:schedule_proposal).permit(:starts_at, :ends_at, :location, :note)
+        params.require(:schedule_proposal).permit(:starts_at, :duration_minutes, :location, :note)
       end
 
       def parsed_params
         values = proposal_params
-        values.merge(
-          starts_at: parse_japan_time(values[:starts_at]),
-          ends_at: parse_japan_time(values[:ends_at])
+        duration_value = values[:duration_minutes].to_s
+        unless duration_value.match?(/\A\d+\z/) && ALLOWED_DURATIONS.include?(duration_value.to_i)
+          render_parameter_error("duration_minutes", "所要時間は15分刻みで2時間以内から選択してください")
+          return nil
+        end
+
+        starts_at = parse_japan_time(values[:starts_at])
+        unless starts_at
+          render_parameter_error("starts_at", "開始日時を入力してください")
+          return nil
+        end
+        if starts_at.min % 15 != 0 || starts_at.sec != 0
+          render_parameter_error("starts_at", "開始日時は15分刻みで指定してください")
+          return nil
+        end
+
+        values.except(:duration_minutes).merge(
+          starts_at: starts_at,
+          ends_at: starts_at + duration_value.to_i.minutes
         )
       end
 
@@ -69,6 +89,12 @@ module Api
         }, status: :not_found
       end
 
+      def render_parameter_error(field, message)
+        render json: {
+          errors: [{ field: field, code: "invalid", message: message }]
+        }, status: :unprocessable_entity
+      end
+
       def schedule_validation_errors(proposal)
         proposal.errors.map do |error|
           message = case [error.attribute, error.type]
@@ -76,7 +102,7 @@ module Api
           when [:starts_at, :future] then "開始日時は未来の日時を指定してください"
           when [:ends_at, :blank] then "終了日時を入力してください"
           when [:ends_at, :after_start] then "終了日時は開始日時より後にしてください"
-          when [:ends_at, :duration] then "予定時間は8時間以内にしてください"
+          when [:ends_at, :duration] then "予定時間は2時間以内にしてください"
           when [:location, :blank] then "実施方法・場所を入力してください"
           when [:location, :too_long] then "実施方法・場所が上限文字数を超えています"
           when [:note, :too_long] then "補足が上限文字数を超えています"

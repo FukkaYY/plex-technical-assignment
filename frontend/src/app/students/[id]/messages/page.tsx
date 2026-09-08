@@ -30,7 +30,7 @@ export default function StudentMessagesPage() {
   const [loadError, setLoadError] = useState("");
   const [sendError, setSendError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
-  const [scheduleFields, setScheduleFields] = useState({ starts_at: "", ends_at: "", location: "", note: "" });
+  const [scheduleFields, setScheduleFields] = useState({ starts_at: "", duration_minutes: "60", location: "", note: "" });
   const [scheduleError, setScheduleError] = useState("");
   const [isScheduling, setIsScheduling] = useState(false);
   const [changingProposalId, setChangingProposalId] = useState<number | null>(null);
@@ -84,9 +84,9 @@ export default function StudentMessagesPage() {
     setScheduleError("");
     setIsScheduling(true);
     try {
-      const { data } = await createScheduleProposal(params.id, scheduleFields);
+      const { data } = await createScheduleProposal(params.id, { ...scheduleFields, duration_minutes: Number(scheduleFields.duration_minutes) });
       setProposals((current) => [...current, data]);
-      setScheduleFields({ starts_at: "", ends_at: "", location: "", note: "" });
+      setScheduleFields({ starts_at: "", duration_minutes: "60", location: "", note: "" });
     } catch (requestError: unknown) {
       handleAccessError(requestError, router, () => setIsNotFound(true), setScheduleError);
     } finally {
@@ -175,8 +175,8 @@ export default function StudentMessagesPage() {
               <form className="schedule-form" aria-label="面談予定の提案" onSubmit={submitSchedule}>
                 <h3>新しい面談予定を提案</h3>
                 <div className="schedule-form-grid">
-                  <label>開始日時（日本時間）<input type="datetime-local" value={scheduleFields.starts_at} onChange={(event) => setScheduleFields((current) => ({ ...current, starts_at: event.target.value }))} disabled={isScheduling} required /></label>
-                  <label>終了日時（日本時間）<input type="datetime-local" value={scheduleFields.ends_at} onChange={(event) => setScheduleFields((current) => ({ ...current, ends_at: event.target.value }))} disabled={isScheduling} required /></label>
+                  <label>開始日時（日本時間）<input type="datetime-local" step="900" value={scheduleFields.starts_at} onChange={(event) => setScheduleFields((current) => ({ ...current, starts_at: event.target.value }))} disabled={isScheduling} required /></label>
+                  <label>所要時間<select value={scheduleFields.duration_minutes} onChange={(event) => setScheduleFields((current) => ({ ...current, duration_minutes: event.target.value }))} disabled={isScheduling} required>{[15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => <option key={minutes} value={minutes}>{formatDuration(minutes)}</option>)}</select></label>
                   <label className="field-wide">実施方法・場所<input value={scheduleFields.location} onChange={(event) => setScheduleFields((current) => ({ ...current, location: event.target.value }))} maxLength={200} disabled={isScheduling} required /></label>
                   <label className="field-wide">補足（任意）<textarea value={scheduleFields.note} onChange={(event) => setScheduleFields((current) => ({ ...current, note: event.target.value }))} maxLength={1000} rows={3} disabled={isScheduling} /></label>
                 </div>
@@ -242,4 +242,10 @@ function formatSentAt(value: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function formatDuration(minutes: number) {
+  if (minutes < 60) return `${minutes}分`;
+  const remainingMinutes = minutes % 60;
+  return `${Math.floor(minutes / 60)}時間${remainingMinutes > 0 ? `${remainingMinutes}分` : ""}`;
 }

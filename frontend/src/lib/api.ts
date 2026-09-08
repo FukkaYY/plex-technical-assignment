@@ -147,6 +147,14 @@ export type ConversationDetail = {
   schedule_proposals: ScheduleProposal[];
 };
 
+export type CompanyConversationListItem = {
+  id: number;
+  student: { id: number; name: string };
+  latest_message_excerpt: string;
+  latest_message_sent_at: string;
+  latest_sender_role: "student" | "company";
+};
+
 export type JobPostingFields = {
   title: string;
   role_name: string;
@@ -329,7 +337,7 @@ export async function sendStudentMessage(studentId: string, body: string) {
 
 export async function createScheduleProposal(studentId: string, payload: {
   starts_at: string;
-  ends_at: string;
+  duration_minutes: number;
   location: string;
   note: string;
 }) {
@@ -341,6 +349,15 @@ export async function createScheduleProposal(studentId: string, payload: {
     body: JSON.stringify({ schedule_proposal: payload }),
   });
   return parseResponse<{ data: ScheduleProposal }>(response);
+}
+
+export async function getCompanyConversations() {
+  const response = await fetch("/api/v1/company/conversations", {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+
+  return parseResponse<{ data: CompanyConversationListItem[] }>(response);
 }
 
 export async function cancelScheduleProposal(id: number) {

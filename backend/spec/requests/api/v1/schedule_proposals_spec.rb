@@ -8,9 +8,8 @@ RSpec.describe "Schedule proposals", type: :request do
   let!(:student) { create_user("student@example.com", :student) }
   let!(:other_student) { create_user("other-student@example.com", :student) }
   let!(:conversation) { Conversation.create!(company: company, student: student) }
-  let(:starts_at) { 2.days.from_now.in_time_zone("Asia/Tokyo").strftime("%Y-%m-%dT%H:%M") }
-  let(:ends_at) { (2.days.from_now + 1.hour).in_time_zone("Asia/Tokyo").strftime("%Y-%m-%dT%H:%M") }
-  let(:attributes) { { starts_at: starts_at, ends_at: ends_at, location: "オンライン", note: "履歴書をご用意ください" } }
+  let(:starts_at) { 2.days.from_now.in_time_zone("Asia/Tokyo").change(min: 30, sec: 0).strftime("%Y-%m-%dT%H:%M") }
+  let(:attributes) { { starts_at: starts_at, duration_minutes: 60, location: "オンライン", note: "履歴書をご用意ください" } }
 
   def create_user(email, role)
     user = User.create!(email: email, password: "password123", password_confirmation: "password123", role: role)
@@ -47,6 +46,7 @@ RSpec.describe "Schedule proposals", type: :request do
     proposal = ScheduleProposal.last
     expected = ActiveSupport::TimeZone["Asia/Tokyo"].strptime(starts_at, "%Y-%m-%dT%H:%M")
     expect(proposal.starts_at).to eq(expected)
+    expect(proposal.ends_at).to eq(expected + 60.minutes)
     expect(proposal.conversation).to eq(conversation)
   end
 
@@ -56,9 +56,10 @@ RSpec.describe "Schedule proposals", type: :request do
     expect(response).to have_http_status(:unprocessable_entity)
     expect(response.parsed_body.dig("errors", 0, "field")).to eq("conversation")
 
-    post "/api/v1/students/#{student.id}/schedule_proposals", params: { schedule_proposal: attributes.merge(ends_at: starts_at) }, headers: { "X-CSRF-Token" => csrf_token }, as: :json
-    expect(response).to have_http_status(:unprocessable_entity)
-    expect(response.parsed_body.fetch("errors").pluck("field")).to include("ends_at")
+    [{ starts_at: starts_at.sub(/:30\z/, ":31") }, { duration_minutes: 10 }, { duration_minutes: 135 }].each do |invalid|
+      post "/api/v1/students/#{student.id}/schedule_proposals", params: { schedule_proposal: attributes.merge(invalid) }, headers: { "X-CSRF-Token" => csrf_token }, as: :json
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   it "lets only the recipient student accept a pending proposal" do

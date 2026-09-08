@@ -51,13 +51,21 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("button", { name: "メッセージを送信" }).click();
   await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
   await page.getByLabel("開始日時（日本時間）").fill("2099-01-02T10:00");
-  await page.getByLabel("終了日時（日本時間）").fill("2099-01-02T11:00");
+  await page.getByLabel("所要時間").selectOption("60");
   await page.getByLabel("実施方法・場所").fill("オンライン面談");
   await page.getByLabel("補足（任意）").fill(scheduleNote);
   await page.getByRole("button", { name: "面談予定を提案" }).click();
   const companySchedule = page.locator("article.schedule-card").filter({ hasText: scheduleNote });
   await expect(companySchedule.getByText("回答待ち", { exact: true })).toBeVisible();
 
+  await page.getByRole("link", { name: "学生詳細へ戻る" }).click();
+  await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
+  await page.getByRole("link", { name: "メッセージ一覧" }).click();
+  const companyConversation = page.getByRole("link", { name: new RegExp(targetStudentName) });
+  await expect(companyConversation).toContainText(messageBody);
+  await expect(companyConversation).toContainText("自社から送信");
+  await companyConversation.click();
+  await expect(page.getByLabel("会話履歴")).toContainText(messageBody);
   await page.getByRole("link", { name: "学生詳細へ戻る" }).click();
   await page.getByRole("link", { name: "学生一覧へ戻る" }).click();
   await page.getByRole("button", { name: "ログアウト" }).click();
