@@ -68,8 +68,13 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByLabel("パスワード").fill("password123");
   await page.getByRole("button", { name: "ログイン" }).click();
   await expect(page).toHaveURL(/\/students\/me$/);
-  await expect(page.getByRole("status").filter({ hasText: "企業から未読メッセージが1件届いています。" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /受信メッセージを見る\s*未読 1件/ })).toBeVisible();
+  const unreadNotification = page.getByRole("status").filter({ hasText: "企業から未読メッセージが1件届いています。" });
+  await expect(unreadNotification).toBeVisible();
+  await expect(unreadNotification).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(unreadNotification).toHaveCSS("border-left-color", "rgb(180, 35, 24)");
+  const inboxLink = page.getByRole("link", { name: /受信メッセージを見る\s*未読 1件/ });
+  await expect(inboxLink).toBeVisible();
+  await expect(inboxLink.locator(".mypage-unread-badge")).toHaveCSS("background-color", "rgb(180, 35, 24)");
 
   await page.getByRole("link", { name: "プロフィールを編集" }).click();
   await expect(page.getByRole("button", { name: "キャンセル" })).toHaveCSS("white-space", "nowrap");
@@ -100,7 +105,9 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
   await expect(conversation).toContainText(messageBody);
-  await expect(conversation.getByLabel(/未読 \d+件/)).toBeVisible();
+  const conversationUnreadBadge = conversation.getByLabel(/未読 \d+件/);
+  await expect(conversationUnreadBadge).toBeVisible();
+  await expect(conversationUnreadBadge).toHaveCSS("background-color", "rgb(180, 35, 24)");
   await conversation.click();
   await expect(page.getByRole("heading", { name: "デモ企業株式会社" })).toBeVisible();
   await expect(page.getByLabel("会話履歴")).toContainText(messageBody);

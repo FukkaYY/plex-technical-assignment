@@ -159,13 +159,15 @@ export default function StudentMessageDetailPage() {
               </div>
             ))}
           </section>
-          <section className="schedule-section" aria-label="面談予定">
-            <h2>面談予定</h2>
-            {conversation.schedule_proposals.length === 0 ? <p className="message-empty">面談予定はまだありません。</p> : conversation.schedule_proposals.map((proposal) => (
-              <ScheduleProposalCard key={proposal.id} proposal={proposal} actions={proposal.status === "pending" ? <div className="schedule-actions"><button className="primary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "accept")} disabled={changingProposalId === proposal.id}>承諾する</button><button className="secondary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "decline")} disabled={changingProposalId === proposal.id}>辞退する</button></div> : undefined} />
-            ))}
-            {scheduleError && <div className="error-banner" role="alert">{scheduleError}</div>}
-          </section>
+          {conversation.schedule_proposals.length > 0 && (
+            <section className="schedule-section" aria-label="面談予定">
+              <h2>面談予定</h2>
+              {conversation.schedule_proposals.map((proposal) => (
+                <ScheduleProposalCard key={proposal.id} proposal={proposal} actions={proposal.status === "pending" ? <div className="schedule-actions"><button className="primary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "accept")} disabled={changingProposalId === proposal.id}>承諾する</button><button className="secondary-button compact-button" type="button" onClick={() => respondToProposal(proposal.id, "decline")} disabled={changingProposalId === proposal.id}>辞退する</button></div> : undefined} />
+              ))}
+              {scheduleError && <div className="error-banner" role="alert">{scheduleError}</div>}
+            </section>
+          )}
           <form className="message-form" aria-label="返信フォーム" onSubmit={handleSubmit}>
             <label htmlFor="reply-body">返信本文</label>
             <textarea
