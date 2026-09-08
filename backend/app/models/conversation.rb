@@ -25,7 +25,7 @@ class Conversation < ApplicationRecord
   end
 
   def latest_activity_at
-    [messages.last&.created_at, schedule_proposals.last&.created_at, created_at].compact.max
+    [messages.last&.created_at, schedule_proposals.last&.created_at].compact.max || created_at
   end
 
   def mark_read_by_student!(message)
