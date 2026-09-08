@@ -5,8 +5,8 @@ module Api
 
       def index
         conversations = current_user.student_conversations
-          .includes(company: :company_profile, messages: :sender)
-          .sort_by { |conversation| [conversation.messages.last&.created_at || conversation.created_at, conversation.id] }
+          .includes(:schedule_proposals, company: :company_profile, messages: :sender)
+          .sort_by { |conversation| [conversation.latest_activity_at, conversation.id] }
           .reverse
 
         render json: {
@@ -58,6 +58,28 @@ module Api
         render json: { data: { unread_count: conversation.student_unread_count } }
       end
 
+      def mark_schedule_proposals_seen
+        conversation = current_user.student_conversations.find_by(id: params[:id])
+
+        unless conversation
+          render json: {
+            errors: [{ field: "conversation", code: "not_found", message: "会話が見つかりません" }]
+          }, status: :not_found
+          return
+        end
+
+        proposal = conversation.schedule_proposals.find_by(id: schedule_proposal_seen_params[:schedule_proposal_id])
+        unless proposal
+          render json: {
+            errors: [{ field: "schedule_proposal_id", code: "invalid", message: "確認済みにする面談提案が正しくありません" }]
+          }, status: :unprocessable_entity
+          return
+        end
+
+        conversation.mark_schedule_proposals_seen_by_student!(proposal)
+        render json: { data: { unseen_schedule_proposal_count: conversation.student_unseen_schedule_proposal_count } }
+      end
+
       private
 
       def list_item_json(conversation)
@@ -69,12 +91,18 @@ module Api
           company: company_json(conversation.company),
           latest_message_excerpt: latest_message.body.truncate(120, omission: "…"),
           latest_message_sent_at: latest_message.created_at.utc.iso8601,
-          unread_count: conversation.student_unread_count
+          latest_activity_at: conversation.latest_activity_at.utc.iso8601,
+          unread_count: conversation.student_unread_count,
+          unseen_schedule_proposal_count: conversation.student_unseen_schedule_proposal_count
         }
       end
 
       def read_params
         params.require(:conversation).permit(:message_id)
+      end
+
+      def schedule_proposal_seen_params
+        params.require(:conversation).permit(:schedule_proposal_id)
       end
 
       def company_json(company)

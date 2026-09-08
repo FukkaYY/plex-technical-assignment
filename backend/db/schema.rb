@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_000017) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_08_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -127,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_000017) do
     t.datetime "starts_at", null: false
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
+    t.datetime "student_seen_at"
     t.index ["conversation_id", "created_at", "id"], name: "index_schedule_proposals_on_conversation_and_created_at"
     t.index ["conversation_id"], name: "index_schedule_proposals_on_conversation_id"
     t.check_constraint "ends_at > starts_at", name: "schedule_proposals_valid_period"

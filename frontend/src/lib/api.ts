@@ -137,7 +137,9 @@ export type ConversationListItem = {
   company: ConversationCompany;
   latest_message_excerpt: string;
   latest_message_sent_at: string;
+  latest_activity_at: string;
   unread_count: number;
+  unseen_schedule_proposal_count: number;
 };
 
 export type ConversationDetail = {
@@ -413,6 +415,21 @@ export async function markConversationRead(id: string, messageId: number) {
   });
 
   return parseResponse<{ data: { unread_count: number } }>(response);
+}
+
+export async function markScheduleProposalsSeen(id: string, scheduleProposalId: number) {
+  const token = await csrfToken();
+  const response = await fetch(`/api/v1/conversations/${encodeURIComponent(id)}/schedule_proposals_seen`, {
+    method: "PATCH",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": token,
+    },
+    body: JSON.stringify({ conversation: { schedule_proposal_id: scheduleProposalId } }),
+  });
+
+  return parseResponse<{ data: { unseen_schedule_proposal_count: number } }>(response);
 }
 
 export async function replyToConversation(id: string, body: string) {

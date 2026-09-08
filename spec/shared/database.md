@@ -110,9 +110,10 @@
 | location | string | NOT NULL、200文字以内 |
 | note | text | NOT NULL、既定値空文字、1,000文字以内 |
 | status | string | NOT NULL、pending/accepted/declined/cancelled |
+| student_seen_at | datetime | NULL可、学生が提案を確認した日時 |
 | created_at / updated_at | datetime | NOT NULL |
 
-予定は `conversation_id, created_at, id` の順で安定して取得する。日時はUTCで保存し、日本時間への変換は入出力境界で行う。
+予定は `conversation_id, created_at, id` の順で安定して取得する。日時はUTCで保存し、日本時間への変換は入出力境界で行う。`student_seen_at` が未設定の回答待ち予定だけを学生向け新着通知へ含める。
 
 ## 共通制約
 

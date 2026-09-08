@@ -24,7 +24,7 @@ module Api
           return
         end
 
-        proposal.transition_from_pending!(next_status)
+        proposal.transition_from_pending!(next_status, student_seen_at: Time.current)
         render json: { data: schedule_proposal_json(proposal) }
       rescue ActiveRecord::RecordInvalid
         render json: {

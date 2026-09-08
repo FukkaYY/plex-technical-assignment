@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       end
       resources :conversations, only: %i[index show] do
         patch :read, on: :member, action: :mark_read
+        patch :schedule_proposals_seen, on: :member, action: :mark_schedule_proposals_seen
         resources :messages, only: :create, controller: :conversation_messages
       end
       resources :job_postings, only: %i[index show] do

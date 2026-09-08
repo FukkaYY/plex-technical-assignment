@@ -87,10 +87,15 @@ export default function StudentMessagesPage() {
                       未読 {conversation.unread_count}件
                     </span>
                   )}
+                  {conversation.unseen_schedule_proposal_count > 0 && (
+                    <span className="unread-badge" aria-label={`新しい面談提案 ${conversation.unseen_schedule_proposal_count}件`}>
+                      面談提案 {conversation.unseen_schedule_proposal_count}件
+                    </span>
+                  )}
                 </div>
                 <p>{conversation.latest_message_excerpt}</p>
               </div>
-              <time dateTime={conversation.latest_message_sent_at}>{formatSentAt(conversation.latest_message_sent_at)}</time>
+              <time dateTime={conversation.latest_activity_at}>{formatSentAt(conversation.latest_activity_at)}</time>
             </Link>
           ))}
         </section>

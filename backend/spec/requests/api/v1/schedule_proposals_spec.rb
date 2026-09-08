@@ -68,6 +68,7 @@ RSpec.describe "Schedule proposals", type: :request do
     patch "/api/v1/schedule_proposals/#{proposal.id}/accept", headers: { "X-CSRF-Token" => csrf_token }, as: :json
     expect(response).to have_http_status(:ok)
     expect(proposal.reload).to be_accepted
+    expect(proposal.student_seen_at).to be_present
 
     patch "/api/v1/schedule_proposals/#{proposal.id}/decline", headers: { "X-CSRF-Token" => csrf_token }, as: :json
     expect(response).to have_http_status(:unprocessable_entity)

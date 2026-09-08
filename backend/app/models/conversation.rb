@@ -20,6 +20,14 @@ class Conversation < ApplicationRecord
     scope.count
   end
 
+  def student_unseen_schedule_proposal_count
+    schedule_proposals.count { |proposal| proposal.pending? && proposal.student_seen_at.nil? }
+  end
+
+  def latest_activity_at
+    [messages.last&.created_at, schedule_proposals.last&.created_at, created_at].compact.max
+  end
+
   def mark_read_by_student!(message)
     raise ArgumentError, "message must belong to conversation" unless message.conversation_id == id
 
@@ -28,6 +36,13 @@ class Conversation < ApplicationRecord
         update!(student_last_read_message_id: message.id)
       end
     end
+  end
+
+  def mark_schedule_proposals_seen_by_student!(proposal)
+    raise ArgumentError, "schedule proposal must belong to conversation" unless proposal.conversation_id == id
+
+    now = Time.current
+    schedule_proposals.where(student_seen_at: nil).where("id <= ?", proposal.id).update_all(student_seen_at: now, updated_at: now)
   end
 
   private

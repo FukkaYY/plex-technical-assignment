@@ -78,10 +78,12 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page).toHaveURL(/\/students\/me$/);
   const unreadNotification = page.getByRole("status").filter({ hasText: "企業から未読メッセージが1件届いています。" });
   await expect(unreadNotification).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "新しい面談提案が1件あります。" })).toBeVisible();
   await expect(unreadNotification).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(unreadNotification).toHaveCSS("border-left-color", "rgb(180, 35, 24)");
   const inboxLink = page.getByRole("link", { name: /受信メッセージを見る\s*未読 1件/ });
   await expect(inboxLink).toBeVisible();
+  await expect(inboxLink).toContainText("面談提案 1件");
   await expect(inboxLink.locator(".mypage-unread-badge")).toHaveCSS("background-color", "rgb(180, 35, 24)");
 
   await page.getByRole("link", { name: "プロフィールを編集" }).click();
@@ -113,6 +115,7 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await page.getByRole("link", { name: "受信メッセージを見る" }).click();
   const conversation = page.getByRole("link", { name: /デモ企業株式会社/ });
   await expect(conversation).toContainText(messageBody);
+  await expect(conversation).toContainText("面談提案 1件");
   const conversationUnreadBadge = conversation.getByLabel(/未読 \d+件/);
   await expect(conversationUnreadBadge).toBeVisible();
   await expect(conversationUnreadBadge).toHaveCSS("background-color", "rgb(180, 35, 24)");
@@ -127,10 +130,12 @@ test("企業が送信したメッセージを対象学生が受信できる", as
   await expect(page.getByLabel("会話履歴")).toContainText("E2Eテストからの返信です。");
   await page.getByRole("link", { name: "受信メッセージへ戻る" }).click();
   await expect(page.getByRole("link", { name: /デモ企業株式会社/ }).getByText(/未読/)).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /デモ企業株式会社/ })).not.toContainText("面談提案");
   const refreshedUnreadCount = page.waitForResponse((response) => response.url().includes("/api/v1/conversations") && response.request().method() === "GET");
   await page.getByRole("link", { name: "学生マイページへ戻る" }).click();
   await refreshedUnreadCount;
   await expect(page.getByText(/企業から未読メッセージが\d+件届いています/)).toHaveCount(0);
+  await expect(page.getByText(/新しい面談提案が\d+件あります/)).toHaveCount(0);
   await expect(page.getByRole("link", { name: "受信メッセージを見る", exact: true })).toBeVisible();
 
   await page.goto("/students");

@@ -11,6 +11,7 @@ export default function StudentMyPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [unreadCount, setUnreadCount] = useState<number | null>(null);
+  const [unseenProposalCount, setUnseenProposalCount] = useState<number | null>(null);
   const [unreadError, setUnreadError] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
@@ -32,7 +33,10 @@ export default function StudentMyPage() {
         setProfile(data.student_profile);
         void getConversations()
           .then(({ data: conversations }) => {
-            if (!cancelled) setUnreadCount(conversations.reduce((total, conversation) => total + conversation.unread_count, 0));
+            if (!cancelled) {
+              setUnreadCount(conversations.reduce((total, conversation) => total + conversation.unread_count, 0));
+              setUnseenProposalCount(conversations.reduce((total, conversation) => total + conversation.unseen_schedule_proposal_count, 0));
+            }
           })
           .catch(() => {
             if (!cancelled) setUnreadError(true);
@@ -111,11 +115,17 @@ export default function StudentMyPage() {
                 企業から未読メッセージが<strong>{unreadCount}件</strong>届いています。
               </div>
             )}
+            {unseenProposalCount !== null && unseenProposalCount > 0 && (
+              <div className="unread-notification" role="status">
+                新しい面談提案が<strong>{unseenProposalCount}件</strong>あります。
+              </div>
+            )}
             {unreadError && <p className="unread-status-error">未読状況を取得できませんでした。</p>}
             <nav className="student-mypage-navigation" aria-label="学生マイページのメニュー">
               <Link className="primary-link mypage-inbox-link" href="/students/messages">
                 受信メッセージを見る
                 {unreadCount !== null && unreadCount > 0 && <span className="mypage-unread-badge">未読 {unreadCount}件</span>}
+                {unseenProposalCount !== null && unseenProposalCount > 0 && <span className="mypage-unread-badge">面談提案 {unseenProposalCount}件</span>}
               </Link>
               <Link className="secondary-link" href="/students/jobs">インターン募集を見る</Link>
               <Link className="secondary-link" href="/students/me/edit">プロフィールを編集</Link>

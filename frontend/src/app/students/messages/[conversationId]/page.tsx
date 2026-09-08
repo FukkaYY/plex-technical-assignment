@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { acceptScheduleProposal, ApiRequestError, ConversationDetail, declineScheduleProposal, getConversation, markConversationRead, replyToConversation } from "@/lib/api";
+import { acceptScheduleProposal, ApiRequestError, ConversationDetail, declineScheduleProposal, getConversation, markConversationRead, markScheduleProposalsSeen, replyToConversation } from "@/lib/api";
 import ScheduleProposalCard from "@/components/schedule-proposal-card";
 
 const MAX_BODY_LENGTH = 2_000;
@@ -30,6 +30,8 @@ export default function StudentMessageDetailPage() {
         if (cancelled) return;
         const latestMessage = data.messages[data.messages.length - 1];
         if (latestMessage) await markConversationRead(params.conversationId, latestMessage.id);
+        const latestProposal = data.schedule_proposals[data.schedule_proposals.length - 1];
+        if (latestProposal) await markScheduleProposalsSeen(params.conversationId, latestProposal.id);
         if (!cancelled) setConversation(data);
       })
       .catch((requestError: unknown) => {

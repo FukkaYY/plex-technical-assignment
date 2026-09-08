@@ -80,6 +80,25 @@ RSpec.describe "Conversations", type: :request do
     expect(response.parsed_body.dig("data", 0, "unread_count")).to eq(1)
   end
 
+  it "reports unseen pending schedule proposals and sorts by their activity" do
+    older = create_conversation(company: first_company, recipient: student, bodies: ["新しい本文"])
+    newer = create_conversation(company: second_company, recipient: student, bodies: ["古い本文"])
+    older.messages.last.update_columns(created_at: 2.minutes.ago)
+    newer.messages.last.update_columns(created_at: 3.minutes.ago)
+    unseen = newer.schedule_proposals.create!(starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, location: "オンライン")
+    unseen.update_columns(created_at: 1.minute.ago)
+    cancelled = newer.schedule_proposals.create!(starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour, location: "来社", status: :cancelled)
+    cancelled.update_columns(created_at: 4.minutes.ago)
+    login_as(student)
+
+    get "/api/v1/conversations"
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.fetch("data").pluck("id")).to eq([newer.id, older.id])
+    expect(response.parsed_body.dig("data", 0, "unseen_schedule_proposal_count")).to eq(1)
+    expect(response.parsed_body.dig("data", 0, "latest_activity_at")).to eq(unseen.created_at.utc.iso8601)
+  end
+
   it "returns an empty list when the student has no conversations" do
     login_as(student)
 
@@ -125,6 +144,65 @@ RSpec.describe "Conversations", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body.dig("data", "unread_count")).to eq(0)
     expect(conversation.reload.student_last_read_message_id).to eq(latest_message.id)
+  end
+
+  it "marks schedule proposals through the displayed proposal as seen" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    first = conversation.schedule_proposals.create!(starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, location: "オンライン")
+    second = conversation.schedule_proposals.create!(starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour, location: "来社")
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/schedule_proposals_seen",
+      params: { conversation: { schedule_proposal_id: first.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:ok)
+    expect(response.parsed_body.dig("data", "unseen_schedule_proposal_count")).to eq(1)
+    expect(first.reload.student_seen_at).to be_present
+    expect(second.reload.student_seen_at).to be_nil
+  end
+
+  it "does not mark another conversation's schedule proposal as seen" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    other_conversation = create_conversation(company: second_company, recipient: student, bodies: ["別会話"])
+    proposal = other_conversation.schedule_proposals.create!(starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, location: "オンライン")
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/schedule_proposals_seen",
+      params: { conversation: { schedule_proposal_id: proposal.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(proposal.reload.student_seen_at).to be_nil
+  end
+
+  it "hides another student's conversation when marking schedule proposals as seen" do
+    conversation = create_conversation(company: first_company, recipient: other_student, bodies: ["本文"])
+    proposal = conversation.schedule_proposals.create!(starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, location: "オンライン")
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/schedule_proposals_seen",
+      params: { conversation: { schedule_proposal_id: proposal.id } },
+      headers: { "X-CSRF-Token" => csrf_token },
+      as: :json
+
+    expect(response).to have_http_status(:not_found)
+    expect(proposal.reload.student_seen_at).to be_nil
+  end
+
+  it "requires CSRF protection when marking schedule proposals as seen" do
+    conversation = create_conversation(company: first_company, recipient: student, bodies: ["本文"])
+    proposal = conversation.schedule_proposals.create!(starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, location: "オンライン")
+    login_as(student)
+
+    patch "/api/v1/conversations/#{conversation.id}/schedule_proposals_seen",
+      params: { conversation: { schedule_proposal_id: proposal.id } },
+      as: :json
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(proposal.reload.student_seen_at).to be_nil
   end
 
   it "does not mark another conversation's message as read" do

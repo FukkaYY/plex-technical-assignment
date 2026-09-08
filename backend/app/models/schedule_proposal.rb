@@ -18,14 +18,14 @@ class ScheduleProposal < ApplicationRecord
   validate :starts_in_future, on: :create
   validate :valid_period
 
-  def transition_from_pending!(next_status)
+  def transition_from_pending!(next_status, student_seen_at: self.student_seen_at)
     with_lock do
       unless pending?
         errors.add(:status, :invalid)
         raise ActiveRecord::RecordInvalid, self
       end
 
-      update!(status: next_status)
+      update!(status: next_status, student_seen_at: student_seen_at)
     end
   end
 
