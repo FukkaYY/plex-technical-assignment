@@ -6,11 +6,11 @@ default: &default
 
 development:
   <<: *default
-  database: plex_development
+  database: technical_assignment_development
 
 test:
   <<: *default
-  database: plex_test
+  database: technical_assignment_test
 
 production:
   <<: *default

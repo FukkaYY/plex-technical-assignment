@@ -9,7 +9,7 @@ require "action_controller/railtie"
 
 Bundler.require(*Rails.groups)
 
-module PlexTechnicalAssignment
+module TechnicalAssignment
   class Application < Rails::Application
     config.load_defaults 8.1
     config.api_only = true
@@ -17,7 +17,7 @@ module PlexTechnicalAssignment
 
     # APIモードでもCookieセッションを利用するため、必要なmiddlewareだけを戻す。
     config.session_store :cookie_store,
-      key: "_plex_session",
+      key: "_technical_assignment_session",
       httponly: true,
       same_site: :lax,
       secure: Rails.env.production?

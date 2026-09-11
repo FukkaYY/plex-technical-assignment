@@ -57,7 +57,7 @@
   "data": [{
     "id": 123,
     "name": "山田 太郎",
-    "school_name": "プレックス大学",
+    "school_name": "サンプル大学",
     "graduation_year": 2028,
     "interested_roles": ["ソフトウェアエンジニア"],
     "skills": ["Ruby", "PostgreSQL", "Docker"],

@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe "Student registrations", type: :request do
-  let!(:school) { School.create!(name: "プレックス大学", school_type: "university") }
+  let!(:school) { School.create!(name: "サンプル大学", school_type: "university") }
   let!(:faculty) { school.faculties.create!(name: "工学部") }
   let!(:department) { faculty.departments.create!(name: "情報工学科") }
   let(:valid_attributes) do
@@ -45,7 +45,7 @@ RSpec.describe "Student registrations", type: :request do
       "name" => "山田 太郎",
       "last_name" => "山田",
       "first_name" => "太郎",
-      "school_name" => "プレックス大学",
+      "school_name" => "サンプル大学",
       "faculty_name" => "工学部",
       "department_name" => "情報工学科",
       "desired_role" => "ソフトウェアエンジニア、データサイエンティスト",

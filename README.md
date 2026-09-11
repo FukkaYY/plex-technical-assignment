@@ -1,6 +1,6 @@
-# plex-technical-assignment
+# technical-assignment
 
-株式会社プレックスのインターン技術課題として開発した、企業と学生をつなぐインターンスカウトサービスです。
+企業と学生をつなぐインターンスカウトサービスの技術課題リポジトリです。
 
 企業による学生検索・スカウトから、学生の返信、面談調整、インターン募集の掲載までを一つのサービスで試せます。本番公開は行わず、Docker Composeでのローカル再現とGitHub Actionsによる自動検証を提出範囲としています。
 
@@ -134,7 +134,7 @@ Next.jsから`/api/v1`へのリクエストをRailsへ転送する同一サイ�
 Docker Composeでバックエンドテストを実行する場合:
 
 ```powershell
-docker compose run --rm -e RAILS_ENV=test -e DATABASE_URL=postgresql://postgres:postgres@db:5432/plex_test backend sh -c "bin/rails db:prepare && bundle exec rspec"
+docker compose run --rm -e RAILS_ENV=test -e DATABASE_URL=postgresql://postgres:postgres@db:5432/technical_assignment_test backend sh -c "bin/rails db:prepare && bundle exec rspec"
 ```
 
 フロントエンドの静的検証:

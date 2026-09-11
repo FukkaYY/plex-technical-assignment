@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Plex Intern Scout",
+  title: "Intern Scout",
   description: "インターン生と企業をつなぐスカウトサービス",
 };
 

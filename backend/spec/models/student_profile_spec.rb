@@ -16,7 +16,7 @@ RSpec.describe StudentProfile, type: :model do
 
     user.build_student_profile({
       name: "山田 太郎",
-      school_name: "プレックス大学",
+      school_name: "サンプル大学",
       graduation_year: Time.zone.today.year,
       desired_role: "エンジニア",
       skills: ["Ruby"],
